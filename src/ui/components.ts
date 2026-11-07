@@ -12,6 +12,8 @@
  * - Chip (for tags/badges only)
  */
 
+import { deriveSecondaryAccent } from '../theme/contrast.ts';
+
 export function escapeHtml(text: string): string {
   return String(text)
     .replace(/&/g, '&amp;')
@@ -37,6 +39,7 @@ export interface RowProps {
   controlHtml: string;
   description?: string;
   iconHtml?: string;
+  dragHandleHtml?: string;
   className?: string;
   actionAttr?: string;
   style?: string;
@@ -48,6 +51,10 @@ export function Row(props: RowProps): string {
   const action = props.actionAttr ? ` ${props.actionAttr}` : '';
   const styleAttr = props.style ? ` style="${props.style}"` : '';
 
+  const dragMarkup = props.dragHandleHtml
+    ? `<span class="flank-ui-row-drag">${props.dragHandleHtml}</span>`
+    : '';
+
   const iconMarkup = props.iconHtml
     ? `<span class="flank-ui-row-icon" aria-hidden="true">${props.iconHtml}</span>`
     : '';
@@ -58,6 +65,7 @@ export function Row(props: RowProps): string {
 
   return `<div class="${cls}"${action}${styleAttr}>
     <div class="flank-ui-row-left">
+      ${dragMarkup}
       ${iconMarkup}
       <div class="flank-ui-row-texts">
         <span class="flank-ui-row-label">${escapeHtml(props.label)}</span>
@@ -156,8 +164,10 @@ export function Swatch(props: SwatchProps): string {
   const sz = props.size || 22;
   const isAct = props.isActive ? ' is-active' : '';
   const title = props.title || props.hex;
+  const secondary = deriveSecondaryAccent(props.hex);
+  const grad = `linear-gradient(135deg, ${props.hex} 0%, ${secondary} 100%)`;
 
-  return `<button type="button" class="flank-ui-swatch${isAct}" ${props.actionAttr}="${escapeHtml(props.hex)}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}" style="--swatch-color: ${escapeHtml(props.hex)}; width: ${sz}px; height: ${sz}px;">
+  return `<button type="button" class="flank-ui-swatch${isAct}" ${props.actionAttr}="${escapeHtml(props.hex)}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}" style="--swatch-color: ${escapeHtml(grad)}; width: ${sz}px; height: ${sz}px;">
     <span class="flank-ui-swatch-inner"></span>
   </button>`;
 }

@@ -78,6 +78,7 @@
     "chipBg": "rgba(255,255,255,0.08)",
     "chipActiveBg": "rgba(255,255,255,0.16)",
     "accent": "#7CF0C8",
+    "accentGradient": "linear-gradient(135deg, #7CF0C8 0%, #38bdf8 100%)",
     "accentInk": "#06231f",
     "accentSoft": "rgba(124,240,200,0.16)",
     "accentLine": "rgba(124,240,200,0.40)",

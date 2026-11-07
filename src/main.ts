@@ -78,6 +78,7 @@ declare global {
         show_hover_card?: (kind: string, clientY: number) => Promise<void>;
         toggle_hover_card?: (kind: string, clientY: number) => Promise<void>;
         close_hover_card?: () => Promise<void>;
+        drag_modal_window?: () => Promise<void>;
         cancel_hide_card?: () => Promise<void>;
         hide_hover_card?: () => Promise<void>;
         open_window?: (win: string) => Promise<void>;
@@ -755,6 +756,19 @@ function setupEventDelegation(): void {
         state.activeWidget = null;
         renderApp();
       }, 180);
+    }
+  });
+
+  // Dedicated titlebar window dragging for frameless modal window
+  stage.addEventListener('pointerdown', (ev) => {
+    const target = ev.target as HTMLElement | null;
+    if (!target) return;
+
+    if (currentView === 'modal') {
+      const titlebar = target.closest<HTMLElement>('.flank-titlebar');
+      if (titlebar && !target.closest('button, input, a, select, textarea, [data-action]')) {
+        window.pywebview?.api?.drag_modal_window?.();
+      }
     }
   });
 

@@ -112,11 +112,69 @@ export function resolveOpaqueSurface(
 }
 
 /**
+ * Compute a complementary harmonic secondary tone for gradient accents.
+ * Rotates hue by +24 degrees and slightly lifts saturation/lightness.
+ */
+export function deriveSecondaryAccent(hex: string): string {
+  const rgb = parseColor(hex);
+  if (!rgb) return hex;
+
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+
+  const newH = (h * 360 + 24) % 360;
+  const newS = Math.min(1, s * 1.05);
+  const newL = Math.min(0.68, Math.max(0.36, l * 1.08));
+
+  const hue2rgb = (p: number, q: number, t: number) => {
+    let tNorm = t;
+    if (tNorm < 0) tNorm += 1;
+    if (tNorm > 1) tNorm -= 1;
+    if (tNorm < 1 / 6) return p + (q - p) * 6 * tNorm;
+    if (tNorm < 1 / 2) return q;
+    if (tNorm < 2 / 3) return p + (q - p) * (2 / 3 - tNorm) * 6;
+    return p;
+  };
+
+  const q = newL < 0.5 ? newL * (1 + newS) : newL + newS - newL * newS;
+  const p = 2 * newL - q;
+  const r2 = Math.round(hue2rgb(p, q, newH / 360 + 1 / 3) * 255);
+  const g2 = Math.round(hue2rgb(p, q, newH / 360) * 255);
+  const b2 = Math.round(hue2rgb(p, q, newH / 360 - 1 / 3) * 255);
+
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`;
+}
+
+/**
  * Given a new hex accent color, pick the highest-contrast ink (#ffffff or #04100a)
- * and generate accentSoft and accentLine tokens.
+ * and generate accentGradient, accentSoft, and accentLine tokens.
  */
 export function deriveAccentTokens(accentHex: string, preferredInk?: string): {
   accent: string;
+  accentGradient: string;
   accentInk: string;
   accentSoft: string;
   accentLine: string;
@@ -155,8 +213,12 @@ export function deriveAccentTokens(accentHex: string, preferredInk?: string): {
     }
   }
 
+  const secondary = deriveSecondaryAccent(accentHex);
+  const accentGradient = `linear-gradient(135deg, ${accentHex} 0%, ${secondary} 100%)`;
+
   return {
     accent: accentHex,
+    accentGradient,
     accentInk: inkHex,
     accentSoft: `rgba(${parsed.r},${parsed.g},${parsed.b},0.14)`,
     accentLine: `rgba(${parsed.r},${parsed.g},${parsed.b},0.38)`,

@@ -231,7 +231,7 @@ function renderWidgetTileInner(
       case 'player':
         return {
           ariaLabel: `Mini player, ${state.player.playing ? 'playing' : 'paused'}`,
-          extraClass: 'flank-tile-accent-icon',
+          extraClass: state.player.playing ? 'flank-tile-accent-icon is-playing' : '',
           html: `${iconSvg('equalizer')}${railIndicator}`,
         };
       case 'focus':
@@ -428,7 +428,7 @@ function renderWidgetTileInner(
     case 'player': {
       return {
         ariaLabel: `Mini player, ${state.player.playing ? 'playing' : 'paused'}`,
-        extraClass: state.player.playing ? 'flank-tile-accent-icon' : '',
+        extraClass: state.player.playing ? 'flank-tile-accent-icon is-playing' : '',
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('equalizer', 20)}</span><span class="flank-widget-value flank-num">${state.player.playing ? 'Play' : 'Pau'}</span></span>`,
       };
     }

@@ -58,6 +58,7 @@
     "dividerSoft": "rgba(207,227,212,0.06)",
     "trackBg": "#243229",
     "accent": "#7CFF8A",
+    "accentGradient": "linear-gradient(135deg, #7CFF8A 0%, #34d399 100%)",
     "accentInk": "#04100a",
     "accentSoft": "rgba(124,255,138,0.14)",
     "accentLine": "rgba(124,255,138,0.38)",

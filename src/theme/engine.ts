@@ -87,6 +87,7 @@ export class ThemeEngine {
           candidate.color = {
             ...(candidate.color || {}),
             accent: derived.accent,
+            accentGradient: derived.accentGradient,
             accentInk: derived.accentInk,
             accentSoft: derived.accentSoft,
             accentLine: derived.accentLine,

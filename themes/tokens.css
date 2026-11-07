@@ -252,6 +252,7 @@ html[data-reduce-motion="true"] {
   --flank-color-divider-soft: #e8e4da;
   --flank-color-track-bg: #dcd7ca;
   --flank-color-accent: #2F4BFF;
+  --flank-color-accent-gradient: linear-gradient(135deg, #2F4BFF 0%, #4F70FF 100%);
   --flank-color-accent-ink: #ffffff;
   --flank-color-accent-soft: rgba(47,75,255,0.10);
   --flank-color-accent-line: rgba(47,75,255,0.35);
@@ -308,6 +309,7 @@ html[data-reduce-motion="true"] {
   --flank-color-divider-soft: rgba(0,0,0,0.05);
   --flank-color-track-bg: rgba(0,0,0,0.09);
   --flank-color-accent: #0369a1;
+  --flank-color-accent-gradient: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%);
   --flank-color-accent-ink: #ffffff;
   --flank-color-accent-soft: rgba(3,105,161,0.14);
   --flank-color-accent-line: rgba(3,105,161,0.40);
@@ -364,6 +366,7 @@ html[data-reduce-motion="true"] {
   --flank-color-divider-soft: rgba(255,255,255,0.07);
   --flank-color-track-bg: rgba(255,255,255,0.09);
   --flank-color-accent: #5EEAD4;
+  --flank-color-accent-gradient: linear-gradient(135deg, #5EEAD4 0%, #38bdf8 100%);
   --flank-color-accent-ink: #04201c;
   --flank-color-accent-soft: rgba(94,234,212,0.14);
   --flank-color-accent-line: rgba(94,234,212,0.38);
@@ -419,6 +422,7 @@ html[data-reduce-motion="true"] {
   --flank-color-divider-soft: #1f2a23;
   --flank-color-track-bg: #243229;
   --flank-color-accent: #7CFF8A;
+  --flank-color-accent-gradient: linear-gradient(135deg, #7CFF8A 0%, #34d399 100%);
   --flank-color-accent-ink: #04100a;
   --flank-color-accent-soft: rgba(124,255,138,0.14);
   --flank-color-accent-line: rgba(124,255,138,0.38);
@@ -476,6 +480,7 @@ html[data-reduce-motion="true"] {
   --flank-color-divider-soft: rgba(255,255,255,0.08);
   --flank-color-track-bg: rgba(255,255,255,0.14);
   --flank-color-accent: #FF8A7A;
+  --flank-color-accent-gradient: linear-gradient(135deg, #FF8A7A 0%, #f43f5e 100%);
   --flank-color-accent-ink: #1a0f10;
   --flank-color-accent-soft: rgba(255,138,122,0.14);
   --flank-color-accent-line: rgba(255,138,122,0.38);
@@ -611,6 +616,7 @@ html[data-reduce-motion="true"] {
   --flank-color-chip-bg: rgba(255,255,255,0.08);
   --flank-color-chip-active-bg: rgba(255,255,255,0.16);
   --flank-color-accent: #7CF0C8;
+  --flank-color-accent-gradient: linear-gradient(135deg, #7CF0C8 0%, #38bdf8 100%);
   --flank-color-accent-ink: #06231f;
   --flank-color-accent-soft: rgba(124,240,200,0.16);
   --flank-color-accent-line: rgba(124,240,200,0.40);

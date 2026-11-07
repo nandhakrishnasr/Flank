@@ -433,7 +433,7 @@ export function renderBatteryWindowHtml(state: FlankState): string {
     <div class="flank-window" role="dialog" aria-label="Power and Battery Details">
       ${renderTitleBar('Power & Battery Details')}
       <div class="flank-window__body flank-win-body" style="padding: 24px; gap: 16px; box-sizing: border-box; flex: 1; min-height: 0; display: flex; overflow: hidden;">
-        <div class="flank-list-col" style="flex: 1; min-width: 0; border-right: none; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden;">
+        <div class="flank-list-col" style="flex: 1; min-width: 0; border-right: none; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px 16px 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;">
           <div class="flank-preview-box" style="flex-direction:column; align-items:stretch; gap: 8px; padding: 12px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10);">
             <div class="flank-card-row-between" style="display:flex; justify-content:space-between; align-items:center;">
               <span class="flank-card-title">Laptop battery</span>
@@ -479,13 +479,13 @@ export function renderBatteryWindowHtml(state: FlankState): string {
             </div>
           </div>
 
-          <button type="button" class="flank-btn is-secondary" data-item-kind="link" data-item-id="win-power-settings" data-target="ms-settings:powersleep" style="width: 100%; justify-content: space-between; height: 34px; padding: 0 14px;">
+          <button type="button" class="flank-btn is-secondary" data-item-kind="link" data-item-id="win-power-settings" data-target="ms-settings:powersleep" style="width: 100%; justify-content: space-between; height: 36px; padding: 0 14px; margin-top: auto; flex-shrink: 0;">
             <span style="font-size: 12px; font-weight: 500;">Open Windows Power &amp; Battery settings</span>
             <span style="display:flex; width: 14px; height: 14px; flex-shrink: 0;">${iconSvg('arrow-up-right', 14)}</span>
           </button>
         </div>
 
-        <div class="flank-preview-col" style="flex: 1; min-width: 0; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden;">
+        <div class="flank-preview-col" style="flex: 1; min-width: 0; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px 16px 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;">
           <span class="flank-card-title">Laptop &amp; peripheral batteries</span>
           <div style="display:flex; flex-direction:column; gap: var(--flank-scale-space-10)">
             ${deviceCards}
@@ -821,7 +821,8 @@ export function renderSettingsWindowHtml(
       return Row({
         label: item.label,
         description: `${item.kind}${item.target ? ` · ${item.target}` : ''}`,
-        iconHtml: `<span class="flank-drag-handle" title="Reorder" style="margin-right: 8px; color: var(--flank-color-text-muted); cursor: grab; font-size: 14px; user-select: none;">⋮⋮</span>${iconMarkup}`,
+        dragHandleHtml: `<span class="flank-drag-handle" title="Reorder" style="color: var(--flank-color-text-muted); cursor: grab; font-size: 14px; user-select: none;">⋮⋮</span>`,
+        iconHtml: iconMarkup,
         controlHtml: `
           <div style="display:flex; align-items:center; gap: 8px;">
             ${isCustom ? `

@@ -56,6 +56,7 @@ var PAPER_THEME = {
     dividerSoft: "rgba(31,30,27,0.06)",
     trackBg: "#dcd7ca",
     accent: "#2F4BFF",
+    accentGradient: "linear-gradient(135deg, #2F4BFF 0%, #4F70FF 100%)",
     accentInk: "#ffffff",
     accentSoft: "rgba(47,75,255,0.10)",
     accentLine: "rgba(47,75,255,0.35)",
@@ -99,13 +100,13 @@ var GLASS_THEME = {
     windowPadding: "48px"
   },
   surface: {
-    dockBg: "rgba(255,255,255,0.28)",
-    dockBorder: "rgba(255,255,255,0.40)",
+    dockBg: "rgba(255,255,255,0.72)",
+    dockBorder: "rgba(255,255,255,0.70)",
     dockShadow: "inset 0 1px 0 rgba(255,255,255,0.65), 0 2px 6px rgba(0,0,0,0.06), 0 8px 20px rgba(0,0,0,0.08)",
     backdropBlur: "30px",
     backdropSaturate: "1.8",
-    cardBg: "rgba(255,255,255,0.36)",
-    cardBorder: "rgba(255,255,255,0.40)",
+    cardBg: "rgba(255,255,255,0.82)",
+    cardBorder: "rgba(255,255,255,0.70)",
     cardShadow: "inset 0 1px 0 rgba(255,255,255,0.65), 0 4px 12px rgba(0,0,0,0.08), 0 16px 32px rgba(0,0,0,0.10)",
     cardRadius: "16px",
     cardPadding: "18px",
@@ -113,7 +114,7 @@ var GLASS_THEME = {
     cardGap: "14px",
     cardOffset: "10px",
     solidFallbackBg: "#f8fafc",
-    opacity: 0.28,
+    opacity: 0.72,
     highlight: "inset 0 1px 0 rgba(255,255,255,0.65)",
     hover: "rgba(255,255,255,0.18)",
     active: "rgba(255,255,255,0.28)",
@@ -122,9 +123,9 @@ var GLASS_THEME = {
   glass: {
     mode: "wallpaper-sampled",
     tintRgb: "255,255,255",
-    tintAlpha: 0.28,
-    tintAlphaMin: 0.16,
-    tintAlphaMax: 0.42,
+    tintAlpha: 0.72,
+    tintAlphaMin: 0.4,
+    tintAlphaMax: 0.85,
     blur: "30px",
     saturate: "1.8",
     rimWidth: "1px",
@@ -135,9 +136,9 @@ var GLASS_THEME = {
   },
   color: {
     text: "#0f172a",
-    textMuted: "#475569",
-    tileBg: "rgba(255,255,255,0.50)",
-    tileBgHover: "rgba(255,255,255,0.85)",
+    textMuted: "#334155",
+    tileBg: "rgba(255,255,255,0.65)",
+    tileBgHover: "rgba(255,255,255,0.90)",
     tileBgPressed: "rgba(255,255,255,0.95)",
     tileIcon: "#0f172a",
     tileActiveBg: "rgba(3,105,161,0.18)",
@@ -146,6 +147,7 @@ var GLASS_THEME = {
     dividerSoft: "rgba(15,23,42,0.06)",
     trackBg: "rgba(0,0,0,0.08)",
     accent: "#0369a1",
+    accentGradient: "linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%)",
     accentInk: "#ffffff",
     accentSoft: "rgba(3,105,161,0.14)",
     accentLine: "rgba(3,105,161,0.40)",
@@ -222,6 +224,7 @@ var NORD_THEME = {
     dividerSoft: "rgba(232,237,242,0.06)",
     trackBg: "rgba(255,255,255,0.09)",
     accent: "#5EEAD4",
+    accentGradient: "linear-gradient(135deg, #5EEAD4 0%, #38bdf8 100%)",
     accentInk: "#04201c",
     accentSoft: "rgba(94,234,212,0.14)",
     accentLine: "rgba(94,234,212,0.38)",
@@ -298,6 +301,7 @@ var TERMINAL_THEME = {
     dividerSoft: "rgba(207,227,212,0.06)",
     trackBg: "#243229",
     accent: "#7CFF8A",
+    accentGradient: "linear-gradient(135deg, #7CFF8A 0%, #34d399 100%)",
     accentInk: "#04100a",
     accentSoft: "rgba(124,255,138,0.14)",
     accentLine: "rgba(124,255,138,0.38)",
@@ -375,6 +379,7 @@ var RAIL_THEME = {
     dividerSoft: "rgba(236,238,243,0.06)",
     trackBg: "rgba(255,255,255,0.14)",
     accent: "#FF8A7A",
+    accentGradient: "linear-gradient(135deg, #FF8A7A 0%, #f43f5e 100%)",
     accentInk: "#1a0f10",
     accentSoft: "rgba(255,138,122,0.14)",
     accentLine: "rgba(255,138,122,0.38)",
@@ -553,6 +558,7 @@ var LIQUID_GLASS_THEME = {
     chipBg: "rgba(255,255,255,0.08)",
     chipActiveBg: "rgba(255,255,255,0.16)",
     accent: "#7CF0C8",
+    accentGradient: "linear-gradient(135deg, #7CF0C8 0%, #38bdf8 100%)",
     accentInk: "#06231f",
     accentSoft: "rgba(124,240,200,0.16)",
     accentLine: "rgba(124,240,200,0.40)",
@@ -671,6 +677,52 @@ function resolveOpaqueSurface(surfaceStr, solidFallbackStr, mode = "light") {
   }
   return parsed;
 }
+function deriveSecondaryAccent(hex) {
+  const rgb = parseColor(hex);
+  if (!rgb) return hex;
+  const r = rgb.r / 255;
+  const g = rgb.g / 255;
+  const b = rgb.b / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+  const newH = (h * 360 + 24) % 360;
+  const newS = Math.min(1, s * 1.05);
+  const newL = Math.min(0.68, Math.max(0.36, l * 1.08));
+  const hue2rgb = (p2, q2, t) => {
+    let tNorm = t;
+    if (tNorm < 0) tNorm += 1;
+    if (tNorm > 1) tNorm -= 1;
+    if (tNorm < 1 / 6) return p2 + (q2 - p2) * 6 * tNorm;
+    if (tNorm < 1 / 2) return q2;
+    if (tNorm < 2 / 3) return p2 + (q2 - p2) * (2 / 3 - tNorm) * 6;
+    return p2;
+  };
+  const q = newL < 0.5 ? newL * (1 + newS) : newL + newS - newL * newS;
+  const p = 2 * newL - q;
+  const r2 = Math.round(hue2rgb(p, q, newH / 360 + 1 / 3) * 255);
+  const g2 = Math.round(hue2rgb(p, q, newH / 360) * 255);
+  const b2 = Math.round(hue2rgb(p, q, newH / 360 - 1 / 3) * 255);
+  const toHex = (n) => n.toString(16).padStart(2, "0");
+  return `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`;
+}
 function deriveAccentTokens(accentHex, preferredInk) {
   const parsed = parseColor(accentHex);
   if (!parsed) return null;
@@ -700,8 +752,11 @@ function deriveAccentTokens(accentHex, preferredInk) {
       bestRatio = darkRatio;
     }
   }
+  const secondary = deriveSecondaryAccent(accentHex);
+  const accentGradient = `linear-gradient(135deg, ${accentHex} 0%, ${secondary} 100%)`;
   return {
     accent: accentHex,
+    accentGradient,
     accentInk: inkHex,
     accentSoft: `rgba(${parsed.r},${parsed.g},${parsed.b},0.14)`,
     accentLine: `rgba(${parsed.r},${parsed.g},${parsed.b},0.38)`,
@@ -1213,6 +1268,7 @@ var ThemeEngine = class {
           candidate.color = {
             ...candidate.color || {},
             accent: derived.accent,
+            accentGradient: derived.accentGradient,
             accentInk: derived.accentInk,
             accentSoft: derived.accentSoft,
             accentLine: derived.accentLine,
@@ -2122,7 +2178,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
       case "player":
         return {
           ariaLabel: `Mini player, ${state2.player.playing ? "playing" : "paused"}`,
-          extraClass: "flank-tile-accent-icon",
+          extraClass: state2.player.playing ? "flank-tile-accent-icon is-playing" : "",
           html: `${iconSvg("equalizer")}${railIndicator}`
         };
       case "focus":
@@ -2315,7 +2371,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
     case "player": {
       return {
         ariaLabel: `Mini player, ${state2.player.playing ? "playing" : "paused"}`,
-        extraClass: state2.player.playing ? "flank-tile-accent-icon" : "",
+        extraClass: state2.player.playing ? "flank-tile-accent-icon is-playing" : "",
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("equalizer", 20)}</span><span class="flank-widget-value flank-num">${state2.player.playing ? "Play" : "Pau"}</span></span>`
       };
     }
@@ -2755,7 +2811,7 @@ function renderPlayerCardInner(state2) {
       </span>
     </div>
     <div style="display:flex; gap: 12px; align-items: center; width: 100%;">
-      <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft);" aria-hidden="true">${iconSvg("equalizer", 22)}</span>
+      <span class="flank-player-art${p.playing ? " is-playing" : ""}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft); transition: box-shadow 0.3s ease, border-color 0.3s ease;" aria-hidden="true">${iconSvg("equalizer", 22)}</span>
       <div style="display:flex; flex-direction:column; gap: 2px; min-width: 0; flex: 1;">
         <div style="font-size: 13px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--flank-color-text);" title="${escapeHtml2(p.title)}">${escapeHtml2(p.title)}</div>
         <div style="font-size: 12px; color: var(--flank-color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml2(p.artist)}</div>
@@ -2773,7 +2829,7 @@ function renderPlayerCardInner(state2) {
       <button type="button" class="flank-btn is-secondary" style="flex: none; width: 34px; height: 34px; padding: 0; border-radius: 50%;" data-media-action="previous" aria-label="Previous track">
         ${iconSvg("previous", 15)}
       </button>
-      <button type="button" class="flank-btn is-primary" style="flex: none; width: 38px; height: 38px; padding: 0; border-radius: 50%;" data-media-action="play-pause" aria-label="${p.playing ? "Pause" : "Play"}">
+      <button type="button" class="flank-btn is-primary${p.playing ? " is-playing-btn" : ""}" style="flex: none; width: 38px; height: 38px; padding: 0; border-radius: 50%;" data-media-action="play-pause" aria-label="${p.playing ? "Pause" : "Play"}">
         ${iconSvg(p.playing ? "pause" : "play", 16)}
       </button>
       <button type="button" class="flank-btn is-secondary" style="flex: none; width: 34px; height: 34px; padding: 0; border-radius: 50%;" data-media-action="next" aria-label="Next track">
@@ -3063,13 +3119,13 @@ function renderAudioCardInner(state2) {
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%;">
       ${presetChips}
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 6px; width: 100%;">
-      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px;" data-audio-action="vol-down">-10%</button>
-      <button type="button" class="flank-btn is-compact ${au.muted ? "is-secondary" : "is-primary"}" style="justify-content: center; height: 32px; font-size: 11px; gap: 4px;" data-audio-action="toggle-mute">
+    <div style="display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 6px; width: 100%;">
+      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px; padding: 0 4px;" data-audio-action="vol-down">-10%</button>
+      <button type="button" class="flank-btn is-compact ${au.muted ? "is-secondary" : "is-primary"}" style="justify-content: center; height: 32px; font-size: 11px; padding: 0 6px; gap: 4px;" data-audio-action="toggle-mute">
         <span style="display: flex; align-items: center; width: 14px; height: 14px; flex-shrink: 0;">${iconSvg(au.muted ? "volume-mute" : "volume", 14)}</span>
         <span>${au.muted ? "Unmute" : "Mute"}</span>
       </button>
-      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px;" data-audio-action="vol-up">+10%</button>
+      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px; padding: 0 4px;" data-audio-action="vol-up">+10%</button>
     </div>
     <div class="flank-row" style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 8px;">
       <span style="display:flex; align-items:center; gap: 6px; min-width: 0; flex: 1;">
@@ -3167,7 +3223,7 @@ function renderAiCardInner(state2) {
         <span class="flank-card__title">AI Usage</span>
         <span class="flank-live-dot" style="background: ${ai.connected !== false ? "#10B981" : "#F59E0B"}; flex-shrink: 0;"></span>
       </div>
-      <span class="flank-chip" style="height: 22px; padding: 0 8px; font-size: 11px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      <span class="flank-chip" style="height: 22px; padding: 0 10px; font-size: 11px; flex-shrink: 0; white-space: nowrap;">
         ${escapeHtml2(ai.planName || "Google AI Pro")}
       </span>
     </div>
@@ -3731,10 +3787,12 @@ function Row(props) {
   const cls = `flank-ui-row${hasDesc ? " has-desc" : ""}${props.className ? ` ${props.className}` : ""}`;
   const action = props.actionAttr ? ` ${props.actionAttr}` : "";
   const styleAttr = props.style ? ` style="${props.style}"` : "";
+  const dragMarkup = props.dragHandleHtml ? `<span class="flank-ui-row-drag">${props.dragHandleHtml}</span>` : "";
   const iconMarkup = props.iconHtml ? `<span class="flank-ui-row-icon" aria-hidden="true">${props.iconHtml}</span>` : "";
   const descMarkup = props.description ? `<span class="flank-ui-row-desc">${escapeHtml4(props.description)}</span>` : "";
   return `<div class="${cls}"${action}${styleAttr}>
     <div class="flank-ui-row-left">
+      ${dragMarkup}
       ${iconMarkup}
       <div class="flank-ui-row-texts">
         <span class="flank-ui-row-label">${escapeHtml4(props.label)}</span>
@@ -3784,7 +3842,9 @@ function Swatch(props) {
   const sz = props.size || 22;
   const isAct = props.isActive ? " is-active" : "";
   const title = props.title || props.hex;
-  return `<button type="button" class="flank-ui-swatch${isAct}" ${props.actionAttr}="${escapeHtml4(props.hex)}" title="${escapeHtml4(title)}" aria-label="${escapeHtml4(title)}" style="--swatch-color: ${escapeHtml4(props.hex)}; width: ${sz}px; height: ${sz}px;">
+  const secondary = deriveSecondaryAccent(props.hex);
+  const grad = `linear-gradient(135deg, ${props.hex} 0%, ${secondary} 100%)`;
+  return `<button type="button" class="flank-ui-swatch${isAct}" ${props.actionAttr}="${escapeHtml4(props.hex)}" title="${escapeHtml4(title)}" aria-label="${escapeHtml4(title)}" style="--swatch-color: ${escapeHtml4(grad)}; width: ${sz}px; height: ${sz}px;">
     <span class="flank-ui-swatch-inner"></span>
   </button>`;
 }
@@ -4152,7 +4212,7 @@ function renderBatteryWindowHtml(state2) {
     <div class="flank-window" role="dialog" aria-label="Power and Battery Details">
       ${renderTitleBar("Power & Battery Details")}
       <div class="flank-window__body flank-win-body" style="padding: 24px; gap: 16px; box-sizing: border-box; flex: 1; min-height: 0; display: flex; overflow: hidden;">
-        <div class="flank-list-col" style="flex: 1; min-width: 0; border-right: none; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden;">
+        <div class="flank-list-col" style="flex: 1; min-width: 0; border-right: none; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px 16px 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;">
           <div class="flank-preview-box" style="flex-direction:column; align-items:stretch; gap: 8px; padding: 12px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10);">
             <div class="flank-card-row-between" style="display:flex; justify-content:space-between; align-items:center;">
               <span class="flank-card-title">Laptop battery</span>
@@ -4198,13 +4258,13 @@ function renderBatteryWindowHtml(state2) {
             </div>
           </div>
 
-          <button type="button" class="flank-btn is-secondary" data-item-kind="link" data-item-id="win-power-settings" data-target="ms-settings:powersleep" style="width: 100%; justify-content: space-between; height: 34px; padding: 0 14px;">
+          <button type="button" class="flank-btn is-secondary" data-item-kind="link" data-item-id="win-power-settings" data-target="ms-settings:powersleep" style="width: 100%; justify-content: space-between; height: 36px; padding: 0 14px; margin-top: auto; flex-shrink: 0;">
             <span style="font-size: 12px; font-weight: 500;">Open Windows Power &amp; Battery settings</span>
             <span style="display:flex; width: 14px; height: 14px; flex-shrink: 0;">${iconSvg("arrow-up-right", 14)}</span>
           </button>
         </div>
 
-        <div class="flank-preview-col" style="flex: 1; min-width: 0; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden;">
+        <div class="flank-preview-col" style="flex: 1; min-width: 0; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 16px 16px 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;">
           <span class="flank-card-title">Laptop &amp; peripheral batteries</span>
           <div style="display:flex; flex-direction:column; gap: var(--flank-scale-space-10)">
             ${deviceCards}
@@ -4502,7 +4562,8 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       return Row({
         label: item.label,
         description: `${item.kind}${item.target ? ` \xB7 ${item.target}` : ""}`,
-        iconHtml: `<span class="flank-drag-handle" title="Reorder" style="margin-right: 8px; color: var(--flank-color-text-muted); cursor: grab; font-size: 14px; user-select: none;">\u22EE\u22EE</span>${iconMarkup}`,
+        dragHandleHtml: `<span class="flank-drag-handle" title="Reorder" style="color: var(--flank-color-text-muted); cursor: grab; font-size: 14px; user-select: none;">\u22EE\u22EE</span>`,
+        iconHtml: iconMarkup,
         controlHtml: `
           <div style="display:flex; align-items:center; gap: 8px;">
             ${isCustom ? `
@@ -5327,6 +5388,16 @@ function setupEventDelegation() {
         state.activeWidget = null;
         renderApp();
       }, 180);
+    }
+  });
+  stage.addEventListener("pointerdown", (ev) => {
+    const target = ev.target;
+    if (!target) return;
+    if (currentView === "modal") {
+      const titlebar = target.closest(".flank-titlebar");
+      if (titlebar && !target.closest("button, input, a, select, textarea, [data-action]")) {
+        window.pywebview?.api?.drag_modal_window?.();
+      }
     }
   });
   stage.addEventListener("click", async (ev) => {

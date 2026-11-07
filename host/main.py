@@ -1,6 +1,7 @@
 import os
 # Force WebView2 default background color to fully transparent before anything initializes
 os.environ['WEBVIEW2_DEFAULT_BACKGROUND_COLOR'] = '0'
+os.environ['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = '--disable-features=FluentScrollbar,OverlayScrollbar'
 
 import ctypes
 from ctypes import wintypes
@@ -1135,7 +1136,27 @@ class FlankHostApi:
         logical_ww = int(round(ww / scale))
         logical_wh = int(round(wh / scale))
 
-        cw, ch, cradius = self._card_shape_size
+        CARD_HEIGHTS = {
+            'stats': 380,
+            'audio': 295,
+            'calendar': 340,
+            'agenda': 340,
+            'weather': 260,
+            'battery': 275,
+            'player': 235,
+            'focus': 240,
+            'network': 290,
+            'bluetooth': 290,
+            'ai_usage': 270,
+            'scratchpad': 290,
+            'clipboard': 300,
+            'clock': 245,
+        }
+        cw, _, cradius = self._card_shape_size
+        cw = max(304, cw)
+        ch = CARD_HEIGHTS.get(kind, 280)
+        self._card_shape_size = (cw, ch, cradius)
+
         dock_x, dock_y, dock_w, dock_h = self._dock_shape_rect
         if dock_x == 0 and dock_y == 0:
             dock_x, dock_y, dock_w = dock.x, dock.y, dock.width
@@ -1218,7 +1239,10 @@ class FlankHostApi:
         self._card_hide_timer.start()
 
     def open_window(self, win_name: str) -> None:
-        self._card_open = False
+        self.close_hover_card()
+        if self._card_hide_timer:
+            self._card_hide_timer.cancel()
+            self._card_hide_timer = None
         card = windows.get('card')
         if card:
             try:
@@ -1274,6 +1298,16 @@ class FlankHostApi:
 
     def set_window_interactive(self, mode: str, rects: List[Dict[str, Any]]) -> None:
         pass
+
+    def drag_modal_window(self) -> None:
+        modal = windows.get('modal')
+        if modal and hasattr(modal, 'native') and modal.native:
+            try:
+                hwnd = modal.native.Handle.ToInt32()
+                user32.ReleaseCapture()
+                user32.SendMessageW(hwnd, 0x0112, 0xF012, 0)
+            except Exception:
+                pass
 
     def launch_item(self, item_id: str, target: str) -> bool:
         if not target:
@@ -1658,6 +1692,7 @@ def main() -> None:
         height=dock_h,
         min_size=(10, 10),
         frameless=True,
+        easy_drag=False,
         on_top=True,
         focus=True,
         transparent=True,
@@ -1674,6 +1709,7 @@ def main() -> None:
         height=240,
         min_size=(10, 10),
         frameless=True,
+        easy_drag=False,
         on_top=True,
         focus=True,
         transparent=True,
@@ -1689,6 +1725,7 @@ def main() -> None:
         width=960,
         height=680,
         frameless=True,
+        easy_drag=False,
         on_top=True,
         focus=True,
         transparent=True,

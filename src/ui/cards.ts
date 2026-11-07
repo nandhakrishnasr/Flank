@@ -275,7 +275,7 @@ function renderPlayerCardInner(state: FlankState): string {
       </span>
     </div>
     <div style="display:flex; gap: 12px; align-items: center; width: 100%;">
-      <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft);" aria-hidden="true">${iconSvg('equalizer', 22)}</span>
+      <span class="flank-player-art${p.playing ? ' is-playing' : ''}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft); transition: box-shadow 0.3s ease, border-color 0.3s ease;" aria-hidden="true">${iconSvg('equalizer', 22)}</span>
       <div style="display:flex; flex-direction:column; gap: 2px; min-width: 0; flex: 1;">
         <div style="font-size: 13px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--flank-color-text);" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</div>
         <div style="font-size: 12px; color: var(--flank-color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.artist)}</div>
@@ -293,7 +293,7 @@ function renderPlayerCardInner(state: FlankState): string {
       <button type="button" class="flank-btn is-secondary" style="flex: none; width: 34px; height: 34px; padding: 0; border-radius: 50%;" data-media-action="previous" aria-label="Previous track">
         ${iconSvg('previous', 15)}
       </button>
-      <button type="button" class="flank-btn is-primary" style="flex: none; width: 38px; height: 38px; padding: 0; border-radius: 50%;" data-media-action="play-pause" aria-label="${p.playing ? 'Pause' : 'Play'}">
+      <button type="button" class="flank-btn is-primary${p.playing ? ' is-playing-btn' : ''}" style="flex: none; width: 38px; height: 38px; padding: 0; border-radius: 50%;" data-media-action="play-pause" aria-label="${p.playing ? 'Pause' : 'Play'}">
         ${iconSvg(p.playing ? 'pause' : 'play', 16)}
       </button>
       <button type="button" class="flank-btn is-secondary" style="flex: none; width: 34px; height: 34px; padding: 0; border-radius: 50%;" data-media-action="next" aria-label="Next track">
@@ -638,13 +638,13 @@ function renderAudioCardInner(state: FlankState): string {
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%;">
       ${presetChips}
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 6px; width: 100%;">
-      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px;" data-audio-action="vol-down">-10%</button>
-      <button type="button" class="flank-btn is-compact ${au.muted ? 'is-secondary' : 'is-primary'}" style="justify-content: center; height: 32px; font-size: 11px; gap: 4px;" data-audio-action="toggle-mute">
+    <div style="display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 6px; width: 100%;">
+      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px; padding: 0 4px;" data-audio-action="vol-down">-10%</button>
+      <button type="button" class="flank-btn is-compact ${au.muted ? 'is-secondary' : 'is-primary'}" style="justify-content: center; height: 32px; font-size: 11px; padding: 0 6px; gap: 4px;" data-audio-action="toggle-mute">
         <span style="display: flex; align-items: center; width: 14px; height: 14px; flex-shrink: 0;">${iconSvg(au.muted ? 'volume-mute' : 'volume', 14)}</span>
         <span>${au.muted ? 'Unmute' : 'Mute'}</span>
       </button>
-      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px;" data-audio-action="vol-up">+10%</button>
+      <button type="button" class="flank-btn is-secondary is-compact" style="justify-content: center; height: 32px; font-size: 11px; padding: 0 4px;" data-audio-action="vol-up">+10%</button>
     </div>
     <div class="flank-row" style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 8px;">
       <span style="display:flex; align-items:center; gap: 6px; min-width: 0; flex: 1;">
@@ -753,7 +753,7 @@ function renderAiCardInner(state: FlankState): string {
         <span class="flank-card__title">AI Usage</span>
         <span class="flank-live-dot" style="background: ${ai.connected !== false ? '#10B981' : '#F59E0B'}; flex-shrink: 0;"></span>
       </div>
-      <span class="flank-chip" style="height: 22px; padding: 0 8px; font-size: 11px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      <span class="flank-chip" style="height: 22px; padding: 0 10px; font-size: 11px; flex-shrink: 0; white-space: nowrap;">
         ${escapeHtml(ai.planName || 'Google AI Pro')}
       </span>
     </div>
