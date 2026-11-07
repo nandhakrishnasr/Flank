@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Flank Liquid Glass</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; overflow: hidden; font-family: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif; color: #ffffff; background: #0b1030">
+
+<!-- wallpaper -->
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: radial-gradient(700px 560px at 10% 16%, rgba(255,86,150,0.85), rgba(255,86,150,0) 70%), radial-gradient(760px 600px at 72% 6%, rgba(122,92,255,0.9), rgba(122,92,255,0) 70%), radial-gradient(800px 640px at 38% 92%, rgba(0,198,190,0.8), rgba(0,198,190,0) 70%), radial-gradient(620px 520px at 100% 100%, rgba(255,150,64,0.7), rgba(255,150,64,0) 70%), #0b1030"></div>
+
+<!-- colourful window behind the glass, so the blur and edge light are visible -->
+<div aria-hidden="true" style="position: absolute; left: 560px; top: 96px; width: 840px; height: 620px; box-sizing: border-box; padding: 20px; border-radius: 24px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); display: flex; flex-direction: column; gap: 16px">
+  <div style="display: flex; align-items: center; gap: 8px; height: 24px">
+    <span style="width: 12px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.5); display: block"></span>
+    <span style="width: 12px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.35); display: block"></span>
+    <span style="width: 12px; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.25); display: block"></span>
+    <span style="width: 140px; height: 10px; margin-left: 16px; border-radius: 5px; background: rgba(255,255,255,0.3); display: block"></span>
+  </div>
+  <div style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 14px">
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #ff7aa8, #8b3dff)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #19c3b3, #2f6bff)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #ffb057, #ff4f7b)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #5be3a3, #14899c)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #7c6bff, #e056b5)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #ff8f5a, #c2306a)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #2bb4ff, #6a4bff)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #ffd166, #ff7a59)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #3fd0c9, #1d7fb5)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #b36bff, #ff6fa3)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #ff6b6b, #ffa94d)"></div>
+    <div style="border-radius: 16px; background: linear-gradient(135deg, #4d8bff, #35d6b0)"></div>
+  </div>
+</div>
+
+<!-- ===== DOCK: liquid glass capsule ===== -->
+<nav aria-label="Flank dock" style="position: absolute; right: 20px; top: 62px; width: 64px; box-sizing: border-box; padding: 12px 0; border-radius: 32px; background: {{tintBg}}; backdrop-filter: blur(30px) saturate(1.8); -webkit-backdrop-filter: blur(30px) saturate(1.8); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 22px rgba(255,255,255,0.10), 0 10px 28px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22)">
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; height: 130px; border-radius: 32px; background: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0)); pointer-events: none"></div>
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; box-sizing: border-box; border-radius: 32px; padding: 1.5px; pointer-events: none; background: linear-gradient(165deg, rgba(255,255,255,0.85), rgba(255,255,255,0.12) 28%, rgba(255,255,255,0.04) 55%, rgba(255,255,255,0.45)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude"></div>
+
+  <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px">
+    <button aria-label="Browser" style="width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c3 3 3 15 0 18"></path><path d="M12 3c-3 3-3 15 0 18"></path></svg></button>
+    <button aria-label="Terminal" style="width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17l6-5-6-5"></path><path d="M12 19h8"></path></svg></button>
+    <button aria-label="Files" style="width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></button>
+    <button aria-label="Documents" style="width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M9 13h6M9 17h4"></path></svg></button>
+    <button aria-label="Clipboard history, 16 items" style="position: relative; width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="2"></rect><path d="M9 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><path d="M9.5 11h5M9.5 15h3"></path></svg>
+      <span style="position: absolute; top: -3px; right: -4px; min-width: 18px; height: 18px; box-sizing: border-box; padding: 0 5px; border-radius: 9px; background: {{accent}}; color: #06231f; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(6,8,24,0.3)">16</span>
+    </button>
+
+    <div aria-hidden="true" style="width: 28px; height: 1px; margin: 4px 0; background: rgba(255,255,255,0.22)"></div>
+
+    <button aria-label="Weather, 24 degrees, open" style="width: 44px; height: 46px; padding: 0; border: 0; border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0.12)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), inset 0 0 12px rgba(255,255,255,0.12), 0 4px 12px rgba(6,8,24,0.25); color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg><span>24°</span>
+    </button>
+    <button aria-label="CPU, 12 percent" style="width: 44px; height: 46px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums"><span>12%</span><span style="width: 24px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.25); overflow: hidden; display: block"><span style="display: block; width: 12%; height: 100%; background: {{accent}}"></span></span></button>
+    <button aria-label="Battery, 82 percent" style="width: 44px; height: 46px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="17" height="10" rx="2.5"></rect><path d="M22 11v2"></path><rect x="4.5" y="9.5" width="11" height="5" rx="1" fill="currentColor" stroke="none"></rect></svg><span>82%</span>
+    </button>
+    <button aria-label="Audio" style="width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: {{accent}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"></path></svg></button>
+    <button aria-label="Focus timer, 25 minutes" style="width: 44px; height: 46px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1" fill="currentColor"></circle></svg><span>25m</span>
+    </button>
+    <button aria-label="Notes, 2 unread" style="position: relative; width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"></path></svg>
+      <span style="position: absolute; top: -3px; right: -4px; min-width: 18px; height: 18px; box-sizing: border-box; padding: 0 5px; border-radius: 9px; background: {{accent}}; color: #06231f; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(6,8,24,0.3)">2</span>
+    </button>
+    <button aria-label="Volume, 68 percent" style="width: 44px; height: 46px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path></svg><span>68%</span>
+    </button>
+    <button aria-label="Network ping, 14 milliseconds" style="width: 44px; height: 46px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"></path><circle cx="12" cy="19.2" r="0.8" fill="currentColor"></circle></svg><span>14ms</span>
+    </button>
+    <button aria-label="AI usage, 68 percent" style="width: 40px; height: 40px; padding: 0; border: 0; border-radius: 16px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 28 28" fill="none" role="img" aria-hidden="true"><circle cx="14" cy="14" r="10" stroke="rgba(255,255,255,0.26)" stroke-width="3"></circle><circle cx="14" cy="14" r="10" stroke="{{accent}}" stroke-width="3" stroke-linecap="round" stroke-dasharray="42.7 62.8" transform="rotate(-90 14 14)"></circle><text x="14" y="17.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="#ffffff" font-family="Inter, sans-serif">68</text></svg></button>
+
+    <div aria-hidden="true" style="width: 28px; height: 1px; margin: 4px 0; background: rgba(255,255,255,0.22)"></div>
+
+    <button aria-label="Settings" style="width: 40px; height: 38px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: rgba(255,255,255,0.94); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg></button>
+  </div>
+</nav>
+
+<!-- ===== WEATHER CARD: liquid glass ===== -->
+<section aria-label="Weather" style="position: absolute; right: 98px; top: 204px; width: 320px; box-sizing: border-box; padding: 20px; border-radius: 30px; background: {{tintBg}}; backdrop-filter: blur(30px) saturate(1.8); -webkit-backdrop-filter: blur(30px) saturate(1.8); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 26px rgba(255,255,255,0.08), 0 10px 28px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22)">
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; height: 110px; border-radius: 30px; background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0)); pointer-events: none"></div>
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; box-sizing: border-box; border-radius: 30px; padding: 1.5px; pointer-events: none; background: linear-gradient(165deg, rgba(255,255,255,0.85), rgba(255,255,255,0.12) 28%, rgba(255,255,255,0.04) 55%, rgba(255,255,255,0.45)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude"></div>
+
+  <div style="position: relative; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; justify-content: space-between"><span style="font-size: 14px; font-weight: 600">Coimbatore</span><span style="font-size: 12.5px; color: rgba(255,255,255,0.8)">Now</span></div>
+    <div style="display: flex; align-items: flex-end; justify-content: space-between">
+      <span style="font-size: 76px; line-height: 0.95; font-weight: 300; letter-spacing: -0.03em">29°</span>
+      <span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-bottom: 6px">
+        <span style="display: flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7H7z"></path><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg>Rain</span>
+        <span style="font-size: 13px; color: rgba(255,255,255,0.82); font-variant-numeric: tabular-nums">H 31°  L 23°</span>
+      </span>
+    </div>
+    <div aria-hidden="true" style="height: 1px; background: rgba(255,255,255,0.2)"></div>
+    <div style="display: flex; gap: 6px">
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-radius: 18px; background: rgba(255,255,255,0.16); box-shadow: inset 0 1px 0 rgba(255,255,255,0.35)"><span style="font-size: 11.5px; color: rgba(255,255,255,0.85)">3 PM</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7H7z"></path><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg><span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">30°</span></div>
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-radius: 18px; background: rgba(255,255,255,0.08)"><span style="font-size: 11.5px; color: rgba(255,255,255,0.85)">4 PM</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7H7z"></path><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg><span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">25°</span></div>
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-radius: 18px; background: rgba(255,255,255,0.08)"><span style="font-size: 11.5px; color: rgba(255,255,255,0.85)">5 PM</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7H7z"></path><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg><span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">24°</span></div>
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-radius: 18px; background: rgba(255,255,255,0.08)"><span style="font-size: 11.5px; color: rgba(255,255,255,0.85)">6 PM</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7H7z"></path><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg><span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">24°</span></div>
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; border-radius: 18px; background: rgba(255,255,255,0.08)"><span style="font-size: 11.5px; color: rgba(255,255,255,0.85)">7 PM</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7H7z"></path><path d="M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg><span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">24°</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- taskbar -->
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 48px; box-sizing: border-box; background: rgba(14,16,34,0.55); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6); border-top: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; color: #ffffff">
+  <div style="width: 160px"></div>
+  <div style="display: flex; align-items: center; gap: 6px">
+    <span style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="8" rx="1.5"></rect><rect x="3" y="13" width="8" height="8" rx="1.5"></rect><rect x="13" y="13" width="8" height="8" rx="1.5"></rect></svg></span>
+    <span style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></span>
+    <span style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>
+    <span style="position: relative; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c3 3 3 15 0 18"></path><path d="M12 3c-3 3-3 15 0 18"></path></svg><span style="position: absolute; bottom: 2px; left: 13px; width: 14px; height: 3px; border-radius: 2px; background: {{accent}}"></span></span>
+  </div>
+  <div style="width: 160px; display: flex; justify-content: flex-end"><span style="display: flex; flex-direction: column; align-items: flex-end; font-size: 11.5px; line-height: 1.25; font-variant-numeric: tabular-nums"><span>4:29 PM</span><span>11/4/2026</span></span></div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#7CF0C8","options":["#7CF0C8","#8CB4FF","#FFB86B","#FF8FB8"]},"tint":{"editor":"range","default":0.42,"min":0.2,"max":0.7,"step":0.02,"section":"Glass"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const t = Number(this.props.tint ?? 0.42);
+    return {
+      accent: this.props.accent ?? '#7CF0C8',
+      tintBg: 'rgba(16,20,42,' + t.toFixed(2) + ')'
+    };
+  }
+}
+</script>
+</body>
+</html>

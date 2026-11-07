@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "id": "nord",
+  "name": "Nord",
+  "mode": "dark",
+  "default": false,
+  "description": "Arctic dark slate with vibrant teal and mint accents.",
+  "layout": {
+    "edge": "right",
+    "orientation": "vertical",
+    "shape": "pill",
+    "widgetStyle": "tile",
+    "labels": false,
+    "inset": "12px",
+    "dockWidth": "64px",
+    "dockPadding": "10px 0",
+    "dockGap": "6px",
+    "dockRadius": "30px",
+    "tileSize": "40px",
+    "tileRadius": "12px",
+    "iconSize": "18px",
+    "maxItems": 12,
+    "windowPadding": "48px",
+    "groupGap": "16px",
+    "handleHeight": "28px"
+  },
+  "surface": {
+    "dockBg": "#141920",
+    "dockBorder": "rgba(232,237,242,0.10)",
+    "dockShadow": "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.35)",
+    "backdropBlur": "0px",
+    "backdropSaturate": "1",
+    "cardBg": "#181f28",
+    "cardBorder": "rgba(232,237,242,0.10)",
+    "cardShadow": "inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.30), 0 16px 32px rgba(0,0,0,0.45)",
+    "cardRadius": "16px",
+    "cardPadding": "18px",
+    "cardWidth": "292px",
+    "cardGap": "14px",
+    "cardOffset": "10px",
+    "solidFallbackBg": "#141920",
+    "opacity": 1,
+    "highlight": "inset 0 1px 0 rgba(255,255,255,0.08)",
+    "hover": "#1e2632",
+    "active": "#252f3d",
+    "selected": "#2c3848"
+  },
+  "color": {
+    "text": "#e8edf2",
+    "textMuted": "#9fb0c3",
+    "tileBg": "rgba(255,255,255,0.04)",
+    "tileBgHover": "rgba(255,255,255,0.09)",
+    "tileBgPressed": "rgba(255,255,255,0.14)",
+    "tileIcon": "#d3dce7",
+    "tileActiveBg": "rgba(94,234,212,0.14)",
+    "tileActiveIcon": "#e8edf2",
+    "divider": "rgba(232,237,242,0.10)",
+    "dividerSoft": "rgba(232,237,242,0.06)",
+    "trackBg": "rgba(255,255,255,0.09)",
+    "accent": "#5EEAD4",
+    "accentInk": "#04201c",
+    "accentSoft": "rgba(94,234,212,0.14)",
+    "accentLine": "rgba(94,234,212,0.38)",
+    "focusRing": "#5EEAD4",
+    "iconPlate": "rgba(255,255,255,0.08)",
+    "iconPlateBorder": "rgba(255,255,255,0.12)",
+    "iconPlateShadow": "0 1px 3px rgba(0,0,0,0.20)"
+  },
+  "type": {
+    "ui": "'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif",
+    "display": "'Inter','Segoe UI Variable',system-ui,sans-serif",
+    "mono": "'JetBrains Mono','Cascadia Mono',Consolas,monospace",
+    "displayUse": "tabular numerals for stats",
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ]
+  },
+  "icons": {
+    "strokeWidth": 1.75,
+    "viewBox": "0 0 24 24",
+    "caps": "round",
+    "joins": "round"
+  },
+  "motion": {
+    "cardInMs": 160,
+    "tileMs": 120,
+    "easing": "cubic-bezier(0.2,0.8,0.2,1)",
+    "cardTravelPx": 8
+  }
+}

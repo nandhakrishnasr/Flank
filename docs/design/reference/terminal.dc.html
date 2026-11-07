@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Flank Terminal Theme</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 720px; height: 520px; overflow: hidden; font-family: 'JetBrains Mono','Cascadia Mono',Consolas,monospace; color: #cfe3d4; background: #070908; font-size: 12.5px">
+
+<!-- context terminal window -->
+<div aria-hidden="true" style="position: absolute; left: 296px; top: 36px; width: 392px; height: 300px; box-sizing: border-box; border: 1px solid #1f2a23; background: #0a0d0b; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #8fa89a">
+  <span>PS C:\dev\flank&gt; npm run tauri dev</span>
+  <span>   Compiling flank-core v0.1.0</span>
+  <span>   Compiling flank-widgets v0.1.0</span>
+  <span>    Finished dev profile in 14.2s</span>
+  <span>     Running `flank.exe`</span>
+  <span style="color: {{accent}}">[dock] attached to left edge</span>
+  <span style="color: {{accent}}">[widgets] loaded 6</span>
+  <span>PS C:\dev\flank&gt; _</span>
+</div>
+
+<!-- DOCK: flush left, expanded with labels -->
+<nav aria-label="Flank dock" style="position: absolute; left: 0; top: 0; bottom: 36px; width: 220px; box-sizing: border-box; border-right: 1px solid #1f2a23; background: #0b0e0c; padding: 14px 0; display: flex; flex-direction: column">
+  <div style="padding: 0 16px 12px; display: flex; justify-content: space-between; color: {{accent}}; font-weight: 700; font-size: 12px; letter-spacing: 0.08em"><span>FLANK</span><span style="color: #7d9486; font-weight: 400">dock</span></div>
+
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">01</span>&nbsp;&nbsp;terminal</span><span style="color: #7d9486; font-size: 11px">Alt 1</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">02</span>&nbsp;&nbsp;browser</span><span style="color: #7d9486; font-size: 11px">Alt 2</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">03</span>&nbsp;&nbsp;files</span><span style="color: #7d9486; font-size: 11px">Alt 3</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">04</span>&nbsp;&nbsp;notes</span><span style="color: #7d9486; font-size: 11px">Alt 4</span></button>
+
+  <div aria-hidden="true" style="height: 30px; padding: 0 16px; display: flex; align-items: center; gap: 8px; color: #5f7468; font-size: 11px"><span>widgets</span><span style="flex: 1; height: 1px; background: #1f2a23"></span></div>
+
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">clip</span>&nbsp;&nbsp;history</span><span style="color: {{accent}}">24</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">wthr</span>&nbsp;&nbsp;kyoto</span><span>24°</span></button>
+  <button aria-label="cpu 23 percent, open" style="height: 34px; padding: 0 16px; border: 0; background: {{accent}}; color: #04100a; font-size: 12.5px; font-weight: 700; text-align: left; display: flex; align-items: center; justify-content: space-between"><span>cpu&nbsp;&nbsp;&nbsp;&nbsp;usage</span><span>23%</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">mem</span>&nbsp;&nbsp;&nbsp;&nbsp;used</span><span>36%</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">play</span>&nbsp;&nbsp;night drive</span><span style="color: {{accent}}">&#9654; 2:14</span></button>
+  <button style="height: 34px; padding: 0 16px; border: 0; background: transparent; color: #cfe3d4; font-size: 12.5px; text-align: left; display: flex; align-items: center; justify-content: space-between"><span><span style="color: #7d9486">ai</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;usage</span><span>68%</span></button>
+</nav>
+
+<!-- STATS CARD -->
+<section aria-label="System stats" style="position: absolute; left: 232px; top: 246px; width: 330px; box-sizing: border-box; border: 1px solid #2a3a2f; background: #0b0e0c; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 0 0 1px #000, 0 20px 50px rgba(0,0,0,0.6)">
+  <div style="color: {{accent}}; font-weight: 700; font-size: 12px">$ flank stats --live</div>
+  <div style="display: flex; flex-direction: column; gap: 7px; font-size: 12px">
+    <div style="display: flex; justify-content: space-between; gap: 10px"><span style="color: #8fa89a; width: 38px">cpu</span><span aria-hidden="true" style="letter-spacing: 0.02em"><span style="color: {{accent}}">&#9608;&#9608;&#9608;&#9608;&#9608;</span><span style="color: #243229">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span></span><span style="width: 38px; text-align: right">23%</span></div>
+    <div style="display: flex; justify-content: space-between; gap: 10px"><span style="color: #8fa89a; width: 38px">mem</span><span aria-hidden="true" style="letter-spacing: 0.02em"><span style="color: {{accent}}">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span style="color: #243229">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span></span><span style="width: 38px; text-align: right">36%</span></div>
+    <div style="display: flex; justify-content: space-between; gap: 10px"><span style="color: #8fa89a; width: 38px">gpu</span><span aria-hidden="true" style="letter-spacing: 0.02em"><span style="color: {{accent}}">&#9608;&#9608;</span><span style="color: #243229">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span></span><span style="width: 38px; text-align: right">8%</span></div>
+    <div style="display: flex; justify-content: space-between; gap: 10px"><span style="color: #8fa89a; width: 38px">disk</span><span aria-hidden="true" style="letter-spacing: 0.02em"><span style="color: {{accent}}">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span><span style="color: #243229">&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span></span><span style="width: 38px; text-align: right">43%</span></div>
+  </div>
+  <div style="display: flex; justify-content: space-between; font-size: 12px; color: #8fa89a; border-top: 1px solid #1f2a23; padding-top: 10px"><span>down 2.4 MB/s</span><span>up 310 KB/s</span></div>
+  <div style="font-size: 11.5px; color: #7d9486">[enter] open full&nbsp;&nbsp;[esc] close</div>
+</section>
+
+<!-- taskbar -->
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 36px; box-sizing: border-box; border-top: 1px solid #1f2a23; background: #0b0e0c; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; font-size: 11.5px; color: #8fa89a"><span>flank@pc</span><span>16:24&nbsp;&nbsp;03-11-2026</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#7CFF8A","options":["#7CFF8A","#FFB454","#7DD3FC","#FF7AB6"]},"$preview":{"width":720,"height":520}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#7CFF8A' };
+  }
+}
+</script>
+</body>
+</html>

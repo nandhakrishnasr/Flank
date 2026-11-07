@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-theme="paper" data-mode="light" data-edge="right">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flank Screenshot Harness</title>
+  <link rel="stylesheet" href="./fonts/fonts.css">
+  <link rel="stylesheet" href="./tokens.css">
+  <link rel="stylesheet" href="./components.css">
+  <style>
+    html, body.shot-root {
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      scrollbar-width: none !important;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+      display: none !important;
+    }
+    body.shot-root {
+      padding: 24px !important;
+      background: radial-gradient(circle at 15% 15%, #f2efe9 0%, #dfdad0 100%) !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+    html[data-theme="liquid-glass"] body.shot-root,
+    html[data-theme="glass"] body.shot-root,
+    html[data-theme="aurora"] body.shot-root {
+      background: radial-gradient(circle at 20% 20%, rgba(255, 86, 150, 0.55), transparent 70%),
+                  radial-gradient(circle at 80% 10%, rgba(122, 92, 255, 0.6), transparent 70%),
+                  radial-gradient(circle at 50% 80%, rgba(30, 120, 255, 0.5), transparent 70%),
+                  #0c122c !important;
+    }
+    body.shot-root .flank-stage {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+    }
+    body.shot-root .flank-card {
+      box-shadow: 0 14px 34px rgba(40, 30, 20, 0.14), 0 2px 6px rgba(40, 30, 20, 0.06) !important;
+      scrollbar-width: none !important;
+    }
+    body.shot-root .flank-card::-webkit-scrollbar {
+      display: none !important;
+    }
+    body.shot-root .flank-dock {
+      box-shadow: 0 16px 36px rgba(40, 30, 20, 0.15), 0 2px 6px rgba(40, 30, 20, 0.06) !important;
+    }
+    body.shot-root .flank-window {
+      width: 960px !important;
+      height: 680px !important;
+      max-width: calc(100vw - 48px) !important;
+      max-height: calc(100vh - 48px) !important;
+      box-shadow: 0 20px 48px rgba(40, 30, 20, 0.18), 0 4px 12px rgba(40, 30, 20, 0.08) !important;
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+  </style>
+</head>
+<body class="shot-root" data-view="card">
+  <div id="flank-stage" class="flank-stage"></div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

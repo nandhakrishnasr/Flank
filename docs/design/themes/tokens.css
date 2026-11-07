@@ -1,0 +1,616 @@
+/* Flank theme tokens & design scale variables.
+   Source of truth: docs/design/TOKENS.md & docs/design/themes/*.json.
+   Components must read these variables only. */
+
+:root {
+  /* ==========================================================================
+     1. TYPOGRAPHY SCALE (Step 1 Foundation)
+     ========================================================================== */
+  --flank-scale-font-caption: 11px;
+  --flank-scale-font-label: 12px;
+  --flank-scale-font-body-sm: 13px;
+  --flank-scale-font-body: 14px;
+  --flank-scale-font-title: 16px;
+  --flank-scale-font-heading: 20px;
+  --flank-scale-font-display: 28px;
+
+  /* Font Weights */
+  --flank-font-weight-regular: 400;
+  --flank-font-weight-medium: 500;
+  --flank-font-weight-semibold: 600;
+
+  /* Line Heights */
+  --flank-font-line-height-display: 1.2;
+  --flank-font-line-height-body: 1.35;
+
+  /* Font Family Stack */
+  --flank-font-stack: Inter, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+
+  /* Legacy Typography Aliases */
+  --flank-scale-font-2xs: var(--flank-scale-font-caption);
+  --flank-scale-font-xs: var(--flank-scale-font-caption);
+  --flank-scale-font-sm: var(--flank-scale-font-caption);
+  --flank-scale-font-meta: var(--flank-scale-font-caption);
+  --flank-scale-font-sub: var(--flank-scale-font-label);
+  --flank-scale-font-item: var(--flank-scale-font-body-sm);
+  --flank-scale-font-title-sm: var(--flank-scale-font-body);
+
+  /* ==========================================================================
+     2. SPACING ON A 4px GRID (Step 1 Foundation)
+     2, 4, 6, 8, 10, 12, 16, 20, 24, 32
+     ========================================================================== */
+  --flank-scale-zero: 0;
+  --flank-scale-space-2: 2px;
+  --flank-scale-space-4: 4px;
+  --flank-scale-space-6: 6px;
+  --flank-scale-space-8: 8px;
+  --flank-scale-space-10: 10px;
+  --flank-scale-space-12: 12px;
+  --flank-scale-space-16: 16px;
+  --flank-scale-space-20: 20px;
+  --flank-scale-space-24: 24px;
+  --flank-scale-space-32: 32px;
+
+  /* Spacing Aliases */
+  --flank-scale-space-2xs: var(--flank-scale-space-2);
+  --flank-scale-space-xs: var(--flank-scale-space-4);
+  --flank-scale-space-sm: var(--flank-scale-space-6);
+  --flank-scale-space-md: var(--flank-scale-space-8);
+  --flank-scale-space-10: var(--flank-scale-space-10);
+  --flank-scale-space-11: var(--flank-scale-space-12);
+  --flank-scale-space-12: var(--flank-scale-space-12);
+  --flank-scale-space-14: var(--flank-scale-space-16);
+  --flank-scale-space-16: var(--flank-scale-space-16);
+  --flank-scale-space-18: var(--flank-scale-space-16);
+  --flank-scale-space-20: var(--flank-scale-space-20);
+  --flank-scale-space-22: var(--flank-scale-space-20);
+  --flank-scale-space-24: var(--flank-scale-space-24);
+
+  --flank-scale-badge-offset: -4px;
+  --flank-scale-caret-offset: -8px;
+  --flank-scale-rail-indicator-offset: -4px;
+
+  /* ==========================================================================
+     3. DOCK METRICS TOKENS (Step 1 Foundation)
+     dock.width = tile.size + 2 x dock.padding + 4 = 40 + 20 + 4 = 64px
+     ========================================================================== */
+  --flank-scale-dock-padding: 10px;
+  --flank-scale-tile-size: 40px;
+  --flank-scale-tile-gap: 6px;
+  --flank-scale-group-gap: 16px;
+  --flank-scale-handle-height: 28px;
+  --flank-scale-dock-width: calc(var(--flank-scale-tile-size) + 2 * var(--flank-scale-dock-padding) + 4px); /* 64px */
+
+  /* Component Dimensions */
+  --flank-scale-hairline: 1px;
+  --flank-scale-ring-width: 2px;
+  --flank-scale-bar-thin: 2px;
+  --flank-scale-bar-std: 4px;
+  --flank-scale-bar-med: 6px;
+  --flank-scale-dot: 6px;
+  --flank-scale-dot-lg: 8px;
+  --flank-scale-caret-size: 12px;
+  --flank-scale-badge-size: 16px;
+  --flank-scale-bar-width: 24px;
+  --flank-scale-divider-len: 24px;
+  --flank-scale-ring-tile: 28px;
+  --flank-scale-chip-height: 32px;
+  --flank-scale-row-height: 36px;
+  --flank-scale-item-icon-box: 36px;
+  --flank-scale-hit-min: 40px;
+  --flank-scale-search-height: 40px;
+  --flank-scale-titlebar-height: 44px;
+  --flank-scale-win-btn-width: 44px;
+  --flank-scale-sparkline-height: 52px;
+  --flank-scale-list-row-height: 60px;
+  --flank-scale-artwork-size: 60px;
+  --flank-scale-ai-ring-lg: 88px;
+  --flank-scale-list-col-width: 420px;
+  --flank-scale-window-width: 960px;
+  --flank-scale-window-height: 680px;
+
+  /* ==========================================================================
+     4. RADII SCALE (Step 1 Foundation)
+     Rules: tiles 12, small buttons/chips 8, cards 16, windows 20, dock full
+     ========================================================================== */
+  --flank-scale-radius-6: 6px;
+  --flank-scale-radius-8: 8px;       /* small buttons and chips */
+  --flank-scale-radius-12: 12px;     /* tiles */
+  --flank-scale-radius-16: 16px;     /* cards */
+  --flank-scale-radius-20: 20px;     /* windows */
+  --flank-scale-radius-full: 9999px; /* dock capsule full */
+
+  /* Radii Aliases */
+  --flank-scale-radius-xs: var(--flank-scale-radius-6);
+  --flank-scale-radius-sm: var(--flank-scale-radius-6);
+  --flank-scale-radius-4: var(--flank-scale-radius-6);
+  --flank-scale-radius-9: var(--flank-scale-radius-8);
+  --flank-scale-radius-10: var(--flank-scale-radius-8);
+  --flank-scale-radius-14: var(--flank-scale-radius-12);
+  --flank-scale-radius-15: var(--flank-scale-radius-16);
+  --flank-scale-radius-22: var(--flank-scale-radius-20);
+  --flank-scale-radius-24: var(--flank-scale-radius-20);
+  --flank-scale-radius-pill: var(--flank-scale-radius-full);
+  --flank-scale-radius-window: var(--flank-scale-radius-20);
+
+  /* ==========================================================================
+     5. ICON SYSTEM TOKENS (Step 1 Foundation)
+     sm 16, md 20, lg 24, stroke 1.75
+     ========================================================================== */
+  --flank-scale-icon-sm: 16px;
+  --flank-scale-icon-md: 20px;
+  --flank-scale-icon-lg: 24px;
+  --flank-scale-icon-stroke: 1.75;
+  --flank-icons-stroke-width: 1.75;
+
+  /* Icon Aliases */
+  --flank-scale-icon-xs: var(--flank-scale-icon-sm);
+  --flank-scale-icon-16: var(--flank-scale-icon-sm);
+  --flank-scale-icon-17: var(--flank-scale-icon-sm);
+  --flank-scale-icon-18: var(--flank-scale-icon-md);
+  --flank-scale-icon-20: var(--flank-scale-icon-md);
+
+  /* ==========================================================================
+     6. MOTION TOKENS (Step 1 Foundation)
+     fast 120ms, base 180ms, slow 240ms, standard & emphasized, spring (300, 24)
+     ========================================================================== */
+  --flank-motion-fast: 120ms;
+  --flank-motion-base: 180ms;
+  --flank-motion-slow: 240ms;
+  --flank-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --flank-motion-easing-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --flank-motion-spring-stiffness: 300;
+  --flank-motion-spring-damping: 24;
+
+  /* Motion Aliases */
+  --flank-motion-card-in-ms: var(--flank-motion-base);
+  --flank-motion-tile-ms: var(--flank-motion-fast);
+  --flank-motion-easing: var(--flank-motion-easing-standard);
+
+  /* ==========================================================================
+     7. ELEVATION TOKENS (Step 1 Foundation)
+     0: none, 1: small, 2: card, 3: window/flyout (two-layer shadows)
+     offsetY + blur <= windowPadding
+     ========================================================================== */
+  --flank-elevation-0: none;
+  --flank-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.05);
+  --flank-elevation-2: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.10);
+  --flank-elevation-3: 0 4px 12px rgba(0, 0, 0, 0.10), 0 16px 32px rgba(0, 0, 0, 0.14);
+}
+
+/* ============================================================================
+   REDUCED MOTION OVERRIDE (Step 1 Foundation)
+   Single place that sets all durations to 0 when on
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root, html {
+    --flank-motion-fast: 0ms !important;
+    --flank-motion-base: 0ms !important;
+    --flank-motion-slow: 0ms !important;
+    --flank-motion-card-in-ms: 0ms !important;
+    --flank-motion-tile-ms: 0ms !important;
+  }
+}
+
+html[data-reduced-motion="true"],
+html[data-reduce-motion="true"] {
+  --flank-motion-fast: 0ms !important;
+  --flank-motion-base: 0ms !important;
+  --flank-motion-slow: 0ms !important;
+  --flank-motion-card-in-ms: 0ms !important;
+  --flank-motion-tile-ms: 0ms !important;
+}
+
+[data-theme="paper"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: pill;
+  --flank-layout-widget-style: tile;
+  --flank-layout-labels: 0;
+  --flank-layout-inset: 14px;
+  --flank-layout-dock-width: 60px;
+  --flank-layout-dock-padding: 10px;
+  --flank-layout-dock-gap: 8px;
+  --flank-layout-dock-radius: 20px;
+  --flank-layout-tile-size: 40px;
+  --flank-layout-tile-radius: 12px;
+  --flank-layout-icon-size: 18px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 64px;
+  --flank-surface-dock-bg: #fbfaf7;
+  --flank-surface-dock-border: #e2ded4;
+  --flank-surface-dock-shadow: 0 14px 34px rgba(60,50,30,0.16);
+  --flank-surface-backdrop-blur: 0px;
+  --flank-surface-backdrop-saturate: 1;
+  --flank-surface-card-bg: #fbfaf7;
+  --flank-surface-card-border: #e2ded4;
+  --flank-surface-card-shadow: 0 18px 44px rgba(60,50,30,0.18);
+  --flank-surface-card-radius: 20px;
+  --flank-surface-card-padding: 18px;
+  --flank-surface-card-width: 292px;
+  --flank-surface-card-gap: 14px;
+  --flank-surface-card-offset: 10px;
+  --flank-color-text: #1f1e1b;
+  --flank-color-text-muted: #6b665c;
+  --flank-color-tile-bg: #f1eee7;
+  --flank-color-tile-bg-hover: #e9e5db;
+  --flank-color-tile-bg-pressed: #e0dbcf;
+  --flank-color-tile-icon: #34322e;
+  --flank-color-tile-active-bg: #1f1e1b;
+  --flank-color-tile-active-icon: #ffffff;
+  --flank-color-divider: #e2ded4;
+  --flank-color-divider-soft: #e8e4da;
+  --flank-color-track-bg: #dcd7ca;
+  --flank-color-accent: #2F4BFF;
+  --flank-color-accent-ink: #ffffff;
+  --flank-color-accent-soft: rgba(47,75,255,0.10);
+  --flank-color-accent-line: rgba(47,75,255,0.35);
+  --flank-color-focus-ring: #2F4BFF;
+  --flank-type-ui: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --flank-type-display: 'Fraunces',Georgia,serif;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.8;
+  --flank-motion-card-in-ms: 160ms;
+  --flank-motion-tile-ms: 120ms;
+  --flank-motion-easing: cubic-bezier(0.2,0.8,0.2,1);
+  --flank-motion-card-travel-px: 8px;
+}
+
+[data-theme="glass"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: pill;
+  --flank-layout-widget-style: tile;
+  --flank-layout-labels: 0;
+  --flank-layout-inset: 12px;
+  --flank-layout-dock-width: 60px;
+  --flank-layout-dock-padding: 12px 10px;
+  --flank-layout-dock-gap: 8px;
+  --flank-layout-dock-radius: 30px;
+  --flank-layout-tile-size: 40px;
+  --flank-layout-tile-radius: 12px;
+  --flank-layout-icon-size: 18px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 16px;
+  --flank-surface-dock-bg: rgba(255,255,255,0.72);
+  --flank-surface-dock-border: rgba(255,255,255,0.60);
+  --flank-surface-dock-shadow: none;
+  --flank-surface-backdrop-blur: 30px;
+  --flank-surface-backdrop-saturate: 1.6;
+  --flank-surface-card-bg: rgba(255,255,255,0.90);
+  --flank-surface-card-border: rgba(255,255,255,0.75);
+  --flank-surface-card-shadow: none;
+  --flank-surface-card-radius: 20px;
+  --flank-surface-card-padding: 18px;
+  --flank-surface-card-width: 292px;
+  --flank-surface-card-gap: 14px;
+  --flank-surface-card-offset: 10px;
+  --flank-surface-solid-fallback-bg: #f8fafc;
+  --flank-color-text: #0f172a;
+  --flank-color-text-muted: #475569;
+  --flank-color-tile-bg: transparent;
+  --flank-color-tile-bg-hover: rgba(0,0,0,0.06);
+  --flank-color-tile-bg-pressed: rgba(0,0,0,0.12);
+  --flank-color-tile-icon: #1e293b;
+  --flank-color-tile-active-bg: rgba(2,132,199,0.14);
+  --flank-color-tile-active-icon: #0284c7;
+  --flank-color-divider: rgba(0,0,0,0.10);
+  --flank-color-divider-soft: rgba(0,0,0,0.05);
+  --flank-color-track-bg: rgba(0,0,0,0.09);
+  --flank-color-accent: #0369a1;
+  --flank-color-accent-ink: #ffffff;
+  --flank-color-accent-soft: rgba(3,105,161,0.14);
+  --flank-color-accent-line: rgba(3,105,161,0.40);
+  --flank-color-focus-ring: #0369a1;
+  --flank-type-ui: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --flank-type-display: 'Inter','Segoe UI Variable',system-ui,sans-serif;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.7;
+  --flank-motion-card-in-ms: 160ms;
+  --flank-motion-tile-ms: 120ms;
+  --flank-motion-easing: cubic-bezier(0.2,0.8,0.2,1);
+  --flank-motion-card-travel-px: 8px;
+}
+
+[data-theme="nord"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: pill;
+  --flank-layout-widget-style: tile;
+  --flank-layout-labels: 0;
+  --flank-layout-inset: 12px;
+  --flank-layout-dock-width: 60px;
+  --flank-layout-dock-padding: 12px 10px;
+  --flank-layout-dock-gap: 8px;
+  --flank-layout-dock-radius: 30px;
+  --flank-layout-tile-size: 40px;
+  --flank-layout-tile-radius: 12px;
+  --flank-layout-icon-size: 18px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 16px;
+  --flank-surface-dock-bg: rgba(20,25,32,0.88);
+  --flank-surface-dock-border: rgba(255,255,255,0.09);
+  --flank-surface-dock-shadow: none;
+  --flank-surface-backdrop-blur: 28px;
+  --flank-surface-backdrop-saturate: 1.4;
+  --flank-surface-card-bg: rgba(20,25,32,0.95);
+  --flank-surface-card-border: rgba(255,255,255,0.10);
+  --flank-surface-card-shadow: none;
+  --flank-surface-card-radius: 20px;
+  --flank-surface-card-padding: 18px;
+  --flank-surface-card-width: 292px;
+  --flank-surface-card-gap: 14px;
+  --flank-surface-card-offset: 10px;
+  --flank-surface-solid-fallback-bg: #161c23;
+  --flank-color-text: #e8edf2;
+  --flank-color-text-muted: #9fb0c3;
+  --flank-color-tile-bg: rgba(255,255,255,0.04);
+  --flank-color-tile-bg-hover: rgba(255,255,255,0.09);
+  --flank-color-tile-bg-pressed: rgba(255,255,255,0.14);
+  --flank-color-tile-icon: #d3dce7;
+  --flank-color-tile-active-bg: rgba(94,234,212,0.14);
+  --flank-color-tile-active-icon: #e8edf2;
+  --flank-color-divider: rgba(255,255,255,0.12);
+  --flank-color-divider-soft: rgba(255,255,255,0.07);
+  --flank-color-track-bg: rgba(255,255,255,0.09);
+  --flank-color-accent: #5EEAD4;
+  --flank-color-accent-ink: #04201c;
+  --flank-color-accent-soft: rgba(94,234,212,0.14);
+  --flank-color-accent-line: rgba(94,234,212,0.38);
+  --flank-color-focus-ring: #5EEAD4;
+  --flank-type-ui: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --flank-type-display: 'Inter','Segoe UI Variable',system-ui,sans-serif;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.7;
+  --flank-motion-card-in-ms: 160ms;
+  --flank-motion-tile-ms: 120ms;
+  --flank-motion-easing: cubic-bezier(0.2,0.8,0.2,1);
+  --flank-motion-card-travel-px: 8px;
+}
+
+[data-theme="terminal"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: pill;
+  --flank-layout-widget-style: tile;
+  --flank-layout-labels: 0;
+  --flank-layout-inset: 12px;
+  --flank-layout-dock-width: 60px;
+  --flank-layout-dock-padding: 12px 10px;
+  --flank-layout-dock-gap: 8px;
+  --flank-layout-dock-radius: 30px;
+  --flank-layout-tile-size: 40px;
+  --flank-layout-tile-radius: 12px;
+  --flank-layout-icon-size: 18px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 8px;
+  --flank-surface-dock-bg: #0b0e0c;
+  --flank-surface-dock-border: #1f2a23;
+  --flank-surface-dock-shadow: none;
+  --flank-surface-backdrop-blur: 0px;
+  --flank-surface-backdrop-saturate: 1;
+  --flank-surface-card-bg: #0b0e0c;
+  --flank-surface-card-border: #2a3a2f;
+  --flank-surface-card-shadow: none;
+  --flank-surface-card-radius: 20px;
+  --flank-surface-card-padding: 16px;
+  --flank-surface-card-width: 292px;
+  --flank-surface-card-gap: 12px;
+  --flank-surface-card-offset: 10px;
+  --flank-color-text: #cfe3d4;
+  --flank-color-text-muted: #7d9486;
+  --flank-color-tile-bg: transparent;
+  --flank-color-tile-bg-hover: #121814;
+  --flank-color-tile-bg-pressed: #18211b;
+  --flank-color-tile-icon: #7CFF8A;
+  --flank-color-tile-active-bg: rgba(124,255,138,0.18);
+  --flank-color-tile-active-icon: #7CFF8A;
+  --flank-color-divider: #1f2a23;
+  --flank-color-divider-soft: #1f2a23;
+  --flank-color-track-bg: #243229;
+  --flank-color-accent: #7CFF8A;
+  --flank-color-accent-ink: #04100a;
+  --flank-color-accent-soft: rgba(124,255,138,0.14);
+  --flank-color-accent-line: rgba(124,255,138,0.38);
+  --flank-color-focus-ring: #7CFF8A;
+  --flank-type-ui: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-type-display: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.8;
+  --flank-motion-card-in-ms: 80ms;
+  --flank-motion-tile-ms: 0ms;
+  --flank-motion-easing: linear;
+  --flank-motion-card-travel-px: 0px;
+}
+
+[data-theme="rail"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: rail;
+  --flank-layout-widget-style: value;
+  --flank-layout-labels: 0;
+  --flank-layout-inset: 0px;
+  --flank-layout-dock-width: 44px;
+  --flank-layout-dock-padding: 12px 4px;
+  --flank-layout-dock-gap: 6px;
+  --flank-layout-dock-radius: 22px 0 0 22px;
+  --flank-layout-tile-size: 36px;
+  --flank-layout-tile-radius: 8px;
+  --flank-layout-icon-size: 16px;
+  --flank-layout-hit-area-min: 40px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 8px;
+  --flank-surface-dock-bg: #0e1018;
+  --flank-surface-dock-border: rgba(255,255,255,0.08);
+  --flank-surface-dock-shadow: none;
+  --flank-surface-backdrop-blur: 22px;
+  --flank-surface-backdrop-saturate: 1;
+  --flank-surface-card-bg: #12141c;
+  --flank-surface-card-border: rgba(255,255,255,0.10);
+  --flank-surface-card-shadow: none;
+  --flank-surface-card-radius: 16px;
+  --flank-surface-card-padding: 16px;
+  --flank-surface-card-width: 292px;
+  --flank-surface-card-gap: 12px;
+  --flank-surface-card-offset: 10px;
+  --flank-surface-solid-fallback-bg: #0e1018;
+  --flank-color-text: #eceef3;
+  --flank-color-text-muted: #b6bccb;
+  --flank-color-tile-bg: transparent;
+  --flank-color-tile-bg-hover: rgba(255,255,255,0.07);
+  --flank-color-tile-bg-pressed: rgba(255,255,255,0.12);
+  --flank-color-tile-icon: #c9cedb;
+  --flank-color-tile-active-bg: rgba(255,255,255,0.10);
+  --flank-color-tile-active-icon: #FF8A7A;
+  --flank-color-divider: rgba(255,255,255,0.14);
+  --flank-color-divider-soft: rgba(255,255,255,0.08);
+  --flank-color-track-bg: rgba(255,255,255,0.14);
+  --flank-color-accent: #FF8A7A;
+  --flank-color-accent-ink: #1a0f10;
+  --flank-color-accent-soft: rgba(255,138,122,0.14);
+  --flank-color-accent-line: rgba(255,138,122,0.38);
+  --flank-color-focus-ring: #FF8A7A;
+  --flank-type-ui: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --flank-type-display: 'Inter','Segoe UI Variable',system-ui,sans-serif;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.8;
+  --flank-motion-card-in-ms: 140ms;
+  --flank-motion-tile-ms: 100ms;
+  --flank-motion-easing: cubic-bezier(0.2,0.8,0.2,1);
+  --flank-motion-card-travel-px: 6px;
+}
+
+[data-theme="aurora"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: pill;
+  --flank-layout-widget-style: tile;
+  --flank-layout-labels: 1;
+  --flank-layout-inset: 12px;
+  --flank-layout-dock-width: 60px;
+  --flank-layout-dock-padding: 12px 10px;
+  --flank-layout-dock-gap: 8px;
+  --flank-layout-dock-radius: 30px;
+  --flank-layout-tile-size: 40px;
+  --flank-layout-tile-radius: 14px;
+  --flank-layout-icon-size: 18px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 16px;
+  --flank-surface-dock-bg: #160a2e;
+  --flank-surface-dock-border: rgba(255,255,255,0.22);
+  --flank-surface-dock-shadow: none;
+  --flank-surface-backdrop-blur: 26px;
+  --flank-surface-backdrop-saturate: 1.5;
+  --flank-surface-card-bg: #1c0f38;
+  --flank-surface-card-border: rgba(255,255,255,0.22);
+  --flank-surface-card-shadow: none;
+  --flank-surface-card-radius: 20px;
+  --flank-surface-card-padding: 18px;
+  --flank-surface-card-width: 292px;
+  --flank-surface-card-gap: 14px;
+  --flank-surface-card-offset: 10px;
+  --flank-surface-solid-fallback-bg: #160a2e;
+  --flank-color-text: #ffffff;
+  --flank-color-text-muted: #ddd3f5;
+  --flank-color-tile-bg: rgba(255,255,255,0.12);
+  --flank-color-tile-bg-hover: rgba(255,255,255,0.20);
+  --flank-color-tile-bg-pressed: rgba(255,255,255,0.28);
+  --flank-color-tile-icon: #ffffff;
+  --flank-color-tile-active-bg: linear-gradient(135deg,#db2777,#7c3aed);
+  --flank-color-tile-active-icon: #ffffff;
+  --flank-color-divider: rgba(255,255,255,0.25);
+  --flank-color-divider-soft: rgba(255,255,255,0.14);
+  --flank-color-track-bg: rgba(255,255,255,0.14);
+  --flank-color-accent: #f472b6;
+  --flank-color-accent2: #8b5cf6;
+  --flank-color-accent-cyan: #67e8f9;
+  --flank-color-accent-pink: #f0abfc;
+  --flank-color-accent-gradient: linear-gradient(90deg,#f472b6,#8b5cf6);
+  --flank-color-accent-ink: #ffffff;
+  --flank-color-accent-soft: rgba(244,114,182,0.16);
+  --flank-color-accent-line: rgba(244,114,182,0.4);
+  --flank-color-focus-ring: #f0abfc;
+  --flank-type-ui: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --flank-type-display: 'Inter','Segoe UI Variable',system-ui,sans-serif;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.9;
+  --flank-motion-card-in-ms: 200ms;
+  --flank-motion-tile-ms: 140ms;
+  --flank-motion-easing: cubic-bezier(0.2,0.8,0.2,1);
+  --flank-motion-card-travel-px: 8px;
+}
+
+
+[data-theme="liquid-glass"] {
+  --flank-layout-edge: right;
+  --flank-layout-orientation: vertical;
+  --flank-layout-shape: pill;
+  --flank-layout-widget-style: tile;
+  --flank-layout-labels: 0;
+  --flank-layout-inset: 20px;
+  --flank-layout-dock-width: 64px;
+  --flank-layout-dock-padding: 12px 0;
+  --flank-layout-dock-gap: 4px;
+  --flank-layout-dock-radius: 32px;
+  --flank-layout-tile-size: 40px;
+  --flank-layout-tile-height: 38px;
+  --flank-layout-value-tile-height: 46px;
+  --flank-layout-tile-radius: 16px;
+  --flank-layout-icon-size: 18px;
+  --flank-layout-max-items: 12;
+  --flank-layout-window-padding: 40px;
+  --flank-surface-dock-bg: rgba(16,20,42,0.42);
+  --flank-surface-dock-border: transparent;
+  --flank-surface-dock-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 22px rgba(255,255,255,0.10), 0 10px 28px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22);
+  --flank-surface-backdrop-blur: 30px;
+  --flank-surface-backdrop-saturate: 1.8;
+  --flank-surface-card-bg: rgba(16,20,42,0.42);
+  --flank-surface-card-border: transparent;
+  --flank-surface-card-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 26px rgba(255,255,255,0.08), 0 10px 28px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22);
+  --flank-surface-card-radius: 30px;
+  --flank-surface-card-padding: 20px;
+  --flank-surface-card-width: 320px;
+  --flank-surface-card-gap: 14px;
+  --flank-surface-card-offset: 14px;
+  --flank-surface-solid-fallback-bg: #1b2038;
+  --flank-glass-display: block;
+  --flank-glass-mode: wallpaper-sampled;
+  --flank-glass-tint-rgb: 16,20,42;
+  --flank-glass-tint-alpha: 0.42;
+  --flank-glass-tint-alpha-min: 0.34;
+  --flank-glass-tint-alpha-max: 0.70;
+  --flank-glass-blur: 30px;
+  --flank-glass-saturate: 1.8;
+  --flank-glass-rim-width: 1.5px;
+  --flank-glass-rim: linear-gradient(165deg, rgba(255,255,255,0.85), rgba(255,255,255,0.12) 28%, rgba(255,255,255,0.04) 55%, rgba(255,255,255,0.45));
+  --flank-glass-sheen: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0));
+  --flank-glass-sheen-height: 130px;
+  --flank-glass-text-shadow-when-low-contrast: 0 1px 2px rgba(0,0,0,0.35);
+  --flank-color-text: #ffffff;
+  --flank-color-text-muted: rgba(255,255,255,0.82);
+  --flank-color-tile-bg: transparent;
+  --flank-color-tile-bg-hover: rgba(255,255,255,0.12);
+  --flank-color-tile-bg-pressed: rgba(255,255,255,0.18);
+  --flank-color-tile-icon: rgba(255,255,255,0.94);
+  --flank-color-tile-active-bg: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0.12));
+  --flank-color-tile-active-shadow: inset 0 1px 0 rgba(255,255,255,0.65), inset 0 0 12px rgba(255,255,255,0.12), 0 4px 12px rgba(6,8,24,0.25);
+  --flank-color-tile-active-icon: #ffffff;
+  --flank-color-divider: rgba(255,255,255,0.22);
+  --flank-color-divider-soft: rgba(255,255,255,0.2);
+  --flank-color-track-bg: rgba(255,255,255,0.25);
+  --flank-color-chip-bg: rgba(255,255,255,0.08);
+  --flank-color-chip-active-bg: rgba(255,255,255,0.16);
+  --flank-color-accent: #7CF0C8;
+  --flank-color-accent-ink: #06231f;
+  --flank-color-accent-soft: rgba(124,240,200,0.16);
+  --flank-color-accent-line: rgba(124,240,200,0.40);
+  --flank-color-focus-ring: #ffffff;
+  --flank-type-ui: 'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --flank-type-display: 'Inter','Segoe UI Variable',system-ui,sans-serif;
+  --flank-type-mono: 'JetBrains Mono','Cascadia Mono',Consolas,monospace;
+  --flank-icons-stroke-width: 1.8;
+  --flank-motion-card-in-ms: 220ms;
+  --flank-motion-tile-ms: 160ms;
+  --flank-motion-easing: cubic-bezier(0.2,0.8,0.2,1);
+  --flank-motion-card-travel-px: 10px;
+}

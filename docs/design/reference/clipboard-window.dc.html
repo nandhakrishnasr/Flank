@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Flank Clipboard History</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,input{font-family:inherit}
+button{cursor:pointer}
+input::placeholder{color:#8b9bb0}
+</style>
+</helmet>
+<div style="position: relative; width: 1040px; height: 760px; overflow: hidden; font-family: 'Inter','Segoe UI',system-ui,sans-serif; color: #e8edf2; background: #0a0e13">
+
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: radial-gradient(760px 560px at 12% 8%, rgba(52,92,156,0.5), rgba(52,92,156,0) 62%), radial-gradient(700px 620px at 92% 96%, rgba(24,132,124,0.34), rgba(24,132,124,0) 62%), #0a0e13"></div>
+
+<!-- window -->
+<div style="position: absolute; left: 40px; top: 40px; width: 960px; height: 680px; box-sizing: border-box; border-radius: 14px; background: rgba(22,27,34,0.94); border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 40px 100px rgba(0,0,0,0.55); overflow: hidden; display: flex; flex-direction: column">
+
+  <!-- title bar -->
+  <div style="height: 44px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 0 0 16px; border-bottom: 1px solid rgba(255,255,255,0.06)">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 20px; height: 20px; border-radius: 6px; background: {{accent}}; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#04201c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4v16M5 12h10M5 4h13"/></svg></span>
+      <span style="font-size: 13px; font-weight: 600">Clipboard History</span>
+    </div>
+    <div style="display: flex; height: 100%; color: #cfd8e3">
+      <span style="width: 46px; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1 6h10"/></svg></span>
+      <span style="width: 46px; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5"/></svg></span>
+      <span style="width: 46px; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg></span>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div style="flex: 1; min-height: 0; display: flex">
+
+    <!-- list column -->
+    <div style="width: 420px; flex: none; box-sizing: border-box; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 14px 0; display: flex; flex-direction: column; gap: 12px; min-height: 0">
+      <label style="display: flex; align-items: center; gap: 10px; height: 42px; box-sizing: border-box; padding: 0 14px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #8b9bb0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input type="text" aria-label="Search clipboard history" placeholder="Search 148 items" style="flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #e8edf2; font-size: 13.5px">
+      </label>
+
+      <div style="display: flex; gap: 6px">
+        <button style="height: 30px; padding: 0 13px; border: 0; border-radius: 15px; background: {{accent}}; color: #04201c; font-size: 12.5px; font-weight: 600">All</button>
+        <button style="height: 30px; padding: 0 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: transparent; color: #c8d3df; font-size: 12.5px; font-weight: 500">Text</button>
+        <button style="height: 30px; padding: 0 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: transparent; color: #c8d3df; font-size: 12.5px; font-weight: 500">Links</button>
+        <button style="height: 30px; padding: 0 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: transparent; color: #c8d3df; font-size: 12.5px; font-weight: 500">Images</button>
+        <button style="height: 30px; padding: 0 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: transparent; color: #c8d3df; font-size: 12.5px; font-weight: 500">Files</button>
+      </div>
+
+      <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 4px; padding-bottom: 12px; overflow: hidden">
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: rgba(255,255,255,0.06); color: #c8d3df; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9"/></svg></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">Ship the dock hover cards before the weekend, then confirm edge snapping</span><span style="font-size: 11.5px; color: #8b9bb0">Text · just now</span></span>
+        </button>
+
+        <button aria-pressed="true" style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border-radius: 12px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: {{accent}}; color: #04201c; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">D</span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">docs.example.com/flank/roadmap</span><span style="font-size: 11.5px; color: #b4c2d1">Link · 2 min ago</span></span>
+        </button>
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span aria-hidden="true" style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: linear-gradient(135deg, #2c5a8a, #1e8c84); display: block"></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">Screenshot 2026-11-03 160212.png</span><span style="font-size: 11.5px; color: #8b9bb0">Image · 14 min ago</span></span>
+        </button>
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: rgba(255,255,255,0.06); color: #c8d3df; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">npm run tauri build -- --target x86_64-pc-windows-msvc</span><span style="font-size: 11.5px; color: #8b9bb0">Text · 31 min ago</span></span>
+        </button>
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: rgba(255,255,255,0.06); color: #c8d3df; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">Flank-brand-assets.zip</span><span style="font-size: 11.5px; color: #8b9bb0">File · 1 hr ago</span></span>
+        </button>
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: rgba(255,255,255,0.06); color: #c8d3df; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9"/></svg></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">hello@flank.example</span><span style="font-size: 11.5px; color: #8b9bb0">Text · Yesterday</span></span>
+        </button>
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: rgba(255,255,255,0.06); color: #c8d3df; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">example.com/design/dock-reference</span><span style="font-size: 11.5px; color: #8b9bb0">Link · Yesterday</span></span>
+        </button>
+
+        <button style="width: 100%; box-sizing: border-box; height: 60px; padding: 0 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: inherit; text-align: left; display: flex; align-items: center; gap: 12px">
+          <span aria-hidden="true" style="width: 36px; height: 36px; flex: none; border-radius: 10px; background: linear-gradient(135deg, #5b4a86, #2c5a8a); display: block"></span>
+          <span style="min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 300px">dock-moodboard.png</span><span style="font-size: 11.5px; color: #8b9bb0">Image · Yesterday</span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- preview column -->
+    <div style="flex: 1; min-width: 0; box-sizing: border-box; padding: 22px 24px 20px; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <span style="height: 24px; padding: 0 10px; border-radius: 12px; background: {{accentSoft}}; color: {{accent}}; font-size: 12px; font-weight: 600; display: flex; align-items: center">Link</span>
+        <span style="font-size: 12px; color: #8b9bb0">2 min ago</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">docs.example.com/flank/roadmap</span>
+        <span style="font-size: 13px; color: #9fb0c3">Opens in your default browser</span>
+      </div>
+
+      <div style="border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); padding: 16px; display: flex; align-items: center; gap: 14px">
+        <span style="width: 48px; height: 48px; flex: none; border-radius: 12px; background: {{accent}}; color: #04201c; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center">D</span>
+        <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0"><span style="font-size: 14px; font-weight: 600">Flank roadmap</span><span style="font-size: 12.5px; color: #9fb0c3">Planning notes for the dock, widgets and clipboard</span></span>
+      </div>
+
+      <div style="display: flex; flex-direction: column">
+        <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px"><span style="color: #9fb0c3">Copied</span><span>Today, 4:22 PM</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px"><span style="color: #9fb0c3">From</span><span>Browser</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px"><span style="color: #9fb0c3">Length</span><span style="font-variant-numeric: tabular-nums">31 characters</span></div>
+      </div>
+
+      <div style="flex: 1"></div>
+
+      <div style="display: flex; gap: 10px">
+        <button style="flex: 1; height: 44px; border: 0; border-radius: 12px; background: {{accent}}; color: #04201c; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px">Copy to clipboard
+          <span style="height: 20px; min-width: 20px; box-sizing: border-box; padding: 0 5px; border-radius: 5px; background: rgba(4,32,28,0.16); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center">Enter</span>
+        </button>
+        <button aria-label="Pin item" style="width: 44px; height: 44px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background: transparent; color: #e8edf2; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/></svg></button>
+        <button aria-label="Delete item" style="width: 44px; height: 44px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background: transparent; color: #e8edf2; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div style="height: 40px; flex: none; box-sizing: border-box; padding: 0 20px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #8b9bb0">
+    <span>148 of 200 saved on this PC</span>
+    <span style="display: flex; align-items: center; gap: 14px"><span>Up / Down to move</span><span>Enter to copy</span><span>Del to remove</span></span>
+  </div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#5EEAD4","options":["#5EEAD4","#7DD3FC","#C4B5FD","#FDBA74"]},"$preview":{"width":1040,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.accent ?? '#5EEAD4';
+    let h = a.replace('#', '');
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const n = parseInt(h, 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return {
+      accent: a,
+      accentSoft: 'rgba(' + r + ',' + g + ',' + b + ',0.14)',
+      accentLine: 'rgba(' + r + ',' + g + ',' + b + ',0.38)'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Flank glyph">
+  <defs>
+    <mask id="flankGlyphCut" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#fff"/>
+      <circle cx="318" cy="226" r="21" fill="#000"/>
+      <path d="M168 226 C150 296 190 366 264 372 C272 300 242 232 168 226 Z" fill="none" stroke="#000" stroke-width="10" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <g mask="url(#flankGlyphCut)" fill="currentColor" stroke="none">
+    <rect x="96" y="402" width="320" height="28" rx="14"/>
+    <path d="M158 296 C112 322 84 356 70 396 C108 388 140 374 180 348 Z"/>
+    <ellipse cx="250" cy="262" rx="124" ry="130"/>
+    <path d="M232 148 C224 116 242 94 268 86 C262 110 276 126 290 140 Z"/>
+    <path d="M366 232 Q424 248 424 261 Q424 274 366 286 Z" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <path d="M212 380 V402 M256 380 V402" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
+</svg>

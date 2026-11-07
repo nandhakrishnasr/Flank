@@ -1,0 +1,14 @@
+{
+  "name": "flank",
+  "version": "1.0.0",
+  "description": "Flank — A second dock for Windows with live widgets, clipboard history, and theme store.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.ts",
+    "build:ui": "node scripts/build-ui.mjs",
+    "start": "python host/main.py",
+    "package": "python scripts/build_executable.py"
+  },
+  "license": "MIT"
+}
+

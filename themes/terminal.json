@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "id": "terminal",
+  "name": "Terminal",
+  "mode": "dark",
+  "default": false,
+  "description": "Monospace matrix terminal with glowing green accents on deep black.",
+  "layout": {
+    "edge": "right",
+    "orientation": "vertical",
+    "shape": "pill",
+    "widgetStyle": "tile",
+    "labels": false,
+    "inset": "12px",
+    "dockWidth": "64px",
+    "dockPadding": "10px 0",
+    "dockGap": "6px",
+    "dockRadius": "30px",
+    "tileSize": "40px",
+    "tileRadius": "12px",
+    "iconSize": "18px",
+    "maxItems": 12,
+    "windowPadding": "48px",
+    "groupGap": "16px",
+    "handleHeight": "28px"
+  },
+  "surface": {
+    "dockBg": "#0b0e0c",
+    "dockBorder": "rgba(207,227,212,0.10)",
+    "dockShadow": "inset 0 1px 0 rgba(124,255,138,0.12), 0 2px 6px rgba(0,0,0,0.30), 0 8px 18px rgba(0,0,0,0.40)",
+    "backdropBlur": "0px",
+    "backdropSaturate": "1",
+    "cardBg": "#0e120f",
+    "cardBorder": "rgba(207,227,212,0.10)",
+    "cardShadow": "inset 0 1px 0 rgba(124,255,138,0.12), 0 4px 12px rgba(0,0,0,0.35), 0 14px 28px rgba(0,0,0,0.50)",
+    "cardRadius": "16px",
+    "cardPadding": "16px",
+    "cardWidth": "292px",
+    "cardGap": "12px",
+    "cardOffset": "10px",
+    "solidFallbackBg": "#0b0e0c",
+    "opacity": 1,
+    "highlight": "inset 0 1px 0 rgba(124,255,138,0.12)",
+    "hover": "#151c17",
+    "active": "#1c261f",
+    "selected": "#233027"
+  },
+  "color": {
+    "text": "#cfe3d4",
+    "textMuted": "#7d9486",
+    "tileBg": "transparent",
+    "tileBgHover": "#121814",
+    "tileBgPressed": "#18211b",
+    "tileIcon": "#7CFF8A",
+    "tileActiveBg": "rgba(124,255,138,0.18)",
+    "tileActiveIcon": "#7CFF8A",
+    "divider": "rgba(207,227,212,0.10)",
+    "dividerSoft": "rgba(207,227,212,0.06)",
+    "trackBg": "#243229",
+    "accent": "#7CFF8A",
+    "accentInk": "#04100a",
+    "accentSoft": "rgba(124,255,138,0.14)",
+    "accentLine": "rgba(124,255,138,0.38)",
+    "focusRing": "#7CFF8A",
+    "iconPlate": "rgba(255,255,255,0.06)",
+    "iconPlateBorder": "rgba(255,255,255,0.15)",
+    "iconPlateShadow": "0 1px 3px rgba(0,0,0,0.30)"
+  },
+  "type": {
+    "ui": "'JetBrains Mono','Cascadia Mono',Consolas,monospace",
+    "display": "'JetBrains Mono','Cascadia Mono',Consolas,monospace",
+    "mono": "'JetBrains Mono','Cascadia Mono',Consolas,monospace",
+    "displayUse": "everything is monospace; bars use block characters",
+    "weights": [
+      400,
+      500,
+      700
+    ]
+  },
+  "icons": {
+    "strokeWidth": 1.75,
+    "viewBox": "0 0 24 24",
+    "caps": "round",
+    "joins": "round"
+  },
+  "motion": {
+    "cardInMs": 80,
+    "tileMs": 0,
+    "easing": "linear",
+    "cardTravelPx": 0
+  }
+}

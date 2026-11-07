@@ -1,0 +1,89 @@
+{
+  "themes": {
+    "paper": [
+      "theme_paper_dock.png",
+      "theme_paper_tab.png",
+      "theme_paper_weather.png",
+      "theme_paper_calendar.png",
+      "theme_paper_focus.png"
+    ],
+    "glass": [
+      "theme_glass_dock.png",
+      "theme_glass_tab.png",
+      "theme_glass_weather.png",
+      "theme_glass_calendar.png",
+      "theme_glass_focus.png"
+    ],
+    "liquid-glass": [
+      "theme_liquid-glass_dock.png",
+      "theme_liquid-glass_tab.png",
+      "theme_liquid-glass_weather.png",
+      "theme_liquid-glass_calendar.png",
+      "theme_liquid-glass_focus.png"
+    ],
+    "terminal": [
+      "theme_terminal_dock.png",
+      "theme_terminal_tab.png",
+      "theme_terminal_weather.png",
+      "theme_terminal_calendar.png",
+      "theme_terminal_focus.png"
+    ],
+    "rail": [
+      "theme_rail_dock.png",
+      "theme_rail_tab.png",
+      "theme_rail_weather.png",
+      "theme_rail_calendar.png",
+      "theme_rail_focus.png"
+    ],
+    "nord": [
+      "theme_nord_dock.png",
+      "theme_nord_tab.png",
+      "theme_nord_weather.png",
+      "theme_nord_calendar.png",
+      "theme_nord_focus.png"
+    ],
+    "aurora": [
+      "theme_aurora_dock.png",
+      "theme_aurora_tab.png",
+      "theme_aurora_weather.png",
+      "theme_aurora_calendar.png",
+      "theme_aurora_focus.png"
+    ]
+  },
+  "scaling": {
+    "100": "scale_100_dock.png",
+    "125": "scale_125_dock.png",
+    "150": "scale_150_dock.png",
+    "200": "scale_200_dock.png"
+  },
+  "edges": {
+    "left": [
+      "edge_left_expanded.png",
+      "edge_left_collapsed.png"
+    ],
+    "right": [
+      "edge_right_expanded.png",
+      "edge_right_collapsed.png"
+    ]
+  },
+  "wallpapers": {
+    "reference": "wallpaper_reference_card.png",
+    "white": "wallpaper_white_card.png",
+    "black": "wallpaper_black_card.png",
+    "magenta": "wallpaper_magenta_card.png"
+  },
+  "edge_cases": {
+    "zero_items": "edgecase_zero_items.png",
+    "30_items": "edgecase_30_items.png",
+    "long_labels": "edgecase_long_labels.png",
+    "no_battery": "edgecase_no_battery.png",
+    "no_calendar": "edgecase_no_calendar.png"
+  },
+  "performance": {
+    "ui_bundle_build_ms": 521.26,
+    "startup_to_first_frame_ms": 210,
+    "idle_cpu_percent": 0.1,
+    "idle_memory_mb": 58.4,
+    "animation_frame_target_fps": 60
+  }
+}

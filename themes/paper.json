@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "id": "paper",
+  "name": "Paper",
+  "mode": "light",
+  "default": true,
+  "description": "Light, warm, editorial. Solid surfaces, soft shadows, serif numerals. The default startup theme.",
+  "layout": {
+    "edge": "right",
+    "orientation": "vertical",
+    "shape": "pill",
+    "widgetStyle": "tile",
+    "labels": false,
+    "inset": "14px",
+    "dockWidth": "64px",
+    "dockPadding": "10px 0",
+    "dockGap": "6px",
+    "dockRadius": "20px",
+    "tileSize": "40px",
+    "tileRadius": "12px",
+    "iconSize": "18px",
+    "maxItems": 12,
+    "windowPadding": "64px",
+    "groupGap": "16px",
+    "handleHeight": "28px"
+  },
+  "surface": {
+    "dockBg": "#fbfaf7",
+    "dockBorder": "#e2ded4",
+    "dockShadow": "0 14px 34px rgba(60,50,30,0.16)",
+    "backdropBlur": "0px",
+    "backdropSaturate": "1",
+    "cardBg": "#fbfaf7",
+    "cardBorder": "#e2ded4",
+    "cardShadow": "0 18px 44px rgba(60,50,30,0.18)",
+    "cardRadius": "16px",
+    "cardPadding": "18px",
+    "cardWidth": "292px",
+    "cardGap": "14px",
+    "cardOffset": "10px",
+    "opacity": 1,
+    "highlight": "inset 0 1px 0 rgba(255,255,255,0.70)",
+    "hover": "#f4f0e8",
+    "active": "#ebe5d8",
+    "selected": "#e4ded0"
+  },
+  "color": {
+    "text": "#1f1e1b",
+    "textMuted": "#6b665c",
+    "tileBg": "#f1eee7",
+    "tileBgHover": "#e9e5db",
+    "tileBgPressed": "#e0dbcf",
+    "tileIcon": "#34322e",
+    "tileActiveBg": "#1f1e1b",
+    "tileActiveIcon": "#ffffff",
+    "divider": "rgba(31,30,27,0.10)",
+    "dividerSoft": "rgba(31,30,27,0.06)",
+    "trackBg": "#dcd7ca",
+    "accent": "#2F4BFF",
+    "accentInk": "#ffffff",
+    "accentSoft": "rgba(47,75,255,0.10)",
+    "accentLine": "rgba(47,75,255,0.35)",
+    "focusRing": "#2F4BFF",
+    "iconPlate": "#ffffff",
+    "iconPlateBorder": "rgba(31,30,27,0.08)",
+    "iconPlateShadow": "0 1px 3px rgba(31,30,27,0.08)"
+  },
+  "type": {
+    "ui": "'Inter','Segoe UI Variable','Segoe UI',system-ui,sans-serif",
+    "display": "'Fraunces',Georgia,serif",
+    "mono": "'JetBrains Mono','Cascadia Mono',Consolas,monospace",
+    "displayUse": "large numerals only (weather temperature, big stat values)",
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ]
+  },
+  "icons": {
+    "strokeWidth": 1.75,
+    "viewBox": "0 0 24 24",
+    "caps": "round",
+    "joins": "round"
+  },
+  "motion": {
+    "cardInMs": 160,
+    "tileMs": 120,
+    "easing": "cubic-bezier(0.2,0.8,0.2,1)",
+    "cardTravelPx": 8
+  }
+}
