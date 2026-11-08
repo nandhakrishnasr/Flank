@@ -60,11 +60,82 @@ user32 = ctypes.WinDLL('user32', use_last_error=True)
 gdi32 = ctypes.WinDLL('gdi32', use_last_error=True)
 shell32 = ctypes.WinDLL('shell32', use_last_error=True)
 dwmapi = ctypes.WinDLL('dwmapi', use_last_error=True)
+ole32 = ctypes.WinDLL('ole32', use_last_error=True)
 
 GWL_EXSTYLE = -20
 WS_EX_TOOLWINDOW = 0x00000080
+WS_EX_APPWINDOW = 0x00040000
 WS_EX_TOPMOST = 0x00000008
 WS_EX_NOACTIVATE = 0x08000000
+
+class GUID(ctypes.Structure):
+    _fields_ = [
+        ('Data1', ctypes.c_ulong),
+        ('Data2', ctypes.c_ushort),
+        ('Data3', ctypes.c_ushort),
+        ('Data4', ctypes.c_ubyte * 8)
+    ]
+    def __init__(self, guid_str: str):
+        ole32.IIDFromString(guid_str, ctypes.byref(self))
+
+CLSID_TaskbarList = GUID('{56FDF344-FD6D-11D0-958A-006097C9A090}')
+IID_ITaskbarList = GUID('{56FDF342-FD6D-11D0-958A-006097C9A090}')
+
+class ITaskbarListVtbl(ctypes.Structure):
+    pass
+
+class ITaskbarList(ctypes.Structure):
+    _fields_ = [('lpVtbl', ctypes.POINTER(ITaskbarListVtbl))]
+
+ITaskbarListVtbl._fields_ = [
+    ('QueryInterface', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, ctypes.POINTER(GUID), ctypes.POINTER(ctypes.c_void_p))),
+    ('AddRef', ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p)),
+    ('Release', ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p)),
+    ('HrInit', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p)),
+    ('AddTab', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND)),
+    ('DeleteTab', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND)),
+    ('ActivateTab', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND)),
+    ('SetActiveAlt', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND)),
+]
+
+_taskbar_list_ptr: Any = None
+
+def get_taskbar_list():
+    global _taskbar_list_ptr
+    if _taskbar_list_ptr is not None:
+        return _taskbar_list_ptr
+    try:
+        ole32.CoInitialize(None)
+        p_tbl = ctypes.POINTER(ITaskbarList)()
+        hr = ole32.CoCreateInstance(
+            ctypes.byref(CLSID_TaskbarList),
+            None,
+            1, # CLSCTX_INPROC_SERVER
+            ctypes.byref(IID_ITaskbarList),
+            ctypes.byref(p_tbl)
+        )
+        if hr == 0 and p_tbl:
+            p_tbl.contents.lpVtbl.contents.HrInit(p_tbl)
+            _taskbar_list_ptr = p_tbl
+    except Exception as e:
+        _log_debug(f"Failed to initialize ITaskbarList: {e}")
+    return _taskbar_list_ptr
+
+def remove_from_taskbar(hwnd: int) -> None:
+    if not hwnd:
+        return
+    try:
+        ex = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+        user32.SetWindowLongW(
+            hwnd,
+            GWL_EXSTYLE,
+            (ex | WS_EX_TOOLWINDOW | WS_EX_TOPMOST) & ~WS_EX_APPWINDOW & ~WS_EX_NOACTIVATE
+        )
+        tbl = get_taskbar_list()
+        if tbl:
+            tbl.contents.lpVtbl.contents.DeleteTab(tbl, hwnd)
+    except Exception as e:
+        _log_debug(f"remove_from_taskbar error: {e}")
 
 WM_HOTKEY = 0x0312
 WM_RELOAD_HOTKEYS = 0x0401  # WM_USER + 1
@@ -152,17 +223,39 @@ ICON_BIG = 1
 IMAGE_ICON = 1
 LR_LOADFROMFILE = 0x0010
 
-def apply_window_icon(hwnd: int, icon_path: str) -> None:
+def apply_window_icon(window_or_hwnd: Any, icon_path: str) -> None:
     try:
-        if os.path.isfile(icon_path):
-            h_big = user32.LoadImageW(None, icon_path, IMAGE_ICON, 32, 32, LR_LOADFROMFILE)
-            if h_big:
-                user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, h_big)
-            h_small = user32.LoadImageW(None, icon_path, IMAGE_ICON, 16, 16, LR_LOADFROMFILE)
-            if h_small:
-                user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, h_small)
+        if not os.path.isfile(icon_path):
+            return
+
+        hwnd = (
+            window_or_hwnd.Handle.ToInt32()
+            if hasattr(window_or_hwnd, 'Handle')
+            else int(window_or_hwnd)
+        )
+
+        h_big = user32.LoadImageW(None, icon_path, IMAGE_ICON, 32, 32, LR_LOADFROMFILE)
+        if h_big:
+            user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, h_big)
+        h_small = user32.LoadImageW(None, icon_path, IMAGE_ICON, 16, 16, LR_LOADFROMFILE)
+        if h_small:
+            user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, h_small)
+
+        # Set form.Icon asynchronously on WinForms UI thread via BeginInvoke
+        if Drawing and System and hasattr(window_or_hwnd, 'Icon'):
+            try:
+                def _set():
+                    try:
+                        window_or_hwnd.Icon = Drawing.Icon(icon_path)
+                    except Exception:
+                        pass
+                if hasattr(window_or_hwnd, 'BeginInvoke'):
+                    window_or_hwnd.BeginInvoke(System.Action(_set))
+            except Exception as e:
+                _log_debug(f"apply_window_icon form.Icon error: {e}")
     except Exception as e:
         _log_debug(f"apply_window_icon error: {e}")
+
 def resolve_icon_path() -> str:
     if getattr(sys, 'frozen', False):
         exe_dir = os.path.dirname(sys.executable)
@@ -187,20 +280,75 @@ def resolve_icon_path() -> str:
         return p
     return os.path.join(base, 'assets', 'flank.ico')
 
+def get_system_taskbar_theme() -> str:
+    """Reads Windows taskbar theme: returns 'light' if light taskbar, else 'dark'."""
+    try:
+        import winreg
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+        ) as key:
+            val, _ = winreg.QueryValueEx(key, "SystemUsesLightTheme")
+            return "light" if val == 1 else "dark"
+    except Exception:
+        return "dark"
+
+def get_tray_dpi_size(hwnd: int = 0) -> int:
+    """Calculates ideal tray icon pixel dimension (16, 20, 24, 32) from DPI scale."""
+    try:
+        dpi = user32.GetDpiForWindow(hwnd) if hwnd else 0
+        if not dpi or dpi <= 0:
+            dpi = user32.GetDpiForSystem()
+        scale = dpi / 96.0 if dpi > 0 else 1.0
+        if scale <= 1.15:
+            return 16
+        elif scale <= 1.35:
+            return 20
+        elif scale <= 1.75:
+            return 24
+        else:
+            return 32
+    except Exception:
+        return 16
+
+def resolve_tray_icon_path(size: int, taskbar_theme: str) -> Optional[str]:
+    """
+    Resolves tray icon PNG.
+    When taskbar is light -> dark glyph (flank-tray-*-dark.png).
+    When taskbar is dark -> light/white glyph (flank-tray-*-light.png).
+    """
+    glyph_variant = "dark" if taskbar_theme == "light" else "light"
+    fname = f"flank-tray-{size}-{glyph_variant}.png"
+
+    candidates = []
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.extend([
+            os.path.join(exe_dir, '_internal', 'assets', 'brand', 'tray', fname),
+            os.path.join(exe_dir, 'assets', 'brand', 'tray', fname),
+        ])
+        if hasattr(sys, '_MEIPASS'):
+            candidates.append(os.path.join(sys._MEIPASS, 'assets', 'brand', 'tray', fname))
+    base = os.path.abspath(os.path.join(HOST_DIR, '..'))
+    candidates.extend([
+        os.path.join(base, 'assets', 'brand', 'tray', fname),
+        os.path.join(base, 'assets', 'brand', fname),
+    ])
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
 class FlankTray:
     def __init__(self, api: Any):
         _log_debug("FlankTray __init__ start")
         self.api = api
         self.notify_icon = Forms.NotifyIcon()
-        icon_path = resolve_icon_path()
-        if Drawing and os.path.isfile(icon_path):
-            try:
-                self.notify_icon.Icon = Drawing.Icon(icon_path, 16, 16)
-            except Exception:
-                try:
-                    self.notify_icon.Icon = Drawing.Icon(icon_path)
-                except Exception:
-                    pass
+        self._current_hicon: Any = None
+        self._current_tray_key: Any = None
+        self._running = True
+
+        self.update_tray_icon()
         self.notify_icon.Text = "Flank"
 
         self.menu = Forms.ContextMenuStrip()
@@ -217,14 +365,94 @@ class FlankTray:
         self.menu.Items.Add(self.quit_item)
 
         self.notify_icon.ContextMenuStrip = self.menu
+        self.notify_icon.MouseClick += self._on_mouse_click
         self.notify_icon.DoubleClick += self._on_double_click
         self.notify_icon.Visible = True
+
+        self._watcher_thread = threading.Thread(target=self._watch_theme_and_dpi, daemon=True)
+        self._watcher_thread.start()
+        _log_debug("FlankTray __init__ complete")
+
+    def update_tray_icon(self) -> None:
+        dock = windows.get('dock')
+        if dock and hasattr(dock, 'native') and dock.native:
+            try:
+                if dock.native.InvokeRequired:
+                    dock.native.BeginInvoke(System.Action(self._do_update_tray_icon))
+                    return
+            except Exception:
+                pass
+        self._do_update_tray_icon()
+
+    def _do_update_tray_icon(self) -> None:
+        try:
+            hwnd = getattr(self.api, 'hwnd', 0)
+            size = get_tray_dpi_size(hwnd)
+            taskbar_theme = get_system_taskbar_theme()
+            key = (size, taskbar_theme)
+            if key == self._current_tray_key and self.notify_icon.Icon is not None:
+                return
+
+            tray_png = resolve_tray_icon_path(size, taskbar_theme)
+            old_hicon = self._current_hicon
+
+            if Drawing and tray_png and os.path.isfile(tray_png):
+                try:
+                    bmp = Drawing.Bitmap(tray_png)
+                    new_hicon = bmp.GetHicon()
+                    new_icon = Drawing.Icon.FromHandle(new_hicon)
+                    self.notify_icon.Icon = new_icon
+                    self._current_hicon = new_hicon
+                    self._current_tray_key = key
+                    if old_hicon:
+                        try:
+                            h_val = old_hicon.ToInt64() if hasattr(old_hicon, 'ToInt64') else int(old_hicon)
+                            user32.DestroyIcon(h_val)
+                        except Exception:
+                            pass
+                    bmp.Dispose()
+                    return
+                except Exception as e:
+                    _log_debug(f"FlankTray PNG icon conversion failed: {e}")
+
+            # Fallback to flank.ico
+            icon_path = resolve_icon_path()
+            if Drawing and os.path.isfile(icon_path):
+                try:
+                    self.notify_icon.Icon = Drawing.Icon(icon_path, size, size)
+                    self._current_tray_key = key
+                except Exception:
+                    try:
+                        self.notify_icon.Icon = Drawing.Icon(icon_path)
+                        self._current_tray_key = key
+                    except Exception:
+                        pass
+        except Exception as e:
+            _log_debug(f"FlankTray update_tray_icon error: {e}")
+
+    def _watch_theme_and_dpi(self):
+        while self._running:
+            time.sleep(3)
+            if not self._running:
+                break
+            self.update_tray_icon()
 
     def update_state(self, collapsed: bool):
         try:
             self.toggle_item.Text = "Show Flank" if collapsed else "Hide Flank"
         except Exception:
             pass
+
+    def _on_mouse_click(self, sender, e):
+        try:
+            if e.Button == Forms.MouseButtons.Left:
+                self.api.toggle_dock()
+            elif e.Button == Forms.MouseButtons.Right:
+                if not self.menu.Visible:
+                    pos = Forms.Cursor.Position
+                    self.menu.Show(pos.X, pos.Y)
+        except Exception as err:
+            _log_debug(f"FlankTray _on_mouse_click error: {err}")
 
     def _on_toggle(self, sender, args):
         self.api.toggle_dock()
@@ -233,18 +461,38 @@ class FlankTray:
         self.api.open_window('settings')
 
     def _on_quit(self, sender, args):
-        self.dispose()
+        _log_debug("FlankTray: Quit clicked from tray menu")
+        try:
+            self.dispose()
+        except Exception as e:
+            _log_debug(f"FlankTray dispose error: {e}")
+        try:
+            for w in list(windows.values()):
+                try:
+                    w.destroy()
+                except Exception:
+                    pass
+        except Exception:
+            pass
         os._exit(0)
 
     def _on_double_click(self, sender, args):
         self.api.toggle_dock()
 
     def dispose(self):
+        self._running = False
         try:
             self.notify_icon.Visible = False
             self.notify_icon.Dispose()
         except Exception:
             pass
+        if self._current_hicon:
+            try:
+                h_val = self._current_hicon.ToInt64() if hasattr(self._current_hicon, 'ToInt64') else int(self._current_hicon)
+                user32.DestroyIcon(h_val)
+                self._current_hicon = None
+            except Exception:
+                pass
 
 DEFAULT_ITEMS: List[Dict[str, Any]] = [
     # Apps Group (Default ON)
@@ -591,12 +839,26 @@ class FlankHostApi:
             }
 
     def init_tray(self) -> None:
-        if Forms and not self._tray:
+        if not Forms or self._tray:
+            return
+        dock = windows.get('dock')
+        if dock and hasattr(dock, 'native') and dock.native:
+            form = dock.native
+            def _create_tray():
+                if not self._tray:
+                    try:
+                        self._tray = FlankTray(self)
+                        self._tray.update_state(self._is_collapsed)
+                        _log_debug("init_tray: FlankTray successfully created on UI thread")
+                    except Exception as e:
+                        _log_debug(f"init_tray create error: {e}")
             try:
-                self._tray = FlankTray(self)
-                self._tray.update_state(self._is_collapsed)
-            except Exception:
-                pass
+                if form.InvokeRequired:
+                    form.BeginInvoke(System.Action(_create_tray))
+                else:
+                    _create_tray()
+            except Exception as e:
+                _log_debug(f"init_tray invoke error: {e}")
 
     def set_dock_state(self, state: str) -> None:
         """One window, two shapes. Resizes and moves dock window between expanded and collapsed edge tab."""
@@ -1281,7 +1543,9 @@ class FlankHostApi:
                     user32.SetWindowRgn(hwnd, 0, True)
 
                     user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0040)
+                    remove_from_taskbar(hwnd)
                     user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+                    remove_from_taskbar(hwnd)
                     user32.SetForegroundWindow(hwnd)
             except Exception:
                 pass
@@ -1656,6 +1920,7 @@ def start_telemetry_loop(api: FlankHostApi) -> None:
 
 
 def main() -> None:
+    _log_debug("main() entered")
     try:
         shell32.SetCurrentProcessExplicitAppUserModelID("Flank.App")
     except Exception:
@@ -1746,7 +2011,7 @@ def main() -> None:
             _log_debug("on_dock_shown: resolving icon")
             icon_p = resolve_icon_path()
             _log_debug(f"on_dock_shown: icon_p={icon_p}")
-            apply_window_icon(hwnd, icon_p)
+            apply_window_icon(dock_window.native, icon_p)
 
             _log_debug("on_dock_shown: calling init_tray")
             try:
@@ -1780,9 +2045,8 @@ def main() -> None:
             rgn = gdi32.CreateRoundRectRgn(0, 0, pw + 1, ph + 1, pw, pw)
             user32.SetWindowRgn(hwnd, rgn, True)
 
-            ex = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            user32.SetWindowLongW(hwnd, GWL_EXSTYLE, (ex | WS_EX_TOOLWINDOW | WS_EX_TOPMOST) & ~WS_EX_NOACTIVATE)
-            _log_debug("on_dock_shown: SetWindowLongW complete")
+            remove_from_taskbar(hwnd)
+            _log_debug("on_dock_shown: remove_from_taskbar complete")
 
             if api._is_collapsed:
                 _log_debug("on_dock_shown: starting collapsed")
@@ -1849,9 +2113,8 @@ def main() -> None:
         try:
             hwnd = card_window.native.Handle.ToInt32()
             icon_p = resolve_icon_path()
-            apply_window_icon(hwnd, icon_p)
-            ex = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            user32.SetWindowLongW(hwnd, GWL_EXSTYLE, (ex | WS_EX_TOOLWINDOW | WS_EX_TOPMOST) & ~WS_EX_NOACTIVATE)
+            apply_window_icon(card_window.native, icon_p)
+            remove_from_taskbar(hwnd)
             setup_transparency(card_window.native)
             if not api._card_open:
                 user32.ShowWindow(hwnd, 0)
@@ -1862,9 +2125,8 @@ def main() -> None:
         try:
             hwnd = modal_window.native.Handle.ToInt32()
             icon_p = resolve_icon_path()
-            apply_window_icon(hwnd, icon_p)
-            ex = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            user32.SetWindowLongW(hwnd, GWL_EXSTYLE, (ex | WS_EX_TOOLWINDOW | WS_EX_TOPMOST) & ~WS_EX_NOACTIVATE)
+            apply_window_icon(modal_window.native, icon_p)
+            remove_from_taskbar(hwnd)
             setup_transparency(modal_window.native)
             if not api._modal_open:
                 user32.ShowWindow(hwnd, 0)
@@ -1885,8 +2147,15 @@ def main() -> None:
     card_window.events.loaded += on_card_loaded
     modal_window.events.loaded += on_modal_loaded
 
+    _log_debug("webview.start() calling...")
     webview.start(gui='edgechromium', debug=False)
+    _log_debug("webview.start() exited")
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        _log_debug(f"TOP-LEVEL CRASH in main: {e}\n{traceback.format_exc()}")
+        raise

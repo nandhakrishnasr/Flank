@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flank — A slim second dock for Windows 11</title>
+  <meta name="description" content="Flank is a slim vertical second dock for Windows 11: app launchers, instant clipboard history, and live widgets for weather, audio mixer, system diagnostics, and background AI sessions.">
+  <link rel="icon" type="image/svg+xml" href="assets/brand/flank-app-icon.svg">
+  <link rel="apple-touch-icon" href="assets/brand/flank-app-icon-1024.png">
+  
+  <!-- OpenGraph / Social Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Flank">
+  <meta property="og:title" content="Flank — A second dock for everything you keep checking">
+  <meta property="og:description" content="Apps, shortcuts, and live glanceable widgets for Windows 11. Weather, audio mixer, system diagnostics, and clipboard history, always one glance away.">
+  <meta property="og:image" content="assets/brand/flank-lockup-1600.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Flank — A slim second dock for Windows 11">
+  <meta name="twitter:description" content="Apps, shortcuts, and live glanceable widgets for Windows 11.">
+  <meta name="twitter:image" content="assets/brand/flank-lockup-1600.png">
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#top" class="brand-link" aria-label="Flank Home">
+        <svg class="brand-logo-svg" viewBox="0 0 178 56" fill="currentColor">
+          <!-- Capsule Icon -->
+          <rect x="0" y="0" width="44" height="56" rx="22" fill="#2F4BFF"/>
+          <text x="22" y="38" fill="#FFFFFF" font-family="Inter, system-ui, sans-serif" font-weight="900" font-size="28" text-anchor="middle">F</text>
+          <!-- Wordmark -->
+          <text x="56" y="38" fill="currentColor" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="30" letter-spacing="-0.03em">flank</text>
+          <circle cx="134" cy="35" r="4.5" fill="#F5A524"/>
+        </svg>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="#demo" class="nav-link">Live Demo</a></li>
+          <li><a href="#widgets" class="nav-link">Widgets</a></li>
+          <li><a href="#clipboard" class="nav-link">Clipboard</a></li>
+          <li><a href="#stats" class="nav-link">Diagnostics</a></li>
+          <li><a href="#themes" class="nav-link">Themes</a></li>
+          <li><a href="#privacy" class="nav-link">Privacy</a></li>
+          <li><a href="#faq" class="nav-link">FAQ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
+          <!-- Populated by script.js -->
+        </button>
+
+        <a href="https://github.com/nandhakrishna/flank" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" aria-label="View on GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+
+        <a href="assets/downloads/Flank-Setup.exe" class="btn btn-primary" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download for Windows
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-section" id="top">
+      <div class="container">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Windows 11 Native · Version 1.0.0 Now Available
+        </div>
+
+        <h1 class="hero-title">
+          A second dock for everything you keep checking.
+        </h1>
+
+        <p class="hero-subtitle">
+          Apps, shortcuts, and live glanceable widgets for Windows 11. Weather, audio mixer, system diagnostics, clipboard history, and your background AI coding sessions — always one glance away.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="assets/downloads/Flank-Setup.exe" class="btn btn-primary btn-lg" download>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download for Windows 11
+          </a>
+          <a href="#demo" class="btn btn-secondary btn-lg">
+            Try Interactive Demo
+          </a>
+        </div>
+
+        <div class="hero-subcaption">
+          <span>✓ 100% Free & Open Source</span>
+          <span>✓ Zero Focus Stealing</span>
+          <span>✓ Local SQLite Storage</span>
+          <span>✓ Zero Telemetry</span>
+        </div>
+
+        <!-- Virtual Windows 11 Desktop Emulator -->
+        <div class="emulator-wrapper" id="demo">
+          <div class="emulator-window wp-aurora" id="emu-window">
+            
+            <!-- Controls Bar -->
+            <div class="desktop-controls-bar">
+              <div class="desktop-brand-title">
+                <span>Flank Virtual Desktop Demo</span>
+                <span class="emulator-tag">Interactive</span>
+              </div>
+
+              <div class="desktop-settings-toggles">
+                <div class="preset-chip-group">
+                  <span style="font-size:11px; opacity:0.8; margin-right:4px;">Wallpaper:</span>
+                  <button class="preset-chip active" data-set-wp="aurora">Aurora</button>
+                  <button class="preset-chip" data-set-wp="mesh">Mesh</button>
+                  <button class="preset-chip" data-set-wp="sunset">Sunset</button>
+                  <button class="preset-chip" data-set-wp="paper">Paper</button>
+                </div>
+
+                <div class="preset-chip-group">
+                  <span style="font-size:11px; opacity:0.8; margin-right:4px;">Theme:</span>
+                  <button class="preset-chip active" data-set-dock-theme="liquid-glass">Liquid Glass</button>
+                  <button class="preset-chip" data-set-dock-theme="paper">Paper</button>
+                  <button class="preset-chip" data-set-dock-theme="glass">Glass</button>
+                  <button class="preset-chip" data-set-dock-theme="terminal">Terminal</button>
+                  <button class="preset-chip" data-set-dock-theme="nord">Nord</button>
+                </div>
+
+                <button class="preset-chip" id="toggle-dock-edge">Edge: Right</button>
+              </div>
+            </div>
+
+            <!-- Virtual Desktop Workspace -->
+            <div class="desktop-stage" id="desktop-stage">
+              
+              <!-- Interactive Card Flyout -->
+              <div class="emu-card-flyout visible theme-liquid-glass" id="emu-card-flyout">
+                <div class="card-header">
+                  <span class="card-title">Weather & Forecast</span>
+                  <span class="card-status-badge">Coimbatore · 28°C</span>
+                </div>
+                <div class="card-body">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <div>
+                      <div style="font-size:32px; font-weight:800; line-height:1;">28°</div>
+                      <div style="font-size:12px; opacity:0.8;">Partly Cloudy · H:31° L:23°</div>
+                    </div>
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  </div>
+                  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; text-align:center; font-size:11px;">
+                    <div style="background:rgba(128,128,128,0.1); padding:6px; border-radius:8px;"><div>Now</div><div style="font-weight:700;">28°</div></div>
+                    <div style="background:rgba(128,128,128,0.1); padding:6px; border-radius:8px;"><div>15:00</div><div style="font-weight:700;">29°</div></div>
+                    <div style="background:rgba(128,128,128,0.1); padding:6px; border-radius:8px;"><div>16:00</div><div style="font-weight:700;">27°</div></div>
+                    <div style="background:rgba(128,128,128,0.1); padding:6px; border-radius:8px;"><div>17:00</div><div style="font-weight:700;">25°</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Flank Vertical Dock -->
+              <nav class="emu-dock theme-liquid-glass" id="emu-dock">
+                <!-- Collapse Handle -->
+                <button class="emu-dock-collapse-btn" id="emu-dock-collapse" title="Collapse Dock">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+
+                <!-- Collapsed Tab Notch Content -->
+                <div class="emu-collapsed-tab-content" id="emu-collapsed-tab" title="Expand Dock">
+                  <svg viewBox="0 0 100 128" width="16" height="20" fill="currentColor">
+                    <path d="M50 0 C22.4 0 0 22.4 0 50 L0 78 C0 105.6 22.4 128 50 128 C77.6 128 100 105.6 100 78 L100 50 C100 22.4 77.6 0 50 0 Z M64 42 L42 42 L42 56 L60 56 L60 66 L42 66 L42 92 L30 92 L30 32 L64 32 Z" fill-rule="evenodd"/>
+                  </svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>
+                </div>
+
+                <!-- Dock Items -->
+                <div class="emu-dock-items">
+                  <!-- App Plates -->
+                  <div class="emu-tile" title="Windows Terminal">
+                    <div class="emu-plate"><svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg></div>
+                  </div>
+                  <div class="emu-tile" title="Google Chrome">
+                    <div class="emu-plate"><svg viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg></div>
+                  </div>
+                  <div class="emu-tile" title="File Explorer">
+                    <div class="emu-plate"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
+                  </div>
+
+                  <div class="emu-divider"></div>
+
+                  <!-- Built-in Widgets -->
+                  <div class="emu-tile active" data-widget="weather" title="Weather">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <span class="emu-widget-value">28°</span>
+                  </div>
+
+                  <div class="emu-tile" data-widget="stats" title="System Diagnostics">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                    <span class="emu-widget-value">18%</span>
+                  </div>
+
+                  <div class="emu-tile" data-widget="battery" title="Laptop Battery">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"></rect><line x1="23" y1="13" x2="23" y2="11"></line></svg>
+                    <span class="emu-widget-value">100%</span>
+                  </div>
+
+                  <div class="emu-tile" data-widget="player" title="Media Player">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <span class="emu-widget-value">Play</span>
+                  </div>
+
+                  <div class="emu-tile" data-widget="clipboard" title="Clipboard History">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                    <span class="emu-widget-value">24</span>
+                  </div>
+
+                  <div class="emu-tile" data-widget="focus" title="Focus Timer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                    <span class="emu-widget-value">25m</span>
+                  </div>
+
+                  <div class="emu-tile" data-widget="audio" title="Audio Mixer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <span class="emu-widget-value">68%</span>
+                  </div>
+
+                  <div class="emu-divider"></div>
+
+                  <!-- Settings Tile -->
+                  <div class="emu-tile" title="Flank Settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                  </div>
+                </div>
+              </nav>
+
+            </div>
+
+            <!-- Windows 11 Taskbar -->
+            <div class="win11-taskbar">
+              <div></div>
+              <div class="taskbar-center">
+                <div class="taskbar-icon-btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#00ADEF"><rect x="3" y="3" width="8" height="8"></rect><rect x="13" y="3" width="8" height="8"></rect><rect x="3" y="13" width="8" height="8"></rect><rect x="13" y="13" width="8" height="8"></rect></svg>
+                </div>
+                <div class="taskbar-icon-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <div class="taskbar-icon-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </div>
+              </div>
+              <div class="taskbar-tray">
+                <span id="taskbar-clock">16:30</span>
+                <span id="taskbar-date">11/8/2026</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clipboard Showcase Section -->
+    <section class="feature-section" id="clipboard">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Clipboard History</div>
+          <h2 class="section-title">Copied earlier. Ready when you need it.</h2>
+          <p class="section-desc">
+            Search, filter, and recall text, links, and code snippets in an instant with a global hotkey. Stored locally in SQLite, protected by automatic password filtering.
+          </p>
+        </div>
+
+        <div class="interactive-showcase-grid">
+          <!-- Interactive Visual Demo -->
+          <div class="showcase-visual">
+            <div class="clip-demo-box">
+              <div class="clip-search-bar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="demo-clip-search" placeholder="Type to filter history...">
+              </div>
+
+              <div class="clip-filter-tabs">
+                <span class="clip-tab active" data-clip-filter="all">All</span>
+                <span class="clip-tab" data-clip-filter="link">Links</span>
+                <span class="clip-tab" data-clip-filter="code">Code</span>
+                <span class="clip-tab" data-clip-filter="text">Text</span>
+              </div>
+
+              <div class="clip-items-list" id="demo-clip-list">
+                <!-- Injected by script.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Description Points -->
+          <div class="showcase-features-list">
+            <div class="feature-item">
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
+              <div>
+                <h3 class="feature-item-title">Password Manager Privacy Filter</h3>
+                <p class="feature-item-desc">Automatically detects and drops sensitive credentials copied from 1Password, Bitwarden, KeePass, and browser password fields.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+              </div>
+              <div>
+                <h3 class="feature-item-title">Persistent Local SQLite</h3>
+                <p class="feature-item-desc">Everything stays securely on your machine. Your pinned items, snippets, and history survive Windows reboots with zero cloud uploads.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h8M6 16h12"></path></svg>
+              </div>
+              <div>
+                <h3 class="feature-item-title">Instant Keyboard Access</h3>
+                <p class="feature-item-desc">Press <code>Ctrl+Alt+V</code> from any game, code editor, or browser window to summon clipboard history without stealing focus.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Diagnostics & Telemetry Section -->
+    <section class="feature-section" id="stats">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">System Diagnostics</div>
+          <h2 class="section-title">Stats in the dock and in a dashboard.</h2>
+          <p class="section-desc">
+            Glanceable hardware telemetry at a glance, plus a comprehensive dashboard with per-core graphs, NVMe wear, and real-time process manager.
+          </p>
+        </div>
+
+        <div class="interactive-showcase-grid">
+          <div class="showcase-features-list">
+            <div class="feature-item">
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+              </div>
+              <div>
+                <h3 class="feature-item-title">Per-Core CPU & GPU Utilization</h3>
+                <p class="feature-item-desc">Hardware monitoring queried via lightweight Windows performance counters with smooth sparkline rendering and configurable refresh intervals.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              </div>
+              <div>
+                <h3 class="feature-item-title">Top 30 Processes View</h3>
+                <p class="feature-item-desc">Inspect memory hogs and runaway background threads at a glance. Sort processes instantly by CPU percentage or RAM consumption.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+              </div>
+              <div>
+                <h3 class="feature-item-title">Network Ping & Throughput</h3>
+                <p class="feature-item-desc">Real-time gateway ping latency in milliseconds plus upload and download speed telemetry so you always know when your connection drops.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="showcase-visual">
+            <img src="assets/screens/brand_about_liquid_glass.png" alt="Flank Diagnostics in Liquid Glass" style="width:100%; border-radius:12px; display:block; box-shadow:var(--shadow-sm);">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 Widgets Grid Showcase -->
+    <section class="feature-section" id="widgets">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Glanceable Widgets</div>
+          <h2 class="section-title">Every widget opens a card.</h2>
+          <p class="section-desc">
+            14 purpose-built widgets that provide glanceable numbers on the dock and expand into rich, interactive controls on hover.
+          </p>
+        </div>
+
+        <div class="widgets-grid">
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+            <h3 class="widget-card-name">Weather & Forecast</h3>
+            <p class="widget-card-desc">Current temperature, conditions, and 5-hour forecast with auto-location support.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></div>
+            <h3 class="widget-card-name">Media Player</h3>
+            <p class="widget-card-desc">Controls Windows Media Session (Spotify, YouTube, Chrome, Apple Music) with track progress.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"></rect><line x1="23" y1="13" x2="23" y2="11"></line></svg></div>
+            <h3 class="widget-card-name">Laptop Battery</h3>
+            <p class="widget-card-desc">Accurate battery percent, discharge rate, charge estimates, and Bluetooth device levels.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></div>
+            <h3 class="widget-card-name">Audio & Mic Mixer</h3>
+            <p class="widget-card-desc">Volume control slider and instant microphone mute toggle without opening Windows Settings.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
+            <h3 class="widget-card-name">Focus Timer</h3>
+            <p class="widget-card-desc">Pomodoro deep work timer with customizable work/break presets and gentle notifications.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
+            <h3 class="widget-card-name">Quick Scratchpad</h3>
+            <p class="widget-card-desc">Instant text notepad for fleeting thoughts, to-dos, and meeting notes, saved automatically.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"></path><path d="m5 2 5 5"></path><circle cx="19" cy="11" r="2"></circle></svg></div>
+            <h3 class="widget-card-name">Color Picker</h3>
+            <p class="widget-card-desc">Eyedropper tool with instant HEX/RGB values and WCAG 4.5:1 contrast compliance tester.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+            <h3 class="widget-card-name">Agenda & Calendar</h3>
+            <p class="widget-card-desc">Upcoming meeting count with 1-click Google Meet and Zoom deep join links.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 7 10 10-5 5V2l5 5L7 17"></path></svg></div>
+            <h3 class="widget-card-name">Bluetooth Quick Hub</h3>
+            <p class="widget-card-desc">Live signal status and 1-click peripheral connect/disconnect for keyboards, mice, and headsets.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+            <h3 class="widget-card-name">World Clock</h3>
+            <p class="widget-card-desc">Multi-timezone clock with time conversion slider for remote team scheduling.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <h3 class="widget-card-name">AI Agent Activity</h3>
+            <p class="widget-card-desc">Monitors background coding sessions, CLI tasks, and AI token usages in real time.</p>
+          </div>
+
+          <div class="widget-card-item">
+            <div class="widget-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg></div>
+            <h3 class="widget-card-name">Network & Ports</h3>
+            <p class="widget-card-desc">Current Wi-Fi SSID, local IPv4 address, and gateway ping latency.</p>
+          </div>
+        </div>
+
+        <!-- Real Flank Cards Showcase -->
+        <div style="margin-top:48px; border-top:1px solid var(--border-subtle); padding-top:40px;">
+          <div style="text-align:center; margin-bottom:28px;">
+            <div class="section-tag" style="margin-bottom:8px;">Live Flyout Previews</div>
+            <h3 style="font-size:22px; font-weight:700;">Authentic Windows 11 Widgets in Action</h3>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+            <div class="showcase-visual" style="padding:16px;">
+              <img src="assets/screens/flank_widget_media_player.jpg" alt="Media Player Widget" style="width:100%; border-radius:8px; display:block; object-fit:contain; max-height:280px; background:var(--bg-secondary);">
+              <div style="margin-top:12px; font-size:15px; font-weight:700;">Media Player</div>
+              <div style="font-size:13px; color:var(--text-secondary);">Track metadata, waveform indicator, live glowing playback progress bar.</div>
+            </div>
+
+            <div class="showcase-visual" style="padding:16px;">
+              <img src="assets/screens/flank_widget_agenda.jpg" alt="Agenda Widget" style="width:100%; border-radius:8px; display:block; object-fit:contain; max-height:280px; background:var(--bg-secondary);">
+              <div style="margin-top:12px; font-size:15px; font-weight:700;">Calendar & Agenda</div>
+              <div style="font-size:13px; color:var(--text-secondary);">One-click Google Meet / Zoom launcher, quick event addition, and countdowns.</div>
+            </div>
+
+            <div class="showcase-visual" style="padding:16px;">
+              <img src="assets/screens/flank_widget_focus_timer.jpg" alt="Focus Timer Widget" style="width:100%; border-radius:8px; display:block; object-fit:contain; max-height:280px; background:var(--bg-secondary);">
+              <div style="margin-top:12px; font-size:15px; font-weight:700;">Pomodoro Focus Timer</div>
+              <div style="font-size:13px; color:var(--text-secondary);">Deep focus intervals, quick presets (15m, 25m, 45m, 60m), and break chimes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme Store & Customizer Section -->
+    <section class="feature-section" id="themes">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Theme Store</div>
+          <h2 class="section-title">Make it yours. 7 Crafted Themes.</h2>
+          <p class="section-desc">
+            From warm editorial paper to Apple-inspired iridescent liquid glass, Flank matches your desktop aesthetic perfectly.
+          </p>
+        </div>
+
+        <div style="text-align:center; max-width:600px; margin:0 auto 40px;">
+          <label style="font-size:14px; font-weight:600; display:block; margin-bottom:12px;">Interactive Accent Hue Slider:</label>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div id="hue-preview-swatch" style="width:36px; height:36px; border-radius:50%; background:var(--accent); border:2px solid #fff; box-shadow:var(--shadow-sm); flex-shrink:0;"></div>
+            <input type="range" id="custom-hue-slider" min="0" max="360" value="230" style="width:100%; accent-color:var(--accent);">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px;">
+          <div class="showcase-visual" style="padding:16px;">
+            <img src="assets/screens/flank_desktop_aurora_weather.jpg" alt="Liquid Glass on Desktop" style="width:100%; border-radius:8px; display:block; object-fit:cover; max-height:220px;">
+            <div style="margin-top:12px; font-size:15px; font-weight:700;">Liquid Glass (Aurora Desktop)</div>
+            <div style="font-size:13px; color:var(--text-secondary);">Frosted DWM acrylic translucency, glowing weather card, and seamless taskbar harmony.</div>
+          </div>
+
+          <div class="showcase-visual" style="padding:16px;">
+            <img src="assets/screens/flank_settings_glass.jpg" alt="Theme Store in Settings" style="width:100%; border-radius:8px; display:block; object-fit:cover; max-height:220px;">
+            <div style="margin-top:12px; font-size:15px; font-weight:700;">Built-in Theme Store</div>
+            <div style="font-size:13px; color:var(--text-secondary);">Switch between Paper, Liquid Glass, Nord, and Terminal with one click.</div>
+          </div>
+
+          <div class="showcase-visual" style="padding:16px;">
+            <img src="assets/screens/flank_settings_accent_slider.png" alt="Accent Hue Engine" style="width:100%; border-radius:8px; display:block; object-fit:cover; max-height:220px;">
+            <div style="margin-top:12px; font-size:15px; font-weight:700;">Accent Gradient Engine</div>
+            <div style="font-size:13px; color:var(--text-secondary);">Fine-tune any accent hue, recent color presets, and rich gradient button highlights.</div>
+          </div>
+
+          <div class="showcase-visual" style="padding:16px;">
+            <img src="assets/screens/brand_about_paper.png" alt="Paper Theme" style="width:100%; border-radius:8px; display:block; object-fit:cover; max-height:220px;">
+            <div style="margin-top:12px; font-size:15px; font-weight:700;">Paper (Light Editorial)</div>
+            <div style="font-size:13px; color:var(--text-secondary);">Warm, calm, solid surfaces with gentle shadows and serif numerals.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy by Design Section -->
+    <section class="feature-section" id="privacy">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Privacy & Performance</div>
+          <h2 class="section-title">Private by design. Native performance.</h2>
+          <p class="section-desc">
+            Engineered exclusively for Windows 11 with zero compromise on system performance or user privacy.
+          </p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:24px;">
+          <div class="widget-card-item">
+            <h3 class="widget-card-name">100% Local Storage</h3>
+            <p class="widget-card-desc">No external backend servers, no cloud telemetry, no user analytics. Everything stays strictly inside your local <code>%APPDATA%/Flank</code> directory.</p>
+          </div>
+          <div class="widget-card-item">
+            <h3 class="widget-card-name">Zero Focus Stealing</h3>
+            <p class="widget-card-desc">Built with native Win32 <code>WS_EX_NOACTIVATE</code> and toolwindow flags. You can interact with Flank widgets without ever dropping keyboard focus from your game, IDE, or terminal.</p>
+          </div>
+          <div class="widget-card-item">
+            <h3 class="widget-card-name">Sub-15MB Memory Footprint</h3>
+            <p class="widget-card-desc">Powered by modern Microsoft WebView2 and Python 3.14. Uses negligible CPU when idle and draws zero battery in the background.</p>
+          </div>
+          <div class="widget-card-item">
+            <h3 class="widget-card-name">Full-Screen Auto-Collapse</h3>
+            <p class="widget-card-desc">Automatically tucks itself into a sleek bezel notch when playing games, watching full-screen movies, or screen sharing during meetings.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="feature-section" id="faq">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-tag">Questions & Answers</div>
+          <h2 class="section-title">Frequently asked questions.</h2>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Which versions of Windows are supported?</span>
+              <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              Flank is optimized for Windows 11 (build 22000 and newer) to take full advantage of native Mica, Acrylic, and DWM composition. It also runs smoothly on Windows 10 (64-bit).
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Is Flank free and open source?</span>
+              <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              Yes! Flank is 100% open source under the permissive MIT License. There are no subscriptions, no ads, no trackers, and no paywalls.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Can I place Flank on the left edge or on a secondary monitor?</span>
+              <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              Yes. You can flip Flank between the right edge and the left edge in Flank Settings with a single click, and it automatically adheres to your active display work area.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>How do keyboard shortcuts work?</span>
+              <svg class="faq-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="faq-answer">
+              Every item has an assignable global hotkey (e.g. <code>Ctrl+Alt+V</code> for Clipboard, <code>Alt+1</code> for Terminal, <code>Alt+S</code> for Diagnostics). You can customize or record them in Settings &gt; Items &amp; Shortcuts.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download CTA Banner -->
+    <section class="download-banner">
+      <div class="container">
+        <div class="banner-box">
+          <h2 class="banner-title">Elevate your Windows 11 desktop today.</h2>
+          <p class="banner-subtitle">Free, lightweight, and open source. Download the setup executable and get started in seconds.</p>
+          <a href="assets/downloads/Flank-Setup.exe" class="btn btn-primary btn-lg" download>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download Flank for Windows 11 (v1.0.0)
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <svg viewBox="0 0 100 128" width="20" height="26" fill="currentColor">
+          <path d="M50 0 C22.4 0 0 22.4 0 50 L0 78 C0 105.6 22.4 128 50 128 C77.6 128 100 105.6 100 78 L100 50 C100 22.4 77.6 0 50 0 Z M64 42 L42 42 L42 56 L60 56 L60 66 L42 66 L42 92 L30 92 L30 32 L64 32 Z" fill-rule="evenodd"/>
+        </svg>
+        <span>© 2026 Flank Project. Released under the MIT License.</span>
+      </div>
+
+      <div class="footer-links">
+        <a href="https://github.com/nandhakrishna/flank" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="#demo">Live Demo</a>
+        <a href="#privacy">Privacy</a>
+        <a href="assets/downloads/Flank-Setup.exe" download>Download</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
