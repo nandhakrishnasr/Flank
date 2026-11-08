@@ -5,6 +5,7 @@ import { renderDockHtml } from './ui/dock.ts';
 import { renderHoverCardHtml } from './ui/cards.ts';
 import { attachDockMagnification } from './ui/magnification.ts';
 import { initDockState, setDockState, toggleDockCollapse, getDockState, isDockCollapsed } from './ui/dockState.ts';
+import { flankMachines } from './state/machines.ts';
 import { showDockTooltip, hideDockTooltip, suppressDockTooltip } from './ui/tooltip.ts';
 import { deriveAccentTokens, parseColor, contrastRatio } from './theme/contrast.ts';
 
@@ -596,6 +597,9 @@ function setupEventDelegation(): void {
     const itemId = tile.getAttribute('data-item-id');
     if (!itemId) return;
     draggedItemId = itemId;
+    flankMachines.pointerInteraction.send({ type: 'START_DOCK_REORDER', itemId });
+    flankMachines.flyoutCard.send({ type: 'FORCE_CLOSE' });
+    hideDockTooltip();
     tile.classList.add('is-dragging');
     if (ev.dataTransfer) {
       ev.dataTransfer.effectAllowed = 'move';
@@ -631,6 +635,7 @@ function setupEventDelegation(): void {
     const targetId = targetTile?.getAttribute('data-item-id');
     if (!targetId || targetId === draggedItemId) {
       draggedItemId = null;
+      flankMachines.pointerInteraction.send({ type: 'END_INTERACTION' });
       return;
     }
 
@@ -643,10 +648,12 @@ function setupEventDelegation(): void {
       await window.pywebview?.api?.save_preferences?.({ items: state.items });
     }
     draggedItemId = null;
+    flankMachines.pointerInteraction.send({ type: 'END_INTERACTION' });
   });
 
   stage.addEventListener('dragend', () => {
     draggedItemId = null;
+    flankMachines.pointerInteraction.send({ type: 'END_INTERACTION' });
     stage.querySelectorAll('.flank-tile').forEach((el) => {
       el.classList.remove('is-dragging', 'is-drag-over');
     });
@@ -659,7 +666,14 @@ function setupEventDelegation(): void {
     const target = ev.target as HTMLElement | null;
     if (!target) return;
 
+    if (!flankMachines.pointerInteraction.canTriggerHoverCard()) {
+      return;
+    }
+
     if (currentView === 'dock') {
+      if (!flankMachines.dockCollapse.canShowFlyout()) {
+        return;
+      }
       const widgetTile = target.closest<HTMLElement>('[data-widget]');
       if (widgetTile) {
         const wKind = widgetTile.getAttribute('data-widget') as WidgetKind;
@@ -669,11 +683,20 @@ function setupEventDelegation(): void {
           const centerY = Math.round(rect.top + rect.height / 2);
           suppressDockTooltip(true);
           hideDockTooltip();
+          flankMachines.flyoutCard.send({
+            type: 'HOVER_TILE',
+            widget: wKind,
+            anchorY: centerY,
+            dockExpanded: true,
+            modalOpen: Boolean(state.activeFullWindow),
+            pointerBusy: !flankMachines.pointerInteraction.canTriggerHoverCard(),
+          });
           window.pywebview?.api?.show_hover_card?.(wKind, centerY);
         }
       } else {
         if (lastHoverWidget !== null) {
           lastHoverWidget = null;
+          flankMachines.flyoutCard.send({ type: 'LEAVE_DOCK_OR_CARD' });
           window.pywebview?.api?.hide_hover_card?.();
         }
         const anyTile = target.closest<HTMLElement>('.flank-tile');
@@ -697,6 +720,7 @@ function setupEventDelegation(): void {
     }
 
     if (currentView === 'card') {
+      flankMachines.flyoutCard.send({ type: 'ENTER_CARD' });
       window.pywebview?.api?.cancel_hide_card?.();
       return;
     }
@@ -712,11 +736,22 @@ function setupEventDelegation(): void {
         hoverCloseTimer = null;
       }
       const wKind = widgetTile.getAttribute('data-widget') as WidgetKind;
-      if (state.activeWidget !== wKind) {
-        state.activeWidget = wKind;
+      const rect = widgetTile.getBoundingClientRect();
+      const centerY = Math.round(rect.top + rect.height / 2);
+      const nextCard = flankMachines.flyoutCard.send({
+        type: 'HOVER_TILE',
+        widget: wKind,
+        anchorY: centerY,
+        dockExpanded: flankMachines.dockCollapse.canShowFlyout(),
+        modalOpen: Boolean(state.activeFullWindow),
+        pointerBusy: !flankMachines.pointerInteraction.canTriggerHoverCard(),
+      });
+      if (nextCard.widget && state.activeWidget !== nextCard.widget) {
+        state.activeWidget = nextCard.widget;
         renderApp();
       }
     } else if (insideCard) {
+      flankMachines.flyoutCard.send({ type: 'ENTER_CARD' });
       if (hoverCloseTimer) {
         clearTimeout(hoverCloseTimer);
         hoverCloseTimer = null;
@@ -733,6 +768,7 @@ function setupEventDelegation(): void {
       if (!related || !related.closest('#flank-dock')) {
         lastHoverWidget = null;
         suppressDockTooltip(false);
+        flankMachines.flyoutCard.send({ type: 'LEAVE_DOCK_OR_CARD' });
         window.pywebview?.api?.hide_hover_card?.();
       }
       return;
@@ -741,6 +777,7 @@ function setupEventDelegation(): void {
     if (currentView === 'card') {
       const related = (ev as PointerEvent).relatedTarget as HTMLElement | null;
       if (!related || !related.closest('#flank-hover-card')) {
+        flankMachines.flyoutCard.send({ type: 'LEAVE_DOCK_OR_CARD' });
         window.pywebview?.api?.hide_hover_card?.();
       }
       return;
@@ -751,25 +788,55 @@ function setupEventDelegation(): void {
       return;
     }
     if (state.activeWidget && !state.activeFullWindow) {
+      const nextCard = flankMachines.flyoutCard.send({ type: 'LEAVE_DOCK_OR_CARD' });
+      if (nextCard.phase === 'pinned') {
+        return;
+      }
       if (hoverCloseTimer) clearTimeout(hoverCloseTimer);
       hoverCloseTimer = setTimeout(() => {
+        flankMachines.flyoutCard.send({ type: 'GRACE_TIMEOUT' });
         state.activeWidget = null;
         renderApp();
       }, 180);
     }
   });
 
-  // Dedicated titlebar window dragging for frameless modal window
+  // Dedicated titlebar window dragging for frameless modal window + slider scrubbing state
   stage.addEventListener('pointerdown', (ev) => {
     const target = ev.target as HTMLElement | null;
     if (!target) return;
 
+    const rangeSlider = target.closest<HTMLInputElement>('input[type="range"]');
+    if (rangeSlider) {
+      flankMachines.pointerInteraction.send({
+        type: 'START_SLIDER_SCRUB',
+        controlId: rangeSlider.id || 'range-slider',
+      });
+      return;
+    }
+
     if (currentView === 'modal') {
       const titlebar = target.closest<HTMLElement>('.flank-titlebar');
-      if (titlebar && !target.closest('button, input, a, select, textarea, [data-action]')) {
+      if (
+        titlebar &&
+        !target.closest('button, input, a, select, textarea, [data-action]') &&
+        flankMachines.pointerInteraction.canStartWindowDrag()
+      ) {
+        flankMachines.pointerInteraction.send({ type: 'START_WINDOW_DRAG' });
         window.pywebview?.api?.drag_modal_window?.();
       }
     }
+  });
+
+  window.addEventListener('pointerup', () => {
+    const mode = flankMachines.pointerInteraction.getSnapshot().mode;
+    if (mode === 'scrubbing_slider' || mode === 'dragging_modal_window') {
+      flankMachines.pointerInteraction.send({ type: 'END_INTERACTION' });
+    }
+  });
+
+  window.addEventListener('pointercancel', () => {
+    flankMachines.pointerInteraction.send({ type: 'END_INTERACTION' });
   });
 
   // Click actions
@@ -1604,7 +1671,13 @@ function setupEventDelegation(): void {
 
     const recordItemId = btn.getAttribute('data-record-shortcut');
     if (recordItemId) {
-      uiState.recordingItemId = uiState.recordingItemId === recordItemId ? null : recordItemId;
+      if (uiState.recordingItemId === recordItemId) {
+        flankMachines.shortcutRecorder.send({ type: 'CANCEL' });
+        uiState.recordingItemId = null;
+      } else {
+        flankMachines.shortcutRecorder.send({ type: 'START_RECORDING', targetId: recordItemId });
+        uiState.recordingItemId = recordItemId;
+      }
       uiState.shortcutConflictMsg = null;
       renderApp();
       return;
@@ -1726,7 +1799,9 @@ function setupEventDelegation(): void {
     if (uiState.recordingItemId) {
       ev.preventDefault();
       if (ev.key === 'Escape') {
+        flankMachines.shortcutRecorder.send({ type: 'CANCEL' });
         uiState.recordingItemId = null;
+        uiState.shortcutConflictMsg = null;
         renderApp();
         return;
       }
@@ -1737,12 +1812,15 @@ function setupEventDelegation(): void {
       if (ev.shiftKey) mods.push('Shift');
       const keyLabel = ev.key.length === 1 ? ev.key.toUpperCase() : ev.key;
       const combo = [...mods, keyLabel].join('+');
+      flankMachines.shortcutRecorder.send({ type: 'CAPTURE_COMBO', combo });
 
       const duplicate = state.items.find(
         (i) => i.id !== uiState.recordingItemId && i.shortcut?.toLowerCase() === combo.toLowerCase()
       );
       if (duplicate) {
-        uiState.shortcutConflictMsg = `Conflict: ${combo} is already assigned to ${duplicate.label}.`;
+        const msg = `Conflict: ${combo} is already assigned to ${duplicate.label}.`;
+        flankMachines.shortcutRecorder.send({ type: 'MARK_CONFLICT', message: msg });
+        uiState.shortcutConflictMsg = msg;
         renderApp();
         return;
       }
@@ -1752,7 +1830,9 @@ function setupEventDelegation(): void {
         combo
       );
       if (hostCheck && !hostCheck.ok) {
-        uiState.shortcutConflictMsg = hostCheck.conflict || `Conflict: ${combo} is reserved by another app.`;
+        const msg = hostCheck.conflict || `Conflict: ${combo} is reserved by another app.`;
+        flankMachines.shortcutRecorder.send({ type: 'MARK_CONFLICT', message: msg });
+        uiState.shortcutConflictMsg = msg;
         renderApp();
         return;
       }
@@ -1761,6 +1841,7 @@ function setupEventDelegation(): void {
       if (item) {
         item.shortcut = combo;
       }
+      flankMachines.shortcutRecorder.send({ type: 'COMMIT_SUCCESS' });
       uiState.recordingItemId = null;
       uiState.shortcutConflictMsg = null;
       saveUserPrefs();

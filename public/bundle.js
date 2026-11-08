@@ -3612,36 +3612,379 @@ function resetDockMagnification() {
   activeDockEl = null;
 }
 
+// src/state/machines.ts
+var DockCollapseMachine = class {
+  state = { phase: "expanded", reason: "none" };
+  constructor(initialPhase = "expanded", initialReason = "none") {
+    this.state = {
+      phase: initialPhase,
+      reason: initialPhase === "expanded" ? "none" : initialReason === "none" ? "manual" : initialReason
+    };
+  }
+  getSnapshot() {
+    return { ...this.state };
+  }
+  getPhase() {
+    return this.state.phase;
+  }
+  isCollapsedOrCollapsing() {
+    return this.state.phase === "collapsed" || this.state.phase === "collapsing";
+  }
+  canShowFlyout() {
+    return this.state.phase === "expanded";
+  }
+  send(event) {
+    switch (event.type) {
+      case "COLLAPSE": {
+        if (this.state.phase === "collapsed" || this.state.phase === "collapsing") {
+          return this.getSnapshot();
+        }
+        this.state = {
+          phase: "collapsing",
+          reason: event.reason ?? "manual"
+        };
+        break;
+      }
+      case "COLLAPSE_ANIMATION_DONE": {
+        if (this.state.phase === "collapsing") {
+          this.state = {
+            phase: "collapsed",
+            reason: this.state.reason === "none" ? "manual" : this.state.reason
+          };
+        }
+        break;
+      }
+      case "EXPAND": {
+        if (event.trigger === "fullscreen_exit" && this.state.reason !== "fullscreen") {
+          return this.getSnapshot();
+        }
+        if (this.state.phase === "expanded" || this.state.phase === "expanding") {
+          return this.getSnapshot();
+        }
+        this.state = { phase: "expanding", reason: "none" };
+        break;
+      }
+      case "EXPAND_ANIMATION_DONE": {
+        if (this.state.phase === "expanding") {
+          this.state = { phase: "expanded", reason: "none" };
+        }
+        break;
+      }
+      case "SYNC_HOST": {
+        this.state = {
+          phase: event.phase,
+          reason: event.phase === "expanded" || event.phase === "expanding" ? "none" : event.reason ?? (this.state.reason === "none" ? "manual" : this.state.reason)
+        };
+        break;
+      }
+    }
+    return this.getSnapshot();
+  }
+};
+var FlyoutCardMachine = class {
+  state = { phase: "closed", widget: null };
+  getSnapshot() {
+    return { ...this.state };
+  }
+  isOpen() {
+    return this.state.phase !== "closed" && this.state.widget !== null;
+  }
+  isPinned() {
+    return this.state.phase === "pinned" && this.state.widget !== null;
+  }
+  send(event) {
+    switch (event.type) {
+      case "HOVER_TILE": {
+        if (event.dockExpanded === false || event.modalOpen === true || event.pointerBusy === true) {
+          return this.getSnapshot();
+        }
+        if (this.state.phase === "pinned") {
+          return this.getSnapshot();
+        }
+        this.state = { phase: "hovering", widget: event.widget };
+        break;
+      }
+      case "ENTER_CARD": {
+        if (this.state.phase === "grace_closing" && this.state.widget) {
+          this.state = { phase: "hovering", widget: this.state.widget };
+        }
+        break;
+      }
+      case "LEAVE_DOCK_OR_CARD": {
+        if (this.state.phase === "hovering" && this.state.widget) {
+          this.state = { phase: "grace_closing", widget: this.state.widget };
+        }
+        break;
+      }
+      case "GRACE_TIMEOUT": {
+        if (this.state.phase === "grace_closing") {
+          this.state = { phase: "closed", widget: null };
+        }
+        break;
+      }
+      case "TOGGLE_PIN": {
+        if (event.dockExpanded === false || event.modalOpen === true) {
+          this.state = { phase: "closed", widget: null };
+          return this.getSnapshot();
+        }
+        if (this.state.phase === "pinned" && this.state.widget === event.widget) {
+          this.state = { phase: "closed", widget: null };
+        } else {
+          this.state = { phase: "pinned", widget: event.widget };
+        }
+        break;
+      }
+      case "FORCE_CLOSE": {
+        this.state = { phase: "closed", widget: null };
+        break;
+      }
+    }
+    return this.getSnapshot();
+  }
+};
+var PointerInteractionMachine = class {
+  state = { mode: "idle", activeId: null };
+  getSnapshot() {
+    return { ...this.state };
+  }
+  isBusy() {
+    return this.state.mode !== "idle";
+  }
+  canStartWindowDrag() {
+    return this.state.mode === "idle";
+  }
+  canTriggerHoverCard() {
+    return this.state.mode === "idle";
+  }
+  send(event) {
+    switch (event.type) {
+      case "START_SLIDER_SCRUB": {
+        this.state = { mode: "scrubbing_slider", activeId: event.controlId ?? "slider" };
+        break;
+      }
+      case "START_DOCK_REORDER": {
+        if (this.state.mode === "scrubbing_slider") return this.getSnapshot();
+        this.state = { mode: "reordering_dock_tile", activeId: event.itemId };
+        break;
+      }
+      case "START_SETTINGS_REORDER": {
+        if (this.state.mode === "scrubbing_slider") return this.getSnapshot();
+        this.state = { mode: "reordering_settings_row", activeId: event.itemId };
+        break;
+      }
+      case "START_WINDOW_DRAG": {
+        if (this.state.mode !== "idle") return this.getSnapshot();
+        this.state = { mode: "dragging_modal_window", activeId: null };
+        break;
+      }
+      case "END_INTERACTION": {
+        this.state = { mode: "idle", activeId: null };
+        break;
+      }
+    }
+    return this.getSnapshot();
+  }
+};
+var ShortcutRecorderMachine = class {
+  state = {
+    phase: "idle",
+    targetId: null,
+    candidateCombo: null,
+    conflictMessage: null
+  };
+  getSnapshot() {
+    return { ...this.state };
+  }
+  isActive() {
+    return this.state.phase !== "idle";
+  }
+  shouldConsumeEscapeKey() {
+    return this.state.phase !== "idle";
+  }
+  send(event) {
+    switch (event.type) {
+      case "START_RECORDING": {
+        this.state = {
+          phase: "listening",
+          targetId: event.targetId,
+          candidateCombo: null,
+          conflictMessage: null
+        };
+        break;
+      }
+      case "CAPTURE_COMBO": {
+        if (this.state.phase === "listening" || this.state.phase === "conflict") {
+          this.state = {
+            ...this.state,
+            phase: "validating",
+            candidateCombo: event.combo,
+            conflictMessage: null
+          };
+        }
+        break;
+      }
+      case "MARK_CONFLICT": {
+        if (this.state.targetId) {
+          this.state = {
+            ...this.state,
+            phase: "conflict",
+            conflictMessage: event.message
+          };
+        }
+        break;
+      }
+      case "COMMIT_SUCCESS":
+      case "CANCEL": {
+        this.state = {
+          phase: "idle",
+          targetId: null,
+          candidateCombo: null,
+          conflictMessage: null
+        };
+        break;
+      }
+    }
+    return this.getSnapshot();
+  }
+};
+var FocusTimerMachine = class {
+  state;
+  constructor(initialMinutes = 25, sessionsCompleted = 0) {
+    const sec = Math.max(1, initialMinutes) * 60;
+    this.state = {
+      phase: "idle",
+      mode: "focus",
+      running: false,
+      remainingSec: sec,
+      totalSec: sec,
+      sessionsCompleted
+    };
+  }
+  getSnapshot() {
+    return { ...this.state };
+  }
+  send(event) {
+    switch (event.type) {
+      case "TOGGLE": {
+        if (this.state.phase === "idle" || this.state.phase === "paused_focus") {
+          this.state = { ...this.state, phase: "running_focus", mode: "focus", running: true };
+        } else if (this.state.phase === "running_focus") {
+          this.state = { ...this.state, phase: "paused_focus", running: false };
+        } else if (this.state.phase === "paused_break") {
+          this.state = { ...this.state, phase: "running_break", mode: "break", running: true };
+        } else if (this.state.phase === "running_break") {
+          this.state = { ...this.state, phase: "paused_break", running: false };
+        }
+        break;
+      }
+      case "RESET": {
+        this.state = {
+          ...this.state,
+          phase: "idle",
+          running: false,
+          remainingSec: this.state.totalSec
+        };
+        break;
+      }
+      case "SELECT_PRESET": {
+        const sec = Math.max(1, event.minutes) * 60;
+        this.state = {
+          ...this.state,
+          phase: "idle",
+          mode: "focus",
+          running: false,
+          totalSec: sec,
+          remainingSec: sec
+        };
+        break;
+      }
+      case "START_BREAK": {
+        const sec = Math.max(1, event.minutes ?? 5) * 60;
+        this.state = {
+          ...this.state,
+          phase: "running_break",
+          mode: "break",
+          running: true,
+          totalSec: sec,
+          remainingSec: sec
+        };
+        break;
+      }
+      case "TICK": {
+        if (!this.state.running) return this.getSnapshot();
+        const nextSec = Math.max(0, this.state.remainingSec - 1);
+        if (nextSec === 0) {
+          const completed = this.state.mode === "focus" ? this.state.sessionsCompleted + 1 : this.state.sessionsCompleted;
+          this.state = {
+            ...this.state,
+            phase: "idle",
+            running: false,
+            remainingSec: this.state.totalSec,
+            sessionsCompleted: completed
+          };
+        } else {
+          this.state = {
+            ...this.state,
+            remainingSec: nextSec
+          };
+        }
+        break;
+      }
+    }
+    return this.getSnapshot();
+  }
+};
+var flankMachines = {
+  dockCollapse: new DockCollapseMachine(),
+  flyoutCard: new FlyoutCardMachine(),
+  pointerInteraction: new PointerInteractionMachine(),
+  shortcutRecorder: new ShortcutRecorderMachine(),
+  focusTimer: new FocusTimerMachine(),
+  getDiagnostics() {
+    return {
+      dockCollapse: this.dockCollapse.getSnapshot(),
+      flyoutCard: this.flyoutCard.getSnapshot(),
+      pointerInteraction: this.pointerInteraction.getSnapshot(),
+      shortcutRecorder: this.shortcutRecorder.getSnapshot(),
+      focusTimer: this.focusTimer.getSnapshot()
+    };
+  }
+};
+
 // src/ui/dockState.ts
-var currentDockState = "expanded";
 var isReducedMotion2 = false;
 var collapseTimer = null;
 function getDockState() {
-  return currentDockState;
+  return flankMachines.dockCollapse.getPhase();
 }
 function isDockCollapsed() {
-  return currentDockState === "collapsed" || currentDockState === "collapsing";
+  return flankMachines.dockCollapse.isCollapsedOrCollapsing();
 }
 function initDockState(initialState = "expanded") {
-  currentDockState = initialState;
+  flankMachines.dockCollapse.send({ type: "SYNC_HOST", phase: initialState });
   isReducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const root = document.documentElement;
-  root.setAttribute("data-dock-state", currentDockState);
-  window.flankSetDockState = (state2) => {
-    setDockState(state2);
+  root.setAttribute("data-dock-state", getDockState());
+  window.flankSetDockState = (state2, reason) => {
+    setDockState(state2, reason);
   };
-  window.flankGetDockState = () => currentDockState;
+  window.flankGetDockState = () => getDockState();
+  window.flankGetStateMachines = () => flankMachines.getDiagnostics();
 }
-function setDockState(next) {
-  if (currentDockState === next) return;
+function setDockState(next, reason) {
+  const prev = getDockState();
+  if (prev === next) return;
+  flankMachines.dockCollapse.send({ type: "SYNC_HOST", phase: next, reason });
   const root = document.documentElement;
-  currentDockState = next;
   root.setAttribute("data-dock-state", next);
   if (collapseTimer !== null) {
     clearTimeout(collapseTimer);
     collapseTimer = null;
   }
   const duration = isReducedMotion2 ? 0 : 220;
+  if (next === "collapsing" || next === "collapsed") {
+    flankMachines.flyoutCard.send({ type: "FORCE_CLOSE" });
+  }
   if (next === "collapsing") {
     try {
       window.pywebview?.api?.close_hover_card?.();
@@ -3649,6 +3992,7 @@ function setDockState(next) {
     }
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
+      flankMachines.dockCollapse.send({ type: "COLLAPSE_ANIMATION_DONE" });
       try {
         window.pywebview?.api?.dock_collapse_done?.();
       } catch {
@@ -3658,6 +4002,7 @@ function setDockState(next) {
   } else if (next === "expanding") {
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
+      flankMachines.dockCollapse.send({ type: "EXPAND_ANIMATION_DONE" });
       try {
         window.pywebview?.api?.dock_expand_done?.();
       } catch {
@@ -3667,8 +4012,9 @@ function setDockState(next) {
   }
 }
 function toggleDockCollapse() {
-  if (currentDockState === "expanded" || currentDockState === "expanding") {
-    setDockState("collapsing");
+  const phase = getDockState();
+  if (phase === "expanded" || phase === "expanding") {
+    setDockState("collapsing", "manual");
   } else {
     try {
       window.pywebview?.api?.expand_dock?.();
@@ -5253,6 +5599,9 @@ function setupEventDelegation() {
     const itemId = tile.getAttribute("data-item-id");
     if (!itemId) return;
     draggedItemId = itemId;
+    flankMachines.pointerInteraction.send({ type: "START_DOCK_REORDER", itemId });
+    flankMachines.flyoutCard.send({ type: "FORCE_CLOSE" });
+    hideDockTooltip();
     tile.classList.add("is-dragging");
     if (ev.dataTransfer) {
       ev.dataTransfer.effectAllowed = "move";
@@ -5285,6 +5634,7 @@ function setupEventDelegation() {
     const targetId = targetTile?.getAttribute("data-item-id");
     if (!targetId || targetId === draggedItemId) {
       draggedItemId = null;
+      flankMachines.pointerInteraction.send({ type: "END_INTERACTION" });
       return;
     }
     const fromIdx = state.items.findIndex((i) => i.id === draggedItemId);
@@ -5296,9 +5646,11 @@ function setupEventDelegation() {
       await window.pywebview?.api?.save_preferences?.({ items: state.items });
     }
     draggedItemId = null;
+    flankMachines.pointerInteraction.send({ type: "END_INTERACTION" });
   });
   stage.addEventListener("dragend", () => {
     draggedItemId = null;
+    flankMachines.pointerInteraction.send({ type: "END_INTERACTION" });
     stage.querySelectorAll(".flank-tile").forEach((el) => {
       el.classList.remove("is-dragging", "is-drag-over");
     });
@@ -5307,7 +5659,13 @@ function setupEventDelegation() {
   stage.addEventListener("pointerover", (ev) => {
     const target = ev.target;
     if (!target) return;
+    if (!flankMachines.pointerInteraction.canTriggerHoverCard()) {
+      return;
+    }
     if (currentView === "dock") {
+      if (!flankMachines.dockCollapse.canShowFlyout()) {
+        return;
+      }
       const widgetTile2 = target.closest("[data-widget]");
       if (widgetTile2) {
         const wKind = widgetTile2.getAttribute("data-widget");
@@ -5317,11 +5675,20 @@ function setupEventDelegation() {
           const centerY = Math.round(rect.top + rect.height / 2);
           suppressDockTooltip(true);
           hideDockTooltip();
+          flankMachines.flyoutCard.send({
+            type: "HOVER_TILE",
+            widget: wKind,
+            anchorY: centerY,
+            dockExpanded: true,
+            modalOpen: Boolean(state.activeFullWindow),
+            pointerBusy: !flankMachines.pointerInteraction.canTriggerHoverCard()
+          });
           window.pywebview?.api?.show_hover_card?.(wKind, centerY);
         }
       } else {
         if (lastHoverWidget !== null) {
           lastHoverWidget = null;
+          flankMachines.flyoutCard.send({ type: "LEAVE_DOCK_OR_CARD" });
           window.pywebview?.api?.hide_hover_card?.();
         }
         const anyTile = target.closest(".flank-tile");
@@ -5344,6 +5711,7 @@ function setupEventDelegation() {
       return;
     }
     if (currentView === "card") {
+      flankMachines.flyoutCard.send({ type: "ENTER_CARD" });
       window.pywebview?.api?.cancel_hide_card?.();
       return;
     }
@@ -5356,11 +5724,22 @@ function setupEventDelegation() {
         hoverCloseTimer = null;
       }
       const wKind = widgetTile.getAttribute("data-widget");
-      if (state.activeWidget !== wKind) {
-        state.activeWidget = wKind;
+      const rect = widgetTile.getBoundingClientRect();
+      const centerY = Math.round(rect.top + rect.height / 2);
+      const nextCard = flankMachines.flyoutCard.send({
+        type: "HOVER_TILE",
+        widget: wKind,
+        anchorY: centerY,
+        dockExpanded: flankMachines.dockCollapse.canShowFlyout(),
+        modalOpen: Boolean(state.activeFullWindow),
+        pointerBusy: !flankMachines.pointerInteraction.canTriggerHoverCard()
+      });
+      if (nextCard.widget && state.activeWidget !== nextCard.widget) {
+        state.activeWidget = nextCard.widget;
         renderApp();
       }
     } else if (insideCard) {
+      flankMachines.flyoutCard.send({ type: "ENTER_CARD" });
       if (hoverCloseTimer) {
         clearTimeout(hoverCloseTimer);
         hoverCloseTimer = null;
@@ -5376,6 +5755,7 @@ function setupEventDelegation() {
       if (!related2 || !related2.closest("#flank-dock")) {
         lastHoverWidget = null;
         suppressDockTooltip(false);
+        flankMachines.flyoutCard.send({ type: "LEAVE_DOCK_OR_CARD" });
         window.pywebview?.api?.hide_hover_card?.();
       }
       return;
@@ -5383,6 +5763,7 @@ function setupEventDelegation() {
     if (currentView === "card") {
       const related2 = ev.relatedTarget;
       if (!related2 || !related2.closest("#flank-hover-card")) {
+        flankMachines.flyoutCard.send({ type: "LEAVE_DOCK_OR_CARD" });
         window.pywebview?.api?.hide_hover_card?.();
       }
       return;
@@ -5392,8 +5773,13 @@ function setupEventDelegation() {
       return;
     }
     if (state.activeWidget && !state.activeFullWindow) {
+      const nextCard = flankMachines.flyoutCard.send({ type: "LEAVE_DOCK_OR_CARD" });
+      if (nextCard.phase === "pinned") {
+        return;
+      }
       if (hoverCloseTimer) clearTimeout(hoverCloseTimer);
       hoverCloseTimer = setTimeout(() => {
+        flankMachines.flyoutCard.send({ type: "GRACE_TIMEOUT" });
         state.activeWidget = null;
         renderApp();
       }, 180);
@@ -5402,12 +5788,30 @@ function setupEventDelegation() {
   stage.addEventListener("pointerdown", (ev) => {
     const target = ev.target;
     if (!target) return;
+    const rangeSlider = target.closest('input[type="range"]');
+    if (rangeSlider) {
+      flankMachines.pointerInteraction.send({
+        type: "START_SLIDER_SCRUB",
+        controlId: rangeSlider.id || "range-slider"
+      });
+      return;
+    }
     if (currentView === "modal") {
       const titlebar = target.closest(".flank-titlebar");
-      if (titlebar && !target.closest("button, input, a, select, textarea, [data-action]")) {
+      if (titlebar && !target.closest("button, input, a, select, textarea, [data-action]") && flankMachines.pointerInteraction.canStartWindowDrag()) {
+        flankMachines.pointerInteraction.send({ type: "START_WINDOW_DRAG" });
         window.pywebview?.api?.drag_modal_window?.();
       }
     }
+  });
+  window.addEventListener("pointerup", () => {
+    const mode = flankMachines.pointerInteraction.getSnapshot().mode;
+    if (mode === "scrubbing_slider" || mode === "dragging_modal_window") {
+      flankMachines.pointerInteraction.send({ type: "END_INTERACTION" });
+    }
+  });
+  window.addEventListener("pointercancel", () => {
+    flankMachines.pointerInteraction.send({ type: "END_INTERACTION" });
   });
   stage.addEventListener("click", async (ev) => {
     const target = ev.target;
@@ -6192,7 +6596,13 @@ function setupEventDelegation() {
     }
     const recordItemId = btn.getAttribute("data-record-shortcut");
     if (recordItemId) {
-      uiState.recordingItemId = uiState.recordingItemId === recordItemId ? null : recordItemId;
+      if (uiState.recordingItemId === recordItemId) {
+        flankMachines.shortcutRecorder.send({ type: "CANCEL" });
+        uiState.recordingItemId = null;
+      } else {
+        flankMachines.shortcutRecorder.send({ type: "START_RECORDING", targetId: recordItemId });
+        uiState.recordingItemId = recordItemId;
+      }
       uiState.shortcutConflictMsg = null;
       renderApp();
       return;
@@ -6307,7 +6717,9 @@ function setupEventDelegation() {
     if (uiState.recordingItemId) {
       ev.preventDefault();
       if (ev.key === "Escape") {
+        flankMachines.shortcutRecorder.send({ type: "CANCEL" });
         uiState.recordingItemId = null;
+        uiState.shortcutConflictMsg = null;
         renderApp();
         return;
       }
@@ -6318,11 +6730,14 @@ function setupEventDelegation() {
       if (ev.shiftKey) mods.push("Shift");
       const keyLabel = ev.key.length === 1 ? ev.key.toUpperCase() : ev.key;
       const combo = [...mods, keyLabel].join("+");
+      flankMachines.shortcutRecorder.send({ type: "CAPTURE_COMBO", combo });
       const duplicate = state.items.find(
         (i) => i.id !== uiState.recordingItemId && i.shortcut?.toLowerCase() === combo.toLowerCase()
       );
       if (duplicate) {
-        uiState.shortcutConflictMsg = `Conflict: ${combo} is already assigned to ${duplicate.label}.`;
+        const msg = `Conflict: ${combo} is already assigned to ${duplicate.label}.`;
+        flankMachines.shortcutRecorder.send({ type: "MARK_CONFLICT", message: msg });
+        uiState.shortcutConflictMsg = msg;
         renderApp();
         return;
       }
@@ -6331,7 +6746,9 @@ function setupEventDelegation() {
         combo
       );
       if (hostCheck && !hostCheck.ok) {
-        uiState.shortcutConflictMsg = hostCheck.conflict || `Conflict: ${combo} is reserved by another app.`;
+        const msg = hostCheck.conflict || `Conflict: ${combo} is reserved by another app.`;
+        flankMachines.shortcutRecorder.send({ type: "MARK_CONFLICT", message: msg });
+        uiState.shortcutConflictMsg = msg;
         renderApp();
         return;
       }
@@ -6339,6 +6756,7 @@ function setupEventDelegation() {
       if (item) {
         item.shortcut = combo;
       }
+      flankMachines.shortcutRecorder.send({ type: "COMMIT_SUCCESS" });
       uiState.recordingItemId = null;
       uiState.shortcutConflictMsg = null;
       saveUserPrefs();

@@ -1,41 +1,45 @@
 /**
  * Flank Collapsible Dock State Manager (Part B)
- * Controls transitions between expanded dock and collapsed edge tab.
+ * Backed by DockCollapseMachine & FlyoutCardMachine for deterministic transitions.
  */
 
-export type DockState = 'expanded' | 'collapsing' | 'collapsed' | 'expanding';
+import { flankMachines, type DockPhase, type CollapseReason } from '../state/machines.ts';
 
-let currentDockState: DockState = 'expanded';
+export type DockState = DockPhase;
+
 let isReducedMotion = false;
 let collapseTimer: number | null = null;
 
 export function getDockState(): DockState {
-  return currentDockState;
+  return flankMachines.dockCollapse.getPhase();
 }
 
 export function isDockCollapsed(): boolean {
-  return currentDockState === 'collapsed' || currentDockState === 'collapsing';
+  return flankMachines.dockCollapse.isCollapsedOrCollapsing();
 }
 
 export function initDockState(initialState: DockState = 'expanded'): void {
-  currentDockState = initialState;
+  flankMachines.dockCollapse.send({ type: 'SYNC_HOST', phase: initialState });
   isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const root = document.documentElement;
-  root.setAttribute('data-dock-state', currentDockState);
+  root.setAttribute('data-dock-state', getDockState());
 
-  // Expose global for Python host communication
-  (window as any).flankSetDockState = (state: DockState) => {
-    setDockState(state);
+  // Expose global for Python host communication & AX diagnostics
+  (window as any).flankSetDockState = (state: DockState, reason?: CollapseReason) => {
+    setDockState(state, reason);
   };
-  (window as any).flankGetDockState = () => currentDockState;
+  (window as any).flankGetDockState = () => getDockState();
+  (window as any).flankGetStateMachines = () => flankMachines.getDiagnostics();
 }
 
-export function setDockState(next: DockState): void {
-  if (currentDockState === next) return;
+export function setDockState(next: DockState, reason?: CollapseReason): void {
+  const prev = getDockState();
+  if (prev === next) return;
+
+  flankMachines.dockCollapse.send({ type: 'SYNC_HOST', phase: next, reason });
 
   const root = document.documentElement;
-  currentDockState = next;
   root.setAttribute('data-dock-state', next);
 
   if (collapseTimer !== null) {
@@ -45,28 +49,31 @@ export function setDockState(next: DockState): void {
 
   const duration = isReducedMotion ? 0 : 220;
 
+  if (next === 'collapsing' || next === 'collapsed') {
+    // UX Invariant: Collapsing the dock immediately closes any open or pinned flyout card
+    flankMachines.flyoutCard.send({ type: 'FORCE_CLOSE' });
+  }
+
   if (next === 'collapsing') {
     try {
       (window as any).pywebview?.api?.close_hover_card?.();
     } catch { }
-    // Play slide-out animation, then notify host
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
+      flankMachines.dockCollapse.send({ type: 'COLLAPSE_ANIMATION_DONE' });
       try {
         (window as any).pywebview?.api?.dock_collapse_done?.();
       } catch {
-        // Dev fallback
         setDockState('collapsed');
       }
     }, duration);
   } else if (next === 'expanding') {
-    // Play slide-in animation, then notify host
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
+      flankMachines.dockCollapse.send({ type: 'EXPAND_ANIMATION_DONE' });
       try {
         (window as any).pywebview?.api?.dock_expand_done?.();
       } catch {
-        // Dev fallback
         setDockState('expanded');
       }
     }, duration);
@@ -74,8 +81,9 @@ export function setDockState(next: DockState): void {
 }
 
 export function toggleDockCollapse(): void {
-  if (currentDockState === 'expanded' || currentDockState === 'expanding') {
-    setDockState('collapsing');
+  const phase = getDockState();
+  if (phase === 'expanded' || phase === 'expanding') {
+    setDockState('collapsing', 'manual');
   } else {
     try {
       (window as any).pywebview?.api?.expand_dock?.();
@@ -84,4 +92,3 @@ export function toggleDockCollapse(): void {
     }
   }
 }
-
