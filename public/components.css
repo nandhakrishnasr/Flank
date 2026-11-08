@@ -3115,41 +3115,169 @@ html[data-reduce-motion="true"] * {
   }
 }
 
-/* Glass Theme Modal Readability & Solid Backing */
+/* Glass & Liquid Glass Theme Styling: Dark Frosted Glass Depth & High Readability */
 html[data-theme="glass"] body[data-view="modal"] .flank-window,
 html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window {
-  background: rgba(248, 250, 252, 0.94) !important;
+  background: rgba(16, 20, 42, 0.85) !important;
   backdrop-filter: blur(40px) saturate(1.8) !important;
   -webkit-backdrop-filter: blur(40px) saturate(1.8) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.90) !important;
-  border: 1px solid rgba(255, 255, 255, 0.80) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
 }
 
 html[data-theme="glass"] body[data-view="modal"] .flank-window .flank-titlebar-title,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window .flank-titlebar-title,
 html[data-theme="glass"] body[data-view="modal"] .flank-window .flank-ui-nav-item,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window .flank-ui-nav-item,
 html[data-theme="glass"] body[data-view="modal"] .flank-window .flank-ui-row-label,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window .flank-ui-row-label,
 html[data-theme="glass"] body[data-view="modal"] .flank-window .flank-card-title,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window .flank-card-title,
 html[data-theme="glass"] body[data-view="modal"] .flank-window h2,
-html[data-theme="glass"] body[data-view="modal"] .flank-window h3 {
-  color: #0f172a !important;
-  text-shadow: none !important;
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window h2,
+html[data-theme="glass"] body[data-view="modal"] .flank-window h3,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window h3 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
 
 html[data-theme="glass"] body[data-view="modal"] .flank-theme-card,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-theme-card,
 html[data-theme="glass"] body[data-view="modal"] .flank-subcard,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-subcard,
 html[data-theme="glass"] body[data-view="modal"] .flank-ui-card,
-html[data-theme="glass"] body[data-view="modal"] .flank-preview-box {
-  background: rgba(255, 255, 255, 0.88) !important;
-  border: 1px solid rgba(15, 23, 42, 0.12) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-card,
+html[data-theme="glass"] body[data-view="modal"] .flank-preview-box,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-preview-box {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20) !important;
+  color: #ffffff !important;
 }
 
 html[data-theme="glass"] body[data-view="modal"] .flank-theme-card p,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-theme-card p,
 html[data-theme="glass"] body[data-view="modal"] .flank-ui-row-desc,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-row-desc,
 html[data-theme="glass"] body[data-view="modal"] .flank-card-muted,
-html[data-theme="glass"] body[data-view="modal"] .flank-stat-label {
-  color: #334155 !important;
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-card-muted,
+html[data-theme="glass"] body[data-view="modal"] .flank-stat-label,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-stat-label {
+  color: rgba(255, 255, 255, 0.80) !important;
   text-shadow: none !important;
+}
+
+html[data-theme="glass"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="glass"] body[data-view="modal"] input,
+html[data-theme="liquid-glass"] body[data-view="modal"] input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+/* Glass & Liquid Glass Flyouts: Frosted Subcards, Pills, Numerals & High Contrast Controls */
+html[data-theme="glass"] .flank-card,
+html[data-theme="liquid-glass"] .flank-card {
+  color: #ffffff !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-card__title,
+html[data-theme="liquid-glass"] .flank-card .flank-card__title,
+html[data-theme="glass"] .flank-card .flank-card-title,
+html[data-theme="liquid-glass"] .flank-card .flank-card-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-hero__value,
+html[data-theme="liquid-glass"] .flank-card .flank-hero__value,
+html[data-theme="glass"] .flank-card .flank-display-hero,
+html[data-theme="liquid-glass"] .flank-card .flank-display-hero {
+  color: #ffffff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-card-muted,
+html[data-theme="liquid-glass"] .flank-card .flank-card-muted,
+html[data-theme="glass"] .flank-card .flank-stat-label,
+html[data-theme="liquid-glass"] .flank-card .flank-stat-label,
+html[data-theme="glass"] .flank-card .flank-hero-hl,
+html[data-theme="liquid-glass"] .flank-card .flank-hero-hl {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-subcard,
+html[data-theme="liquid-glass"] .flank-card .flank-subcard,
+html[data-theme="glass"] .flank-card .flank-rate-box,
+html[data-theme="liquid-glass"] .flank-card .flank-rate-box,
+html[data-theme="glass"] .flank-card .flank-preview-box,
+html[data-theme="liquid-glass"] .flank-card .flank-preview-box,
+html[data-theme="glass"] .flank-card .flank-widget-grid-item,
+html[data-theme="liquid-glass"] .flank-card .flank-widget-grid-item {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-hourly-col,
+html[data-theme="liquid-glass"] .flank-card .flank-hourly-col {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 8px 4px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme="glass"] .flank-card .flank-hourly-col.is-current,
+html[data-theme="liquid-glass"] .flank-card .flank-hourly-col.is-current {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+html[data-theme="glass"] .flank-card .flank-hourly-temp,
+html[data-theme="liquid-glass"] .flank-card .flank-hourly-temp {
+  color: #ffffff !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-chip,
+html[data-theme="liquid-glass"] .flank-card .flank-chip,
+html[data-theme="glass"] .flank-card .flank-card-btn,
+html[data-theme="liquid-glass"] .flank-card .flank-card-btn,
+html[data-theme="glass"] .flank-card .flank-ui-btn.is-secondary,
+html[data-theme="liquid-glass"] .flank-card .flank-ui-btn.is-secondary {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-card-btn:hover,
+html[data-theme="liquid-glass"] .flank-card .flank-card-btn:hover,
+html[data-theme="glass"] .flank-card .flank-ui-btn.is-secondary:hover,
+html[data-theme="liquid-glass"] .flank-card .flank-ui-btn.is-secondary:hover {
+  background: rgba(255, 255, 255, 0.20) !important;
+}
+
+html[data-theme="glass"] .flank-card input,
+html[data-theme="liquid-glass"] .flank-card input,
+html[data-theme="glass"] .flank-card .flank-input,
+html[data-theme="liquid-glass"] .flank-card .flank-input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="glass"] .flank-card input::placeholder,
+html[data-theme="liquid-glass"] .flank-card input::placeholder {
+  color: rgba(255, 255, 255, 0.50) !important;
+}
+
+html[data-theme="glass"] .flank-card .flank-progress-track,
+html[data-theme="liquid-glass"] .flank-card .flank-progress-track {
+  background: rgba(255, 255, 255, 0.18) !important;
 }
 
 /* Comprehensive scrollbar elimination */
