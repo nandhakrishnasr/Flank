@@ -2,20 +2,83 @@
   <img src="assets/brand/png/flank-lockup-1600.png" alt="Flank" width="340" />
 </p>
 
-# Flank — A Second Dock for Windows 11
+<p align="center">
+  <strong>The second dock Windows never shipped.</strong><br/>
+  Apps, shortcuts, clipboard history, and live interactive widgets on the edge of your Windows 11 screen.
+</p>
 
-**Flank** is a slim, non-activating vertical dock and widget flyout app for Windows 11 inspired by macOS dock mechanics and iOS Picture-in-Picture edge tabs. Built with an editorial warm-paper default aesthetic (**Paper**) and 7 built-in theme personalities.
+---
+
+## Flank in Action
+
+### Desktop Overview & Themes
+
+| Aurora / Liquid Glass Desktop | Settings & Live Weather Flyout |
+| :---: | :---: |
+| <img src="docs/screens/showcase/flank_desktop_aurora_weather.jpg" alt="Flank on Windows 11 Desktop" width="460" /> | <img src="docs/screens/showcase/flank_settings_glass.jpg" alt="Flank Settings and Glass Theme" width="460" /> |
+
+| Media Player Flyout | Agenda & One-Click Meeting Join | Focus Timer Flyout |
+| :---: | :---: | :---: |
+| <img src="docs/screens/showcase/flank_widget_media_player.jpg" alt="Media Player Flyout" width="300" /> | <img src="docs/screens/showcase/flank_widget_agenda.jpg" alt="Agenda Flyout" width="300" /> | <img src="docs/screens/showcase/flank_widget_focus_timer.jpg" alt="Focus Timer Flyout" width="220" /> |
+
+---
+
+### Dock & Edge Collapse (`Ctrl+Alt+F`)
+
+Flank sits cleanly on the left or right monitor edge and tucks away into an iOS Picture-in-Picture style edge tab (`32×104 px` with capsule glyph or `20×72 px` minimal tab) in one click—or automatically when a full-screen game or presentation starts.
+
+| Expanded Dock (Paper) | Expanded Dock (Liquid Glass) | Collapsed Edge Tab (Paper) | Collapsed Edge Tab (Liquid Glass) |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/brand/brand_dock_face_paper.png" alt="Expanded Dock Paper" height="320" /> | <img src="docs/screens/brand/brand_dock_face_liquid_glass.png" alt="Expanded Dock Liquid Glass" height="320" /> | <img src="docs/screens/brand/brand_collapsed_tab_paper.png" alt="Collapsed Tab Paper" height="180" /> | <img src="docs/screens/brand/brand_collapsed_tab_liquid_glass.png" alt="Collapsed Tab Liquid Glass" height="180" /> |
+
+---
+
+### Live Widget Flyout Cards
+
+Hovering any widget tile on the dock slides out its interactive flyout card without stealing window focus (`SWP_NOACTIVATE`) from your active game, editor, or browser.
+
+| Weather Forecast | Audio & Mic Mixer | Focus Timer | Agenda & Calendar |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/flyout_weather.png" alt="Weather Flyout" width="210" /> | <img src="docs/screens/flyout_audio.png" alt="Audio Flyout" width="210" /> | <img src="docs/screens/flyout_focus.png" alt="Focus Flyout" width="210" /> | <img src="docs/screens/flyout_calendar.png" alt="Agenda Flyout" width="210" /> |
+
+| Media Player | System Telemetry | Battery & Devices | World Clock |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/flyout_player.png" alt="Player Flyout" width="210" /> | <img src="docs/screens/flyout_stats.png" alt="System Stats Flyout" width="210" /> | <img src="docs/screens/flyout_battery.png" alt="Battery Flyout" width="210" /> | <img src="docs/screens/flyout_clock.png" alt="World Clock Flyout" width="210" /> |
+
+| Quick Clipboard | Scratchpad Notes | Screen Color Picker | Network Monitor |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/flyout_clipboard.png" alt="Clipboard Flyout" width="210" /> | <img src="docs/screens/flyout_scratchpad.png" alt="Scratchpad Flyout" width="210" /> | <img src="docs/screens/flyout_colorpicker.png" alt="Color Picker Flyout" width="210" /> | <img src="docs/screens/flyout_network.png" alt="Network Flyout" width="210" /> |
+
+---
+
+### Clipboard History, Settings & Theme Store
+
+| Appearance & 7 Themes | Dock Items & Global Hotkeys |
+| :---: | :---: |
+| <img src="docs/screens/settings_appearance.png" alt="Settings Appearance" width="440" /> | <img src="docs/screens/settings_items.png" alt="Settings Items and Shortcuts" width="440" /> |
+
+| Clipboard History (`Ctrl+Alt+V`) | Widgets Configuration |
+| :---: | :---: |
+| <img src="docs/screens/modal_clipboard.png" alt="Clipboard History Modal" width="440" /> | <img src="docs/screens/settings_widgets.png" alt="Settings Widgets" width="440" /> |
+
+| About Flank (Paper Theme) | About Flank (Liquid Glass Theme) |
+| :---: | :---: |
+| <img src="docs/screens/brand/brand_about_paper.png" alt="About Flank Paper" width="440" /> | <img src="docs/screens/brand/brand_about_liquid_glass.png" alt="About Flank Liquid Glass" width="440" /> |
+
+<p align="center">
+  <img src="docs/screens/showcase/flank_settings_accent_slider.png" alt="Custom Accent Override and Hue Slider" width="680" />
+</p>
 
 ---
 
 ## Architecture
 
-- **Host:** `host/main.py`, Python 3.14 + pywebview (`gui="edgechromium"`), WinForms + Edge WebView2, Win32 via ctypes (`user32`, `gdi32`, `dwmapi`, `shell32`, `kernel32`), system tray icon, global hotkeys (`RegisterHotKey`), high-res favicon fetcher, and executable icon extractor. Also `host/clipboard_service.py`, `host/wallpaper.py`, `host/providers.py`.
+- **Host:** `host/main.py`, Python 3.14 + pywebview (`gui="edgechromium"`), WinForms + Edge WebView2, Win32 via ctypes (`user32`, `gdi32`, `dwmapi`, `shell32`, `kernel32`), system tray icon (`ITaskbarList` taskbar suppression), global hotkeys (`RegisterHotKey`), high-res favicon fetcher, and executable icon extractor. Also `host/clipboard_service.py`, `host/wallpaper.py`, `host/providers.py`.
 - **Three windows, one HTML entry** (`public/index.html`, routed by `body[data-view]`):
   - `#dock` (`view=dock`): Vertical dock and collapsible edge tab (the same window resized via `SetWindowPos` and native region clipping).
   - `#card` (`view=card`): Widget flyout hover card with caret pointing to the active dock tile.
-  - `#modal` (`view=modal`): Standalone focusable Settings & Theme Store dialog (`960x680`).
-- **Frontend:** Vanilla TypeScript bundled by esbuild into `public/bundle.js`. Strict `--flank-<group>-<token>` CSS custom properties. Zero hardcoded colors or pixel values in components.
+  - `#modal` (`view=modal`): Standalone focusable Settings & Theme Store dialog (`960×680`).
+- **Frontend:** Vanilla TypeScript bundled by esbuild into `public/bundle.js`. Strict `--flank-<group>-<token>` CSS custom properties.
 - **7 Bundled Themes:** Paper (default), Glass, Liquid Glass, Terminal, Rail, Nord, Aurora.
 
 ---
@@ -27,7 +90,7 @@
    - Slides toward the screen edge in 220 ms and morphs into a discreet edge tab with an inward chevron (`<` on right, `>` on left). Clicking expands the full dock.
    - Configurable auto-collapse on idle (3–60s) and full-screen app detection (`SHQueryUserNotificationState`).
 2. **Clipboard History (`Ctrl+Alt+V`)**:
-   - Dock tile with live item counter badge and full `960x680` Clipboard History window.
+   - Dock tile with live item counter badge and full `960×680` Clipboard History window.
    - Instant search, category chips (`All`, `Pinned`, `Links`, `Images`, `Files`, `Code`), detail preview pane, and keyboard navigation.
    - Respects Windows privacy flags (`ExcludeClipboardContentFromMonitorProcessing`, `CanIncludeInClipboardHistory=0`).
 3. **Weather**:
@@ -64,7 +127,7 @@
 
 ## Installation & Release
 
-Download the latest `Flank-Setup.exe` from [Releases](https://github.com/flank-dock/flank/releases).
+Download the latest `Flank-Setup.exe` from [Releases](https://github.com/nandhakrishnasr/Flank/releases).
 
 > **Note on Windows SmartScreen**:
 > Because Flank is an independent open-source utility without an expensive enterprise certificate, Windows Defender SmartScreen may display:

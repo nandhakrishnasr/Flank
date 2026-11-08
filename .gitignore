@@ -21,6 +21,8 @@ flank_stdout.log
 *.png
 !public/**/*.png
 !assets/**/*.png
+!docs/screens/**/*.png
+!docs/screens/**/*.jpg
 test_output.png
 test_*.png
 snap_*.png
