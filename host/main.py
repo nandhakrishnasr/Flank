@@ -437,16 +437,19 @@ class FlankTray:
                 break
             self.update_tray_icon()
 
-    def update_state(self, collapsed: bool):
+    def update_state(self, hidden: bool = False, collapsed: bool = False):
         try:
-            self.toggle_item.Text = "Show Flank" if collapsed else "Hide Flank"
+            if hidden or getattr(self.api, '_dock_hidden', False):
+                self.toggle_item.Text = "Show Flank"
+            else:
+                self.toggle_item.Text = "Hide Flank"
         except Exception:
             pass
 
     def _on_mouse_click(self, sender, e):
         try:
             if e.Button == Forms.MouseButtons.Left:
-                self.api.toggle_dock()
+                threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
             elif e.Button == Forms.MouseButtons.Right:
                 if not self.menu.Visible:
                     pos = Forms.Cursor.Position
@@ -455,10 +458,10 @@ class FlankTray:
             _log_debug(f"FlankTray _on_mouse_click error: {err}")
 
     def _on_toggle(self, sender, args):
-        self.api.toggle_dock()
+        threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
 
     def _on_settings(self, sender, args):
-        self.api.open_window('settings')
+        threading.Thread(target=self.api.open_window, args=('settings',), daemon=True).start()
 
     def _on_quit(self, sender, args):
         _log_debug("FlankTray: Quit clicked from tray menu")
@@ -477,7 +480,7 @@ class FlankTray:
         os._exit(0)
 
     def _on_double_click(self, sender, args):
-        self.api.toggle_dock()
+        threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
 
     def dispose(self):
         self._running = False
@@ -686,6 +689,7 @@ class FlankHostApi:
         self._is_collapsed = self.prefs.get('dockState') == 'collapsed' or self.prefs.get('startCollapsed', False)
         self._tray: FlankTray | None = None
         self._collapsed_due_to_fullscreen = False
+        self._dock_hidden = False
 
     def _load_prefs(self) -> Dict[str, Any]:
         if os.path.isfile(self.config_path):
@@ -1009,7 +1013,43 @@ class FlankHostApi:
             except Exception:
                 pass
 
+    def hide_dock(self) -> None:
+        self._dock_hidden = True
+        self.close_hover_card()
+        dock = windows.get('dock')
+        if dock and hasattr(dock, 'native') and dock.native:
+            try:
+                hwnd = dock.native.Handle.ToInt32()
+                user32.ShowWindow(hwnd, 0)  # SW_HIDE
+            except Exception:
+                pass
+        if self._tray:
+            self._tray.update_state(hidden=True)
+
+    def show_dock(self) -> None:
+        self._dock_hidden = False
+        dock = windows.get('dock')
+        if dock and hasattr(dock, 'native') and dock.native:
+            try:
+                hwnd = dock.native.Handle.ToInt32()
+                user32.ShowWindow(hwnd, 5)  # SW_SHOW
+                user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0040)
+                remove_from_taskbar(hwnd)
+            except Exception:
+                pass
+        if self._tray:
+            self._tray.update_state(hidden=False)
+
+    def toggle_visibility(self) -> None:
+        if getattr(self, '_dock_hidden', False):
+            self.show_dock()
+        else:
+            self.hide_dock()
+
     def toggle_dock(self) -> None:
+        if getattr(self, '_dock_hidden', False):
+            self.show_dock()
+            return
         if self._is_collapsed:
             self.expand_dock()
         else:
