@@ -1952,30 +1952,30 @@ function iconSvg(name, sizePx) {
       return `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg>`;
     case "flank-mark":
     case "flank-glyph":
-      return flankGlyphSvg(sizePx ? typeof sizePx === "number" ? sizePx : parseInt(sizePx, 10) : 18);
+      return flankGlyph({ size: sizePx ? typeof sizePx === "number" ? sizePx : parseInt(String(sizePx), 10) : 18 });
     default:
       return `<svg ${sizeStyle} ${strokeAttr}><circle cx="12" cy="12" r="8"/></svg>`;
   }
 }
+function flankGlyph(options = {}) {
+  const { size = 18, className = "" } = options;
+  const isSolid = options.solid !== void 0 ? options.solid : size < 24;
+  const width = Math.round(size * 100 / 128);
+  const classAttr = className ? ` class="${className}"` : "";
+  if (isSolid) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="${width}" height="${size}"${classAttr} role="img" aria-label="Flank glyph" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M12 44 a38 38 0 0 1 76 0 V84 a38 38 0 0 1 -76 0 Z M33.10 35.40 a5.20 5.20 0 0 1 5.20 -5.20 H65.60 a9.10 9.10 0 0 1 0.00 18.20 H51.30 V58.80 H63.00 a7.80 7.80 0 0 1 0.00 15.60 H51.30 V92.60 a5.20 5.20 0 0 1 -5.20 5.20 H38.30 a5.20 5.20 0 0 1 -5.20 -5.20 Z" fill="currentColor" fill-rule="evenodd"/></svg>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="${width}" height="${size}"${classAttr} role="img" aria-label="Flank glyph" style="display:inline-block; vertical-align:middle; flex-shrink:0;"><path d="M12 44 a38 38 0 0 1 76 0 V84 a38 38 0 0 1 -76 0 Z" fill="none" stroke="currentColor" stroke-width="9"/><path d="M37 42 a4 4 0 0 1 4 -4 H62 a7 7 0 0 1 0 14 H51 V60 H60 a6 6 0 0 1 0 12 H51 V86 a4 4 0 0 1 -4 4 H41 a4 4 0 0 1 -4 -4 Z" fill="currentColor"/></svg>`;
+}
 function flankGlyphSvg(size = 18, idSuffix = "") {
-  const maskId = `flankGlyphCut${idSuffix || Math.random().toString(36).substring(2, 7)}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="${size}" height="${size}" role="img" aria-label="Flank glyph" style="display:inline-block; vertical-align:middle; flex-shrink:0;">
-  <defs>
-    <mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-      <rect width="512" height="512" fill="#fff"/>
-      <circle cx="318" cy="226" r="21" fill="#000"/>
-      <path d="M168 226 C150 296 190 366 264 372 C272 300 242 232 168 226 Z" fill="none" stroke="#000" stroke-width="10" stroke-linejoin="round"/>
-    </mask>
-  </defs>
-  <g mask="url(#${maskId})" fill="currentColor" stroke="none">
-    <rect x="96" y="402" width="320" height="28" rx="14"/>
-    <path d="M158 296 C112 322 84 356 70 396 C108 388 140 374 180 348 Z"/>
-    <ellipse cx="250" cy="262" rx="124" ry="130"/>
-    <path d="M232 148 C224 116 242 94 268 86 C262 110 276 126 290 140 Z"/>
-    <path d="M366 232 Q424 248 424 261 Q424 274 366 286 Z" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
-  </g>
-  <path d="M212 380 V402 M256 380 V402" stroke="currentColor" stroke-width="9" stroke-linecap="round" fill="none"/>
-</svg>`;
+  return flankGlyph({ size, idSuffix });
+}
+function flankLockup(options = {}) {
+  const { theme = "light", height = 84, className = "" } = options;
+  const width = options.width || Math.round(height * 258 / 84);
+  const textFill = theme === "dark" ? "#FFFFFF" : "#1F1E1B";
+  const classAttr = className ? ` class="${className}"` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 258.0 84" width="${width}" height="${height}"${classAttr} role="img" aria-label="Flank"><svg x="0" y="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="84" height="84"><rect width="128" height="128" rx="30" fill="#2F4BFF"/><g transform="translate(28.00 17.92) scale(0.72)"><path d="M12 44 a38 38 0 0 1 76 0 V84 a38 38 0 0 1 -76 0 Z" fill="none" stroke="#fff" stroke-width="9"/><path d="M37 42 a4 4 0 0 1 4 -4 H62 a7 7 0 0 1 0 14 H51 V60 H60 a6 6 0 0 1 0 12 H51 V86 a4 4 0 0 1 -4 4 H41 a4 4 0 0 1 -4 -4 Z" fill="#fff"/></g></svg><g transform="translate(106 6)"><path d="M24.15625 16.92H17.375V15.138750000000002C17.375 12.638750000000002 18.3125 11.670000000000002 20.875 11.670000000000002H24.15625V3.3575000000000017H18.15625C10.3125 3.3575000000000017 6.59375 6.545000000000002 6.59375 13.263750000000002V16.92H0.59375V25.2325H6.59375V49.92H17.375V25.2325H24.15625Z M35.95625 3.3575000000000017H25.20625V49.92H35.95625Z M48.85 50.4825C53.50625 50.4825 56.475 48.8575 58.44375 45.295H58.56875V49.92H69.06875V27.70125C69.06875 20.42 63.7875 16.20125 54.19375 16.20125C44.63125 16.20125 39.225 20.45125 38.75625 27.6075H48.75625C48.975 25.3575 50.81875 23.92 53.81875 23.92C56.6625 23.92 58.4125 25.26375 58.4125 27.2325V27.38875C58.4125 29.3575 56.25625 29.82625 50.35 30.32625C43.31875 30.88875 37.5375 33.295 37.5375 40.70125C37.5375 47.26375 42.25625 50.4825 48.85 50.4825ZM52.13125 43.45125C49.50625 43.45125 47.725 42.2325 47.725 40.20125C47.725 38.045 49.7875 36.8575 52.6625 36.42C55.31875 35.9825 57.35 35.57625 58.50625 35.045V38.045C58.50625 41.295 55.725 43.45125 52.13125 43.45125Z M82.61875 31.9825C82.61875 27.4825 84.80625 25.38875 88.2125 25.38875C91.61875 25.38875 93.5875 27.51375 93.5875 31.42V49.92H104.3375V29.17C104.3375 21.045 100.15 16.20125 92.99375 16.20125C88.025 16.20125 84.68125 18.4825 82.49375 22.26375V16.92H71.86875V49.92H82.61875Z M107.1375 49.92H117.8875V40.1075L120.16875 37.45125L128.575 49.92H140.98125L128.16875 31.32625L140.45 16.92H128.04375L118.0125 28.63875H117.8875V3.3575000000000017H107.1375Z" fill="${textFill}"/><circle cx="147.20" cy="45.12" r="4.80" fill="#F5A524"/></g></svg>`;
 }
 
 // src/ui/dock.ts
@@ -2557,7 +2557,7 @@ function renderDockHtml(state2, theme) {
   }
   const tabChevronIcon = edge === "right" ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>`;
   const tabHtml = `<button type="button" class="flank-dock-tab${state2.showLogoOnTab ? " has-logo" : ""}" data-action="expand-dock" aria-label="Show Flank" title="Show Flank">
-    ${state2.showLogoOnTab ? `<span class="flank-tab-glyph" style="margin-bottom: 6px">${flankGlyphSvg(24, "tab")}</span>` : ""}
+    ${state2.showLogoOnTab ? `<span class="flank-tab-glyph" style="display:flex; align-items:center; justify-content:center; margin-bottom: 6px; color: currentColor">${flankGlyph({ solid: true, size: 20 })}</span>` : ""}
     <span class="flank-tab-chevron">${tabChevronIcon}</span>
   </button>`;
   return `<nav class="flank-dock${state2.showLogoOnTab ? " has-logo" : ""}" id="flank-dock" aria-label="Flank dock" data-edge="${edge}">
@@ -2582,7 +2582,9 @@ function escapeHtml2(text) {
 function renderEmptyState(title, subtitle) {
   return `
     <div class="flank-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: var(--flank-scale-space-16) var(--flank-scale-space-12); gap: var(--flank-scale-space-xs); pointer-events:none;">
-      <img src="brand/flank-mascot.svg" alt="" width="72" height="72" style="width: 72px; height: 72px; opacity: 0.55; pointer-events: none;" />
+      <span class="flank-empty-glyph" style="display:flex; align-items:center; justify-content:center; color: var(--flank-color-text-muted); opacity: 0.60; margin-bottom: 6px;">
+        ${flankGlyph({ solid: false, size: 56 })}
+      </span>
       <span style="font-size: var(--flank-scale-font-body-sm); font-weight: 500; color: var(--flank-color-text); line-height: 1.3">${escapeHtml2(title)}</span>
       ${subtitle ? `<span style="font-size: var(--flank-scale-font-caption); color: var(--flank-color-text-muted); line-height: 1.2">${escapeHtml2(subtitle)}</span>` : ""}
     </div>
@@ -3467,7 +3469,9 @@ function renderHoverCardHtml(state2, theme) {
   if (!inner) {
     inner = `
       <div class="flank-card-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:var(--flank-scale-space-16) 0; gap:var(--flank-scale-space-8); text-align:center;">
-        <img src="brand/flank-mascot.svg" alt="" width="56" height="56" style="opacity:0.65;" draggable="false" />
+        <span style="display:flex; align-items:center; justify-content:center; color: var(--flank-color-text-muted); opacity: 0.60;">
+          ${flankGlyph({ solid: false, size: 56 })}
+        </span>
         <span style="font-size:var(--flank-scale-font-caption); color:var(--flank-color-text-muted);">No activity to display</span>
       </div>
     `;
@@ -3889,7 +3893,7 @@ function renderTitleBar(title) {
   return `
     <div class="flank-window__titlebar flank-titlebar">
       <div class="flank-titlebar-brand" style="display:flex; align-items:center; gap: var(--flank-scale-space-12); color: var(--flank-color-text)">
-        <span class="flank-titlebar-glyph" style="display:flex; align-items:center; color: currentColor">${flankGlyphSvg(18, "titlebar")}</span>
+        <span class="flank-titlebar-glyph" style="display:flex; align-items:center; color: currentColor">${flankGlyph({ solid: true, size: 18 })}</span>
         <span class="flank-titlebar-title" style="font-weight: 600; font-size: 14px;">${escapeHtml5(title)}</span>
       </div>
       <div class="flank-win-controls">
@@ -4541,7 +4545,7 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
     })}
         ${Row({
       label: "Show logo on collapsed tab",
-      description: "Shows the Flank bird mascot glyph on the edge tab.",
+      description: "Shows the Flank capsule logo glyph on the edge tab.",
       controlHtml: Switch({ checked: Boolean(state2.showLogoOnTab), actionAttr: 'data-action="toggle-logo-on-tab"' })
     })}
         ${Row({
@@ -4735,12 +4739,12 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       </div>
     `;
   } else {
+    const isDark = currentTheme.mode === "dark";
     contentHtml = `
       <div style="display: flex; flex-direction: column; gap: 24px;">
-        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding: 24px 0 12px; gap: 8px;">
-          <img src="brand/flank-mascot.svg" alt="Flank Mascot" width="120" height="120" style="width: 120px; height: 120px; pointer-events: none;" />
-          <span style="font-size: 20px; font-weight: 700; color: var(--flank-color-text);">Flank</span>
-          <span class="flank-card-muted" style="color: var(--flank-color-text-muted);">Version ${APP_VERSION}</span>
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding: 24px 0 12px; gap: 12px;">
+          ${flankLockup({ theme: isDark ? "dark" : "light", height: 72 })}
+          <span class="flank-card-muted" style="color: var(--flank-color-text-muted); font-family: var(--flank-type-mono); font-size: 12px; margin-top: -4px;">Version ${APP_VERSION}</span>
           <span style="max-width: 440px; font-size: 13px; color: var(--flank-color-text-muted); line-height: 1.5;">
             A slim, vertical second dock for Windows with live widgets, instant clipboard history, and fluid themes.
           </span>
@@ -6615,6 +6619,15 @@ async function bootstrap() {
   const queryLogo = params.get("showLogoOnTab");
   if (queryLogo !== null) {
     state.showLogoOnTab = queryLogo === "true" || queryLogo === "1";
+  }
+  const queryEmpty = params.get("empty");
+  if (queryEmpty === "true" || queryEmpty === "1") {
+    state.clipboard.items = [];
+    state.clipboard.count = 0;
+    state.calendar.events = [];
+    state.calendar.nextSummary = "";
+    if (state.aiTasks) state.aiTasks = [];
+    if (state.bluetooth) state.bluetooth.devices = [];
   }
   initDockState(state.dockState || (state.startCollapsed ? "collapsed" : "expanded"));
   applyCurrentThemeSelection();

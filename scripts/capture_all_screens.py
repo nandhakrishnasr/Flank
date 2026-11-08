@@ -209,7 +209,7 @@ SCREENS = [
         "category": "Settings Window",
         "filename": "settings_about.png",
         "title": "Settings — About & Credits",
-        "description": "Flank brand mascot, version 1.0.0 info, open-source licenses, and links",
+        "description": "Flank brand lockup, version 1.0.0 info, open-source licenses, and links",
         "url": f"{HARNESS_URL}?view=modal&theme=paper&modal=settings&tab=about",
         "width": 1040,
         "height": 780,

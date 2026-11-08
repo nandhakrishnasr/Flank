@@ -538,7 +538,7 @@ body[data-view="modal"] .flank-window {
   height: 72px;
   min-height: 72px;
   max-height: 72px;
-  margin: 0;
+  margin: auto 0;
   padding: 0;
   box-sizing: border-box;
   flex-direction: column;
@@ -2088,7 +2088,7 @@ a:focus-visible,
 .flank-ui-row-icon .flank-icon-plate {
   width: 32px;
   height: 32px;
-  margin: 0;
+  margin: auto 0;
   border: none;
   background: transparent;
   box-shadow: none;
@@ -2150,14 +2150,14 @@ a:focus-visible,
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--flank-color-text);
-  margin: 0;
+  margin: auto 0;
   padding: 0;
 }
 
 .flank-ui-section-desc {
   font-size: var(--flank-scale-font-body-sm, 12px);
   color: var(--flank-color-text-muted);
-  margin: 0;
+  margin: auto 0;
   line-height: 1.4;
 }
 

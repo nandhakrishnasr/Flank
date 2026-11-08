@@ -2075,6 +2075,15 @@ async function bootstrap(): Promise<void> {
   if (queryLogo !== null) {
     state.showLogoOnTab = queryLogo === 'true' || queryLogo === '1';
   }
+  const queryEmpty = params.get('empty');
+  if (queryEmpty === 'true' || queryEmpty === '1') {
+    state.clipboard.items = [];
+    state.clipboard.count = 0;
+    state.calendar.events = [];
+    state.calendar.nextSummary = '';
+    if (state.aiTasks) state.aiTasks = [];
+    if (state.bluetooth) state.bluetooth.devices = [];
+  }
 
   initDockState((state.dockState as any) || (state.startCollapsed ? 'collapsed' : 'expanded'));
   applyCurrentThemeSelection();

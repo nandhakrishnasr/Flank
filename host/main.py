@@ -352,14 +352,11 @@ class FlankTray:
         self.notify_icon.Text = "Flank"
 
         self.menu = Forms.ContextMenuStrip()
-        self.toggle_item = Forms.ToolStripMenuItem("Hide Flank")
-        self.toggle_item.Click += self._on_toggle
         self.settings_item = Forms.ToolStripMenuItem("Settings")
         self.settings_item.Click += self._on_settings
         self.quit_item = Forms.ToolStripMenuItem("Quit")
         self.quit_item.Click += self._on_quit
 
-        self.menu.Items.Add(self.toggle_item)
         self.menu.Items.Add(self.settings_item)
         self.menu.Items.Add(Forms.ToolStripSeparator())
         self.menu.Items.Add(self.quit_item)
@@ -437,27 +434,14 @@ class FlankTray:
                 break
             self.update_tray_icon()
 
-    def update_state(self, hidden: bool = False, collapsed: bool = False):
-        try:
-            is_hid = hidden or getattr(self.api, '_dock_hidden', False)
-            def _set_text():
-                try:
-                    self.toggle_item.Text = "Show Flank" if is_hid else "Hide Flank"
-                except Exception:
-                    pass
-            dock = windows.get('dock')
-            if dock and hasattr(dock, 'native') and dock.native and dock.native.InvokeRequired:
-                dock.native.BeginInvoke(System.Action(_set_text))
-            else:
-                _set_text()
-        except Exception as e:
-            _log_debug(f"FlankTray update_state error: {e}")
+    def update_state(self, *args, **kwargs):
+        pass
 
     def _on_mouse_click(self, sender, e):
         try:
             if e.Button == Forms.MouseButtons.Left:
-                _log_debug("FlankTray: Left click -> toggle_visibility")
-                threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
+                _log_debug("FlankTray: Left click -> open Settings")
+                threading.Thread(target=self.api.open_window, args=('settings',), daemon=True).start()
             elif e.Button == Forms.MouseButtons.Right:
                 _log_debug("FlankTray: Right click -> show menu")
                 if not self.menu.Visible:
@@ -465,10 +449,6 @@ class FlankTray:
                     self.menu.Show(pos.X, pos.Y)
         except Exception as err:
             _log_debug(f"FlankTray _on_mouse_click error: {err}")
-
-    def _on_toggle(self, sender, args):
-        _log_debug("FlankTray: Menu -> toggle_visibility")
-        threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
 
     def _on_settings(self, sender, args):
         _log_debug("FlankTray: Menu -> open_window('settings')")
@@ -491,8 +471,8 @@ class FlankTray:
         os._exit(0)
 
     def _on_double_click(self, sender, args):
-        _log_debug("FlankTray: Double click -> toggle_visibility")
-        threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
+        _log_debug("FlankTray: Double click -> open Settings")
+        threading.Thread(target=self.api.open_window, args=('settings',), daemon=True).start()
 
     def dispose(self):
         self._running = False
@@ -701,7 +681,6 @@ class FlankHostApi:
         self._is_collapsed = self.prefs.get('dockState') == 'collapsed' or self.prefs.get('startCollapsed', False)
         self._tray: FlankTray | None = None
         self._collapsed_due_to_fullscreen = False
-        self._dock_hidden = False
 
     def _load_prefs(self) -> Dict[str, Any]:
         if os.path.isfile(self.config_path):
@@ -1025,66 +1004,7 @@ class FlankHostApi:
             except Exception:
                 pass
 
-    def hide_dock(self) -> None:
-        _log_debug("hide_dock: executing")
-        self._dock_hidden = True
-        self.close_hover_card()
-        dock = windows.get('dock')
-        if dock and hasattr(dock, 'native') and dock.native:
-            try:
-                hwnd = dock.native.Handle.ToInt32()
-                user32.ShowWindow(hwnd, 0)  # SW_HIDE
-                def _winforms_hide():
-                    try:
-                        dock.native.Visible = False
-                    except Exception:
-                        pass
-                if dock.native.InvokeRequired:
-                    dock.native.BeginInvoke(System.Action(_winforms_hide))
-                else:
-                    _winforms_hide()
-                _log_debug("hide_dock: successfully hidden")
-            except Exception as e:
-                _log_debug(f"hide_dock error: {e}")
-        if self._tray:
-            self._tray.update_state(hidden=True)
-
-    def show_dock(self) -> None:
-        _log_debug("show_dock: executing")
-        self._dock_hidden = False
-        dock = windows.get('dock')
-        if dock and hasattr(dock, 'native') and dock.native:
-            try:
-                hwnd = dock.native.Handle.ToInt32()
-                def _winforms_show():
-                    try:
-                        dock.native.Visible = True
-                    except Exception:
-                        pass
-                if dock.native.InvokeRequired:
-                    dock.native.BeginInvoke(System.Action(_winforms_show))
-                else:
-                    _winforms_show()
-                user32.ShowWindow(hwnd, 5)  # SW_SHOW
-                user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0040)
-                remove_from_taskbar(hwnd)
-                _log_debug("show_dock: successfully restored")
-            except Exception as e:
-                _log_debug(f"show_dock error: {e}")
-        if self._tray:
-            self._tray.update_state(hidden=False)
-
-    def toggle_visibility(self) -> None:
-        _log_debug(f"toggle_visibility: current _dock_hidden={getattr(self, '_dock_hidden', False)}")
-        if getattr(self, '_dock_hidden', False):
-            self.show_dock()
-        else:
-            self.hide_dock()
-
     def toggle_dock(self) -> None:
-        if getattr(self, '_dock_hidden', False):
-            self.show_dock()
-            return
         if self._is_collapsed:
             self.expand_dock()
         else:

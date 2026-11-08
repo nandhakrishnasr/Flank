@@ -1,6 +1,6 @@
 import { type FlankTheme } from '../theme/schema.ts';
 import { type FlankState, type WidgetKind } from '../providers/types.ts';
-import { iconSvg } from './icons.ts';
+import { iconSvg, flankGlyph } from './icons.ts';
 
 function escapeHtml(text: string): string {
   return String(text)
@@ -13,7 +13,9 @@ function escapeHtml(text: string): string {
 export function renderEmptyState(title: string, subtitle?: string): string {
   return `
     <div class="flank-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: var(--flank-scale-space-16) var(--flank-scale-space-12); gap: var(--flank-scale-space-xs); pointer-events:none;">
-      <img src="brand/flank-mascot.svg" alt="" width="72" height="72" style="width: 72px; height: 72px; opacity: 0.55; pointer-events: none;" />
+      <span class="flank-empty-glyph" style="display:flex; align-items:center; justify-content:center; color: var(--flank-color-text-muted); opacity: 0.60; margin-bottom: 6px;">
+        ${flankGlyph({ solid: false, size: 56 })}
+      </span>
       <span style="font-size: var(--flank-scale-font-body-sm); font-weight: 500; color: var(--flank-color-text); line-height: 1.3">${escapeHtml(title)}</span>
       ${subtitle ? `<span style="font-size: var(--flank-scale-font-caption); color: var(--flank-color-text-muted); line-height: 1.2">${escapeHtml(subtitle)}</span>` : ''}
     </div>
@@ -1014,7 +1016,9 @@ export function renderHoverCardHtml(state: FlankState, theme: FlankTheme): strin
   if (!inner) {
     inner = `
       <div class="flank-card-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:var(--flank-scale-space-16) 0; gap:var(--flank-scale-space-8); text-align:center;">
-        <img src="brand/flank-mascot.svg" alt="" width="56" height="56" style="opacity:0.65;" draggable="false" />
+        <span style="display:flex; align-items:center; justify-content:center; color: var(--flank-color-text-muted); opacity: 0.60;">
+          ${flankGlyph({ solid: false, size: 56 })}
+        </span>
         <span style="font-size:var(--flank-scale-font-caption); color:var(--flank-color-text-muted);">No activity to display</span>
       </div>
     `;

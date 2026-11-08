@@ -120,7 +120,7 @@ Tested boundary conditions to ensure zero crashes or broken panels:
 | **30 Dock Items** | 30 sequential apps/links | Scrollable dock container with smooth mousewheel scrolling (`edgecase_30_items.png`). | No vertical overflow past screen | **PASS** |
 | **Extremely Long Label**| 65-character app title | Label truncates with ellipsis without pushing icon or controls offscreen (`edgecase_long_labels.png`). | Clean ellipsis truncation | **PASS** |
 | **No Battery (Desktop PC)**| Battery API returns `None` | Flyout degrades cleanly without errors (`edgecase_no_battery.png`). | Shows desktop AC status | **PASS** |
-| **No Calendar Events** | Schedule clear for today | Displays friendly empty state with Flank mascot illustration (`edgecase_no_calendar.png`). | Mascot empty state rendered | **PASS** |
+| **No Calendar Events** | Schedule clear for today | Displays friendly empty state with Flank capsule F glyph illustration (`edgecase_no_calendar.png`). | Capsule F empty state rendered | **PASS** |
 | **Corrupted Settings File**| Invalid JSON in `settings.json` | Host falls back to default preferences without crashing. | Safely reverts to Paper defaults | **PASS** |
 
 ---
@@ -162,7 +162,7 @@ Confirmed that every capability introduced in earlier steps continues to functio
 2. **Documentation Updated**:
    - `README.md`: Updated to feature all 7 themes, collapsible edge tab, and installer details.
    - `docs/design/TOKENS.md`: Comprehensive reference for spacing, typography, motion, radii, and elevations.
-   - `docs/design/ICONS.md`: Detailed specifications for 1.75-stroke icons, 32px icon plates, and mascot glyphs.
+   - `docs/design/ICONS.md`: Detailed specifications for 1.75-stroke icons, 32px icon plates, and brand glyphs.
    - `docs/design/DECISIONS.md`: Added architectural records for edge tab morphing, removal of 'top' edge, Step 6 design system components, and Step 7 QA findings.
 
 ---

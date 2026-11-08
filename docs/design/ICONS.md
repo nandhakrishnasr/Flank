@@ -110,8 +110,8 @@ When an icon fails the quality gate or has no favicon:
 | **YouTube** | Web Shortcut | YouTube 128px favicon on plate / "Y" badge | Yes | 32px plate, 8px radius, `--flank-color-icon-plate` |
 | **Custom Link** | Custom Shortcut | Full-colour favicon or hashed letter badge | Yes | 32px plate, 8px radius, `--flank-color-icon-plate` |
 | **Collapse Handle** | Dock Navigation | Directional chevron (`<` / `>`) | No | 14px, stroke 2.4, round caps, 28px tall handle |
-| **Collapsed Tab** | Edge Morph Tab | Inward chevron (`<` / `>`) + optional logo | No | 14px chevron + 24px inlined Flank bird glyph |
-| **Settings Titlebar**| Window Chrome | Flank mascot glyph | No | 18px inlined SVG, `currentColor` |
+| **Collapsed Tab** | Edge Morph Tab | Inward chevron (`<` / `>`) + optional logo | No | 14px chevron + 20px inlined Flank capsule F glyph (solid) |
+| **Settings Titlebar**| Window Chrome | Flank capsule F glyph | No | 18px inlined solid SVG, `currentColor` |
 
 ---
 

@@ -1,7 +1,7 @@
 import { ACCENT_PRESETS, BUNDLED_THEMES, type FlankTheme } from '../theme/schema.ts';
 import { type ClipboardEntry, type FlankState } from '../providers/types.ts';
 import { buildSparklineSvg, formatDuration, formatRate, renderEmptyState } from './cards.ts';
-import { iconSvg, flankGlyphSvg } from './icons.ts';
+import { iconSvg, flankGlyph, flankLockup, flankGlyphSvg } from './icons.ts';
 import { renderItemIcon, getLetterBadgeProps } from './dock.ts';
 import { APP_VERSION } from '../version.ts';
 import { deriveAccentTokens, parseColor, contrastRatio, resolveOpaqueSurface } from '../theme/contrast.ts';
@@ -44,7 +44,7 @@ function renderTitleBar(title: string): string {
   return `
     <div class="flank-window__titlebar flank-titlebar">
       <div class="flank-titlebar-brand" style="display:flex; align-items:center; gap: var(--flank-scale-space-12); color: var(--flank-color-text)">
-        <span class="flank-titlebar-glyph" style="display:flex; align-items:center; color: currentColor">${flankGlyphSvg(18, 'titlebar')}</span>
+        <span class="flank-titlebar-glyph" style="display:flex; align-items:center; color: currentColor">${flankGlyph({ solid: true, size: 18 })}</span>
         <span class="flank-titlebar-title" style="font-weight: 600; font-size: 14px;">${escapeHtml(title)}</span>
       </div>
       <div class="flank-win-controls">
@@ -793,7 +793,7 @@ export function renderSettingsWindowHtml(
         })}
         ${Row({
           label: 'Show logo on collapsed tab',
-          description: 'Shows the Flank bird mascot glyph on the edge tab.',
+          description: 'Shows the Flank capsule logo glyph on the edge tab.',
           controlHtml: Switch({ checked: Boolean(state.showLogoOnTab), actionAttr: 'data-action="toggle-logo-on-tab"' }),
         })}
         ${Row({
@@ -994,12 +994,12 @@ export function renderSettingsWindowHtml(
       </div>
     `;
   } else {
+    const isDark = currentTheme.mode === 'dark';
     contentHtml = `
       <div style="display: flex; flex-direction: column; gap: 24px;">
-        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding: 24px 0 12px; gap: 8px;">
-          <img src="brand/flank-mascot.svg" alt="Flank Mascot" width="120" height="120" style="width: 120px; height: 120px; pointer-events: none;" />
-          <span style="font-size: 20px; font-weight: 700; color: var(--flank-color-text);">Flank</span>
-          <span class="flank-card-muted" style="color: var(--flank-color-text-muted);">Version ${APP_VERSION}</span>
+        <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding: 24px 0 12px; gap: 12px;">
+          ${flankLockup({ theme: isDark ? 'dark' : 'light', height: 72 })}
+          <span class="flank-card-muted" style="color: var(--flank-color-text-muted); font-family: var(--flank-type-mono); font-size: 12px; margin-top: -4px;">Version ${APP_VERSION}</span>
           <span style="max-width: 440px; font-size: 13px; color: var(--flank-color-text-muted); line-height: 1.5;">
             A slim, vertical second dock for Windows with live widgets, instant clipboard history, and fluid themes.
           </span>

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/flank-mascot-1024.png" alt="Flank Mascot" width="220" />
+  <img src="assets/brand/png/flank-lockup-1600.png" alt="Flank" width="340" />
 </p>
 
 # Flank — A Second Dock for Windows 11
@@ -23,7 +23,7 @@
 ## Core Features & Widgets
 
 1. **Collapsible Dock to Edge Tab (`Ctrl+Alt+F`)**:
-   - iOS Picture-in-Picture style tab (`20×72 px`, inward `12px` radii, flush with screen edge, or `32×104 px` with mascot glyph).
+   - iOS Picture-in-Picture style tab (`20×72 px`, inward `12px` radii, flush with screen edge, or `32×104 px` with capsule logo glyph).
    - Slides toward the screen edge in 220 ms and morphs into a discreet edge tab with an inward chevron (`<` on right, `>` on left). Clicking expands the full dock.
    - Configurable auto-collapse on idle (3–60s) and full-screen app detection (`SHQueryUserNotificationState`).
 2. **Clipboard History (`Ctrl+Alt+V`)**:
@@ -33,7 +33,7 @@
 3. **Weather**:
    - Live Open-Meteo geocoding and forecast with condition icon, temperature badge, high/low summary, and 5-hour strip.
 4. **Agenda & Meetings**:
-   - Upcoming schedule with meeting countdown, join buttons for Zoom/Teams/Meet, and empty state with mascot illustration.
+   - Upcoming schedule with meeting countdown, join buttons for Zoom/Teams/Meet, and friendly empty state.
 5. **Focus Timer**:
    - Deep focus / short break timer with tabular numerals, session presets (15m, 25m, 45m, 60m), and daily stats.
 6. **System Stats (`Alt+S`)**:

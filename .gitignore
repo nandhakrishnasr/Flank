@@ -8,6 +8,8 @@ build/
 dist/
 *.spec
 *.zip
+*.rar
+!website/assets/brand/**/*.png
 
 # Logs
 *.log

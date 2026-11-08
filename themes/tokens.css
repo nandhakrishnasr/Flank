@@ -156,6 +156,15 @@
   --flank-color-icon-plate-shadow: 0 1px 3px rgba(31, 30, 27, 0.08);
 
   /* ==========================================================================
+     BRAND SYSTEM TOKENS
+     ========================================================================== */
+  --flank-brand-blue: #2F4BFF;
+  --flank-brand-deep: #1E34C9;
+  --flank-brand-amber: #F5A524;
+  --flank-brand-ink: #1F1E1B;
+  --flank-brand-paper: #FBFAF7;
+
+  /* ==========================================================================
      6. MOTION TOKENS (Step 1 Foundation)
      fast 120ms, base 180ms, slow 240ms, standard & emphasized, spring (300, 24)
      ========================================================================== */

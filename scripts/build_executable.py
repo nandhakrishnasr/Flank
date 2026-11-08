@@ -169,8 +169,7 @@ def build() -> None:
     # 1. Ensure UI bundle and icon exist
     print('=== Step 1: Building UI bundle ===')
     subprocess.run(['npm', 'run', 'build:ui'], cwd=ROOT_DIR, shell=True, check=True)
-    if not os.path.isfile(ICON_PATH):
-        subprocess.run([sys.executable, os.path.join(ROOT_DIR, 'scripts', 'generate_icon.py')], check=True)
+    subprocess.run([sys.executable, os.path.join(ROOT_DIR, 'scripts', 'generate_icon.py')], check=True)
 
     # 2. Build standalone Flank.exe directory bundle via PyInstaller
     print('=== Step 2: Building standalone Flank.exe ===')

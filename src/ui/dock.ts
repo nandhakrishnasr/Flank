@@ -1,6 +1,6 @@
 import { type FlankTheme } from '../theme/schema.ts';
 import { type DockItem, type FlankState, type WidgetKind } from '../providers/types.ts';
-import { iconSvg, flankGlyphSvg } from './icons.ts';
+import { iconSvg, flankGlyph, flankGlyphSvg } from './icons.ts';
 
 function escapeHtml(text: string): string {
   return String(text)
@@ -631,7 +631,7 @@ export function renderDockHtml(state: FlankState, theme: FlankTheme): string {
       ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>`
       : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>`;
   const tabHtml = `<button type="button" class="flank-dock-tab${state.showLogoOnTab ? ' has-logo' : ''}" data-action="expand-dock" aria-label="Show Flank" title="Show Flank">
-    ${state.showLogoOnTab ? `<span class="flank-tab-glyph" style="margin-bottom: 6px">${flankGlyphSvg(24, 'tab')}</span>` : ''}
+    ${state.showLogoOnTab ? `<span class="flank-tab-glyph" style="display:flex; align-items:center; justify-content:center; margin-bottom: 6px; color: currentColor">${flankGlyph({ solid: true, size: 20 })}</span>` : ''}
     <span class="flank-tab-chevron">${tabChevronIcon}</span>
   </button>`;
 
