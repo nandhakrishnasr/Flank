@@ -439,18 +439,27 @@ class FlankTray:
 
     def update_state(self, hidden: bool = False, collapsed: bool = False):
         try:
-            if hidden or getattr(self.api, '_dock_hidden', False):
-                self.toggle_item.Text = "Show Flank"
+            is_hid = hidden or getattr(self.api, '_dock_hidden', False)
+            def _set_text():
+                try:
+                    self.toggle_item.Text = "Show Flank" if is_hid else "Hide Flank"
+                except Exception:
+                    pass
+            dock = windows.get('dock')
+            if dock and hasattr(dock, 'native') and dock.native and dock.native.InvokeRequired:
+                dock.native.BeginInvoke(System.Action(_set_text))
             else:
-                self.toggle_item.Text = "Hide Flank"
-        except Exception:
-            pass
+                _set_text()
+        except Exception as e:
+            _log_debug(f"FlankTray update_state error: {e}")
 
     def _on_mouse_click(self, sender, e):
         try:
             if e.Button == Forms.MouseButtons.Left:
+                _log_debug("FlankTray: Left click -> toggle_visibility")
                 threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
             elif e.Button == Forms.MouseButtons.Right:
+                _log_debug("FlankTray: Right click -> show menu")
                 if not self.menu.Visible:
                     pos = Forms.Cursor.Position
                     self.menu.Show(pos.X, pos.Y)
@@ -458,9 +467,11 @@ class FlankTray:
             _log_debug(f"FlankTray _on_mouse_click error: {err}")
 
     def _on_toggle(self, sender, args):
+        _log_debug("FlankTray: Menu -> toggle_visibility")
         threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
 
     def _on_settings(self, sender, args):
+        _log_debug("FlankTray: Menu -> open_window('settings')")
         threading.Thread(target=self.api.open_window, args=('settings',), daemon=True).start()
 
     def _on_quit(self, sender, args):
@@ -480,6 +491,7 @@ class FlankTray:
         os._exit(0)
 
     def _on_double_click(self, sender, args):
+        _log_debug("FlankTray: Double click -> toggle_visibility")
         threading.Thread(target=self.api.toggle_visibility, daemon=True).start()
 
     def dispose(self):
@@ -1014,6 +1026,7 @@ class FlankHostApi:
                 pass
 
     def hide_dock(self) -> None:
+        _log_debug("hide_dock: executing")
         self._dock_hidden = True
         self.close_hover_card()
         dock = windows.get('dock')
@@ -1021,26 +1034,48 @@ class FlankHostApi:
             try:
                 hwnd = dock.native.Handle.ToInt32()
                 user32.ShowWindow(hwnd, 0)  # SW_HIDE
-            except Exception:
-                pass
+                def _winforms_hide():
+                    try:
+                        dock.native.Visible = False
+                    except Exception:
+                        pass
+                if dock.native.InvokeRequired:
+                    dock.native.BeginInvoke(System.Action(_winforms_hide))
+                else:
+                    _winforms_hide()
+                _log_debug("hide_dock: successfully hidden")
+            except Exception as e:
+                _log_debug(f"hide_dock error: {e}")
         if self._tray:
             self._tray.update_state(hidden=True)
 
     def show_dock(self) -> None:
+        _log_debug("show_dock: executing")
         self._dock_hidden = False
         dock = windows.get('dock')
         if dock and hasattr(dock, 'native') and dock.native:
             try:
                 hwnd = dock.native.Handle.ToInt32()
+                def _winforms_show():
+                    try:
+                        dock.native.Visible = True
+                    except Exception:
+                        pass
+                if dock.native.InvokeRequired:
+                    dock.native.BeginInvoke(System.Action(_winforms_show))
+                else:
+                    _winforms_show()
                 user32.ShowWindow(hwnd, 5)  # SW_SHOW
                 user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0040)
                 remove_from_taskbar(hwnd)
-            except Exception:
-                pass
+                _log_debug("show_dock: successfully restored")
+            except Exception as e:
+                _log_debug(f"show_dock error: {e}")
         if self._tray:
             self._tray.update_state(hidden=False)
 
     def toggle_visibility(self) -> None:
+        _log_debug(f"toggle_visibility: current _dock_hidden={getattr(self, '_dock_hidden', False)}")
         if getattr(self, '_dock_hidden', False):
             self.show_dock()
         else:
@@ -1541,6 +1576,7 @@ class FlankHostApi:
         self._card_hide_timer.start()
 
     def open_window(self, win_name: str) -> None:
+        _log_debug(f"open_window called with: {win_name}")
         self.close_hover_card()
         if self._card_hide_timer:
             self._card_hide_timer.cancel()
@@ -1557,8 +1593,6 @@ class FlankHostApi:
         if modal:
             try:
                 self._modal_open = True
-                modal.evaluate_js(f"window.flankOpenModal && window.flankOpenModal('{win_name}')")
-                modal.show()
                 if hasattr(modal, 'native') and modal.native:
                     hwnd = modal.native.Handle.ToInt32()
                     scale = user32.GetDpiForWindow(hwnd) / 96.0 if user32.GetDpiForWindow(hwnd) > 0 else 1.0
@@ -1587,8 +1621,18 @@ class FlankHostApi:
                     user32.ShowWindow(hwnd, 9)  # SW_RESTORE
                     remove_from_taskbar(hwnd)
                     user32.SetForegroundWindow(hwnd)
-            except Exception:
-                pass
+                    _log_debug("open_window: modal window shown and positioned")
+
+                # Asynchronously trigger JS navigation without blocking the UI thread
+                def _do_nav():
+                    try:
+                        modal.evaluate_js(f"window.flankOpenModal && window.flankOpenModal('{win_name}')")
+                        _log_debug(f"open_window: evaluated flankOpenModal('{win_name}')")
+                    except Exception as err:
+                        _log_debug(f"open_window evaluate_js error: {err}")
+                threading.Thread(target=_do_nav, daemon=True).start()
+            except Exception as e:
+                _log_debug(f"open_window error: {e}")
 
     def close_window(self) -> None:
         self._modal_open = False
