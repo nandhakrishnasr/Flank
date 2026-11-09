@@ -1403,6 +1403,8 @@ class FlankHostApi:
         diameter = int(round(radius * 2 * scale))
         wx, wy, ww, wh = get_work_area()
         rc = RECT()
+        px = 0
+        py = 0
         if user32.GetWindowRect(hwnd, ctypes.byref(rc)):
             px = rc.left
             py = rc.top
@@ -1415,6 +1417,16 @@ class FlankHostApi:
         user32.SetWindowRgn(hwnd, rgn, True)
         if not self._card_open:
             user32.ShowWindow(hwnd, 0)
+        else:
+            try:
+                card = windows.get('card')
+                if card:
+                    sw = user32.GetSystemMetrics(0) or 1920
+                    sh = user32.GetSystemMetrics(1) or 1080
+                    card_bd = self._wallpaper_mgr.get_backdrop(sw, sh, px, py, pw, ph)
+                    card.evaluate_js(f"window.flankUpdateBackdrop && window.flankUpdateBackdrop({json.dumps(card_bd)})")
+            except Exception:
+                pass
 
     def set_card_bounds(self, width: int, height: int, radius: int = 20, window_padding: int | None = None) -> None:
         card = windows.get('card')
@@ -1456,20 +1468,20 @@ class FlankHostApi:
         logical_wh = int(round(wh / scale))
 
         CARD_HEIGHTS = {
-            'stats': 380,
-            'audio': 320,
-            'calendar': 340,
-            'agenda': 340,
-            'weather': 260,
-            'battery': 275,
+            'stats': 390,
+            'audio': 330,
+            'calendar': 360,
+            'agenda': 360,
+            'weather': 270,
+            'battery': 280,
             'player': 240,
             'focus': 240,
-            'network': 290,
+            'network': 300,
             'bluetooth': 520,
-            'ai_usage': 270,
-            'scratchpad': 290,
-            'clipboard': 320,
-            'clock': 245,
+            'ai_usage': 280,
+            'scratchpad': 300,
+            'clipboard': 340,
+            'clock': 400,
         }
         cw, _, cradius = self._card_shape_size
         cw = max(304, cw)
