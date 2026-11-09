@@ -56,15 +56,11 @@
   --flank-scale-space-xs: var(--flank-scale-space-4);
   --flank-scale-space-sm: var(--flank-scale-space-6);
   --flank-scale-space-md: var(--flank-scale-space-8);
-  --flank-scale-space-10: var(--flank-scale-space-10);
   --flank-scale-space-11: var(--flank-scale-space-12);
-  --flank-scale-space-12: var(--flank-scale-space-12);
   --flank-scale-space-14: var(--flank-scale-space-16);
-  --flank-scale-space-16: var(--flank-scale-space-16);
   --flank-scale-space-18: var(--flank-scale-space-16);
-  --flank-scale-space-20: var(--flank-scale-space-20);
   --flank-scale-space-22: var(--flank-scale-space-20);
-  --flank-scale-space-24: var(--flank-scale-space-24);
+  --flank-layout-dock-height: 60px;
 
   --flank-scale-badge-offset: -4px;
   --flank-scale-caret-offset: -8px;
@@ -163,6 +159,61 @@
   --flank-brand-amber: #F5A524;
   --flank-brand-ink: #1F1E1B;
   --flank-brand-paper: #FBFAF7;
+
+  /* ==========================================================================
+     ONBOARDING & SWATCH TOKENS (Paper-locked chrome + preview backdrops)
+     ========================================================================== */
+  --flank-ob-surface: #fbfaf7;
+  --flank-ob-surface-elevated: #ffffff;
+  --flank-ob-surface-preview-col: #f3f1ea;
+  --flank-ob-surface-schematic: #efebdf;
+  --flank-ob-border: #e1ddd2;
+  --flank-ob-border-dashed: #cfcabb;
+  --flank-ob-text: #1f1e1b;
+  --flank-ob-text-muted: #625e55;
+  --flank-ob-accent: #2F4BFF;
+  --flank-ob-accent-deep: #2339D6;
+  --flank-ob-accent-soft: #e8ecff;
+  --flank-ob-accent-ring: rgba(47, 75, 255, 0.12);
+  --flank-ob-accent-ink: #ffffff;
+  --flank-ob-status-ok: #14804A;
+  --flank-ob-dot-inactive: #d6d2c6;
+  --flank-ob-schematic-bar-inactive: #9a958a;
+  --flank-ob-callout-bg: #1f1e1b;
+  --flank-ob-callout-ink: #fbfaf7;
+  --flank-ob-callout-muted: #c9c5b8;
+  --flank-ob-app-terminal-bg: #1f2937;
+  --flank-ob-swatch-terracotta: #D95D39;
+  --flank-ob-swatch-blue: #2F4BFF;
+  --flank-ob-swatch-violet: #7C5CFF;
+  --flank-ob-swatch-pink: #FF4FA3;
+  --flank-ob-swatch-green: #1FB57A;
+  --flank-ob-wallpaper-light: radial-gradient(260px 200px at 10% 0%, rgb(246, 196, 168), transparent 70%), radial-gradient(300px 240px at 95% 15%, rgb(188, 210, 245), transparent 70%), radial-gradient(320px 260px at 30% 105%, rgb(207, 230, 196), transparent 70%), rgb(241, 237, 227);
+  --flank-ob-wallpaper-vivid: radial-gradient(280px 220px at 15% 10%, rgba(255, 79, 154, 0.85), transparent 72%), radial-gradient(320px 260px at 90% 20%, rgba(122, 92, 255, 0.88), transparent 72%), radial-gradient(320px 260px at 35% 100%, rgba(0, 198, 190, 0.78), transparent 72%), rgb(18, 22, 48);
+  --flank-ob-wallpaper-aurora: radial-gradient(280px 220px at 15% 5%, rgba(219, 39, 119, 0.55), transparent 70%), radial-gradient(300px 240px at 90% 20%, rgba(124, 58, 237, 0.65), transparent 70%), radial-gradient(320px 260px at 30% 100%, rgba(56, 189, 248, 0.35), transparent 70%), rgb(22, 10, 46);
+  --flank-ob-wallpaper-dark: radial-gradient(280px 220px at 15% 5%, rgba(76, 86, 106, 0.55), transparent 70%), radial-gradient(300px 240px at 90% 20%, rgba(94, 129, 172, 0.40), transparent 70%), radial-gradient(320px 260px at 30% 100%, rgba(46, 52, 64, 0.65), transparent 70%), rgb(20, 24, 33);
+  --flank-ob-wallpaper-terminal: radial-gradient(260px 200px at 20% 10%, rgba(36, 74, 46, 0.45), transparent 70%), radial-gradient(300px 240px at 85% 85%, rgba(20, 52, 30, 0.45), transparent 70%), rgb(8, 13, 10);
+  --flank-ob-theme-paper-bg: linear-gradient(135deg, rgb(246, 196, 168), rgb(188, 210, 245));
+  --flank-ob-theme-paper-dock: rgb(251, 250, 247);
+  --flank-ob-theme-paper-border: rgb(225, 221, 210);
+  --flank-ob-theme-liquid-bg: linear-gradient(135deg, rgb(255, 79, 154), rgb(122, 92, 255) 55%, rgb(0, 198, 190));
+  --flank-ob-theme-liquid-dock: rgba(255, 255, 255, 0.4);
+  --flank-ob-theme-liquid-border: rgba(255, 255, 255, 0.7);
+  --flank-ob-theme-aurora-bg: linear-gradient(135deg, rgb(42, 22, 70), rgb(91, 60, 196));
+  --flank-ob-theme-aurora-dock: rgba(26, 18, 64, 0.8);
+  --flank-ob-theme-aurora-border: rgba(190, 160, 255, 0.7);
+  --flank-ob-theme-nord-bg: rgb(59, 66, 82);
+  --flank-ob-theme-nord-dock: rgb(46, 52, 64);
+  --flank-ob-theme-nord-border: rgb(136, 192, 208);
+  --flank-ob-theme-terminal-bg: rgb(10, 16, 10);
+  --flank-ob-theme-terminal-dock: rgb(10, 16, 10);
+  --flank-ob-theme-terminal-border: rgb(140, 255, 140);
+  --flank-ob-theme-rail-bg: rgb(24, 28, 40);
+  --flank-ob-theme-rail-dock: rgb(14, 16, 24);
+  --flank-ob-theme-rail-border: rgb(255, 138, 122);
+  --flank-ob-theme-glass-bg: linear-gradient(135deg, rgb(30, 58, 138), rgb(15, 118, 110));
+  --flank-ob-theme-glass-dock: rgba(255, 255, 255, 0.32);
+  --flank-ob-theme-glass-border: rgba(124, 240, 200, 0.75);
 
   /* ==========================================================================
      6. MOTION TOKENS (Step 1 Foundation)

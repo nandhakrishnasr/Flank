@@ -46,6 +46,15 @@ import {
   renderSettingsWindowHtml,
   type WindowUiState,
 } from './ui/windows.ts';
+import {
+  OnboardingMachine,
+  renderOnboardingFooterHtml,
+  renderOnboardingHtml,
+  renderOnboardingStepBodyHtml,
+  type OnboardingSnapshot,
+  type OnboardingStep,
+} from './ui/onboarding/onboarding.ts';
+import { renderOnboardingPreviewHtml } from './ui/onboarding/preview.ts';
 
 declare global {
   interface Window {
@@ -84,6 +93,8 @@ declare global {
         hide_hover_card?: () => Promise<void>;
         open_window?: (win: string) => Promise<void>;
         close_window?: () => Promise<void>;
+        open_onboarding?: (replay?: boolean) => Promise<void>;
+        complete_onboarding?: (prefsPatch: Record<string, unknown>, skipped?: boolean) => Promise<{ ok: boolean }>;
         set_dock_bounds?: (width: number, height: number, shape: string, windowPadding?: number) => Promise<void>;
         set_card_bounds?: (width: number, height: number, radius?: number, windowPadding?: number) => Promise<void>;
         set_window_interactive?: (
@@ -102,7 +113,9 @@ declare global {
     flankOpenWindow?: (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'settings') => void;
     flankSwitchTheme?: (themeId: string) => void;
     flankShowCard?: (widgetKind: WidgetKind) => void;
-    flankOpenModal?: (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'settings') => void;
+    flankOpenModal?: (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'settings' | 'onboarding') => void;
+    flankStartOnboarding?: (opts?: { replay?: boolean; step?: OnboardingStep }) => void;
+    flankSkipOnboardingFromHost?: () => Record<string, unknown> | null;
     flankUpdateBackdrop?: (backdrop: any) => void;
     flankSetDockState?: (state: string) => void;
     flankGetDockState?: () => string;
@@ -112,13 +125,64 @@ declare global {
 
 const urlParams = new URLSearchParams(window.location.search);
 const hashView = (window.location.hash || '').replace(/^#/, '').replace(/^view=/, '');
-const currentView = (urlParams.get('view') || hashView || 'dock') as 'dock' | 'card' | 'modal' | 'unified';
+let currentView = (urlParams.get('view') || hashView || 'dock') as
+  | 'dock'
+  | 'card'
+  | 'modal'
+  | 'onboarding'
+  | 'unified';
 document.body.setAttribute('data-view', currentView);
 
 const themeEngine = new ThemeEngine();
 const state: FlankState = createSampleState();
 if (currentView === 'modal') {
   state.activeFullWindow = 'settings';
+}
+
+let onboardingMachine: OnboardingMachine | null = null;
+let lastRenderedOnboardingStep: OnboardingStep | null = null;
+
+function createOnboardingMachineFromState(opts?: {
+  replay?: boolean;
+  step?: OnboardingStep;
+}): OnboardingMachine {
+  const replay = Boolean(opts?.replay);
+  const clipItem = state.items.find(
+    (it) => it.id === 'widget-clipboard' || it.widgetKind === 'clipboard'
+  );
+  const queryEdge = urlParams.get('edge') as 'left' | 'right' | null;
+  const queryObTheme = urlParams.get('obTheme');
+  const queryObAccent = urlParams.get('obAccent');
+
+  const machine = new OnboardingMachine({
+    replay,
+    edge: queryEdge || (replay ? (state.edgeOverride === 'left' ? 'left' : 'right') : 'right'),
+    themeId: queryObTheme || (replay ? state.themeId : 'paper'),
+    accent: queryObAccent || (replay ? state.accentOverride || '#2F4BFF' : '#2F4BFF'),
+    items: state.items,
+    autostart: replay ? state.autostart : true,
+    hideHotkey: state.collapseHotkey || 'Ctrl+Alt+F',
+    clipboardHotkey: clipItem?.shortcut || 'Ctrl+Alt+V',
+  });
+
+  if (urlParams.get('expanded') === '1' || urlParams.get('expanded') === 'true') {
+    machine.expandThemes();
+  }
+
+  const targetStep = opts?.step || (Number(urlParams.get('step')) as OnboardingStep);
+  if (targetStep && targetStep >= 1 && targetStep <= 5) {
+    machine.goToStep(targetStep);
+  }
+  return machine;
+}
+
+function ensureOnboardingMachine(): OnboardingMachine {
+  if (!onboardingMachine) {
+    onboardingMachine = createOnboardingMachineFromState({
+      replay: urlParams.get('replay') === '1' || urlParams.get('replay') === 'true',
+    });
+  }
+  return onboardingMachine;
 }
 
 const uiState: WindowUiState = {
@@ -131,7 +195,32 @@ const uiState: WindowUiState = {
   themeValidationMsg: null,
 };
 
-window.flankOpenModal = (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'settings') => {
+window.flankStartOnboarding = (opts?: { replay?: boolean; step?: OnboardingStep }) => {
+  currentView = 'onboarding';
+  document.body.setAttribute('data-view', 'onboarding');
+  themeEngine.revertToPaper();
+  lastRenderedOnboardingStep = null;
+  onboardingMachine = createOnboardingMachineFromState(opts);
+  renderApp();
+};
+
+window.flankSkipOnboardingFromHost = () => {
+  const machine = ensureOnboardingMachine();
+  const res = machine.skip();
+  return res.prefsPatch;
+};
+
+window.flankOpenModal = (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'settings' | 'onboarding') => {
+  if (win === 'onboarding') {
+    window.flankStartOnboarding?.({ replay: false });
+    return;
+  }
+  if (currentView === 'onboarding') {
+    currentView = 'modal';
+    document.body.setAttribute('data-view', 'modal');
+    lastRenderedOnboardingStep = null;
+    applyCurrentThemeSelection();
+  }
   state.activeFullWindow = win;
   renderApp();
 };
@@ -436,6 +525,90 @@ export function renderApp(preserveSearchFocus = false): void {
         );
       }
     });
+  } else if (currentView === 'onboarding') {
+    themeEngine.revertToPaper();
+    const machine = ensureOnboardingMachine();
+    const snap = machine.getSnapshot();
+    const canContinue = machine.canContinue();
+    const existingShell = stage.querySelector<HTMLElement>('.flank-ob-shell');
+    const stepChanged = lastRenderedOnboardingStep !== snap.step;
+
+    if (existingShell && !stepChanged) {
+      const stepBodyEl = existingShell.querySelector<HTMLElement>('#flank-ob-step-body');
+      const footerEl = existingShell.querySelector<HTMLElement>('#flank-ob-footer');
+      if (stepBodyEl) {
+        stepBodyEl.classList.remove('is-anim-next', 'is-anim-back');
+        stepBodyEl.innerHTML = renderOnboardingStepBodyHtml(snap);
+      }
+      if (footerEl) {
+        footerEl.innerHTML = renderOnboardingFooterHtml(snap, canContinue);
+      }
+
+      const newPreviewHtml = renderOnboardingPreviewHtml({
+        step: snap.step,
+        edge: snap.edge,
+        themeId: snap.themeId,
+        accent: snap.accent,
+        selectedWidgets: snap.selectedWidgets,
+        hideHotkey: snap.hideHotkey,
+        liveState: state,
+      });
+      const tmp = document.createElement('div');
+      tmp.innerHTML = newPreviewHtml.trim();
+      const nextDesktop = tmp.querySelector<HTMLElement>('.flank-ob-preview-desktop');
+      const curDesktop = existingShell.querySelector<HTMLElement>('.flank-ob-preview-desktop');
+
+      if (curDesktop && nextDesktop) {
+        for (const attr of [
+          'data-theme',
+          'data-mode',
+          'data-edge',
+          'data-shape',
+          'data-preview-backdrop',
+          'style',
+        ]) {
+          const val = nextDesktop.getAttribute(attr);
+          if (val !== null) curDesktop.setAttribute(attr, val);
+        }
+
+        const curDock = curDesktop.querySelector<HTMLElement>('.flank-ob-mock-dock');
+        const nextDock = nextDesktop.querySelector<HTMLElement>('.flank-ob-mock-dock');
+        if (curDock && nextDock) {
+          curDock.setAttribute('style', nextDock.getAttribute('style') || '');
+          curDock.innerHTML = nextDock.innerHTML;
+        }
+
+        for (const sel of [
+          '.flank-ob-faux-window',
+          '.flank-ob-ghost-dock',
+          '.flank-ob-edge-pill',
+          '.flank-ob-mock-card',
+          '.flank-ob-callout',
+          '.flank-ob-mock-tab',
+        ]) {
+          const curNode = curDesktop.querySelector<HTMLElement>(sel);
+          const nextNode = nextDesktop.querySelector<HTMLElement>(sel);
+          if (curNode && nextNode) {
+            curNode.setAttribute('style', nextNode.getAttribute('style') || '');
+            curNode.innerHTML = nextNode.innerHTML;
+          }
+        }
+      } else {
+        const curRight = existingShell.querySelector<HTMLElement>('.flank-ob-right');
+        const nextRight = tmp.querySelector<HTMLElement>('.flank-ob-right');
+        if (curRight && nextRight) {
+          curRight.replaceWith(nextRight);
+        }
+      }
+    } else {
+      stage.innerHTML = renderOnboardingHtml(machine, state);
+      lastRenderedOnboardingStep = snap.step;
+      const headingEl = document.getElementById('flank-ob-step-heading');
+      headingEl?.focus();
+      requestAnimationFrame(() => {
+        document.getElementById('flank-ob-step-heading')?.focus();
+      });
+    }
   } else if (currentView === 'modal') {
     let windowHtml = '';
     if (state.activeFullWindow === 'clipboard') {
@@ -544,6 +717,10 @@ function saveUserPrefs(): void {
 }
 
 function applyCurrentThemeSelection(): void {
+  if (currentView === 'onboarding') {
+    themeEngine.revertToPaper();
+    return;
+  }
   const res = themeEngine.switchTheme(state.themeId, {
     edge: state.edgeOverride ?? undefined,
     accent: state.accentOverride ?? undefined,
@@ -552,6 +729,36 @@ function applyCurrentThemeSelection(): void {
     uiState.themeValidationMsg = `Theme fell back to Paper: ${res.errors.join(' ')}`;
   } else {
     uiState.themeValidationMsg = null;
+  }
+}
+
+async function completeOnboardingFlow(
+  result: { prefsPatch: Record<string, unknown>; snapshot: OnboardingSnapshot },
+  skipped: boolean
+): Promise<void> {
+  const patch = result.prefsPatch;
+  if (typeof patch.themeId === 'string') {
+    state.themeId = patch.themeId;
+  }
+  if (patch.edgeOverride === 'left' || patch.edgeOverride === 'right') {
+    state.edgeOverride = patch.edgeOverride;
+  }
+  if (typeof patch.accentOverride === 'string') {
+    state.accentOverride = patch.accentOverride;
+  }
+  if (typeof patch.autostart === 'boolean') {
+    state.autostart = patch.autostart;
+  }
+  if (Array.isArray(patch.items)) {
+    state.items = normalizeDockItems(patch.items as DockItem[]);
+  }
+  setDockState('expanded');
+
+  if (window.pywebview?.api?.complete_onboarding) {
+    await window.pywebview.api.complete_onboarding(patch, skipped);
+  } else {
+    await window.pywebview?.api?.save_preferences?.(patch);
+    await window.pywebview?.api?.close_window?.();
   }
 }
 
@@ -815,11 +1022,11 @@ function setupEventDelegation(): void {
       return;
     }
 
-    if (currentView === 'modal') {
-      const titlebar = target.closest<HTMLElement>('.flank-titlebar');
+    if (currentView === 'modal' || currentView === 'onboarding') {
+      const titlebar = target.closest<HTMLElement>('.flank-titlebar, .flank-ob-topbar');
       if (
         titlebar &&
-        !target.closest('button, input, a, select, textarea, [data-action]') &&
+        !target.closest('button, input, a, select, textarea, [data-action], [data-ob-action]') &&
         flankMachines.pointerInteraction.canStartWindowDrag()
       ) {
         flankMachines.pointerInteraction.send({ type: 'START_WINDOW_DRAG' });
@@ -843,6 +1050,92 @@ function setupEventDelegation(): void {
   stage.addEventListener('click', async (ev) => {
     const target = ev.target as HTMLElement | null;
     if (!target) return;
+
+    if (currentView === 'onboarding') {
+      const machine = ensureOnboardingMachine();
+      const obBtn = target.closest<HTMLElement>(
+        '[data-ob-action], [data-ob-edge], [data-ob-theme], [data-ob-accent], [data-ob-widget], [data-ob-widget-row]'
+      );
+      if (obBtn) {
+        const obAction = obBtn.getAttribute('data-ob-action');
+        if (obAction === 'next') {
+          machine.next();
+          renderApp();
+          return;
+        }
+        if (obAction === 'back') {
+          machine.back();
+          renderApp();
+          return;
+        }
+        if (obAction === 'skip') {
+          const res = machine.skip();
+          await completeOnboardingFlow(res, true);
+          return;
+        }
+        if (obAction === 'finish') {
+          const res = machine.finish();
+          await completeOnboardingFlow(res, false);
+          return;
+        }
+        if (obAction === 'expand-themes') {
+          machine.expandThemes();
+          renderApp();
+          return;
+        }
+        if (obAction === 'toggle-custom-accent') {
+          machine.toggleCustomColorPopover();
+          renderApp();
+          return;
+        }
+        if (obAction === 'apply-custom-accent') {
+          const hexInput = document.getElementById('flank-ob-color-hex') as HTMLInputElement | null;
+          if (hexInput?.value) {
+            machine.setAccent(hexInput.value);
+          }
+          machine.toggleCustomColorPopover(false);
+          renderApp();
+          return;
+        }
+        if (obAction === 'toggle-autostart') {
+          const snap = machine.getSnapshot();
+          machine.setAutostart(!snap.autostart);
+          renderApp();
+          return;
+        }
+
+        const obEdge = obBtn.getAttribute('data-ob-edge') as 'left' | 'right' | null;
+        if (obEdge) {
+          machine.setEdge(obEdge);
+          renderApp();
+          return;
+        }
+
+        const obTheme = obBtn.getAttribute('data-ob-theme');
+        if (obTheme) {
+          machine.setTheme(obTheme);
+          renderApp();
+          return;
+        }
+
+        const obAccent = obBtn.getAttribute('data-ob-accent');
+        if (obAccent) {
+          machine.setAccent(obAccent);
+          machine.toggleCustomColorPopover(false);
+          renderApp();
+          return;
+        }
+
+        const obWidget = (obBtn.getAttribute('data-ob-widget') ||
+          obBtn.getAttribute('data-ob-widget-row')) as WidgetKind | null;
+        if (obWidget) {
+          machine.toggleWidget(obWidget);
+          renderApp();
+          return;
+        }
+      }
+      return;
+    }
 
     const expandBtn = target.closest<HTMLElement>('[data-action="expand-dock"], .flank-dock-tab');
     if (expandBtn) {
@@ -958,6 +1251,14 @@ function setupEventDelegation(): void {
       applyCurrentThemeSelection();
       saveUserPrefs();
       renderApp();
+      return;
+    }
+    if (action === 'replay-onboarding') {
+      if (window.pywebview?.api?.open_onboarding) {
+        await window.pywebview.api.open_onboarding(true);
+        return;
+      }
+      window.flankStartOnboarding?.({ replay: true });
       return;
     }
     if (action === 'toggle-auto-collapse') {
@@ -1777,6 +2078,25 @@ function setupEventDelegation(): void {
           renderApp(true);
         }, 350);
       }
+    } else if (target.id === 'flank-ob-color-native') {
+      const hex = target.value.toUpperCase();
+      const hexInput = document.getElementById('flank-ob-color-hex') as HTMLInputElement | null;
+      if (hexInput) hexInput.value = hex;
+      if (currentView === 'onboarding') {
+        const machine = ensureOnboardingMachine();
+        machine.setAccent(hex);
+        renderApp(true);
+      }
+    } else if (target.id === 'flank-ob-color-hex') {
+      let hex = target.value.trim();
+      if (!hex.startsWith('#')) hex = `#${hex}`;
+      if (/^#[0-9A-Fa-f]{6}$/.test(hex) && currentView === 'onboarding') {
+        const nativePicker = document.getElementById('flank-ob-color-native') as HTMLInputElement | null;
+        if (nativePicker) nativePicker.value = hex;
+        const machine = ensureOnboardingMachine();
+        machine.setAccent(hex);
+        renderApp(true);
+      }
     } else if (target.id === 'flank-native-color-input') {
       const hex = target.value.toUpperCase();
       state.colorpicker.currentHex = hex;
@@ -1791,6 +2111,99 @@ function setupEventDelegation(): void {
 
   // Keyboard navigation (Escape, ArrowUp/Down/Enter/Delete in Clipboard, Shortcut recording)
   window.addEventListener('keydown', async (ev) => {
+    if (currentView === 'onboarding') {
+      const machine = ensureOnboardingMachine();
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        const res = machine.handleEscape();
+        if (res.closedPopover) {
+          renderApp();
+        }
+        return;
+      }
+
+      if (ev.altKey && ev.key === 'ArrowLeft') {
+        ev.preventDefault();
+        machine.back();
+        renderApp();
+        return;
+      }
+
+      const activeEl = document.activeElement as HTMLElement | null;
+      const radioGroup = activeEl?.closest<HTMLElement>('[role="radiogroup"]');
+      if (
+        radioGroup &&
+        (ev.key === 'ArrowRight' || ev.key === 'ArrowDown' || ev.key === 'ArrowLeft' || ev.key === 'ArrowUp')
+      ) {
+        const radios = Array.from(radioGroup.querySelectorAll<HTMLElement>('[role="radio"]'));
+        if (radios.length > 0) {
+          ev.preventDefault();
+          const curIdx = Math.max(
+            0,
+            radios.findIndex((r) => r === activeEl || r.contains(activeEl))
+          );
+          const delta = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : -1;
+          const nextIdx = (curIdx + delta + radios.length) % radios.length;
+          const nextRadio = radios[nextIdx];
+          if (nextRadio) {
+            const obEdge = nextRadio.getAttribute('data-ob-edge') as 'left' | 'right' | null;
+            const obTheme = nextRadio.getAttribute('data-ob-theme');
+            const obAccent = nextRadio.getAttribute('data-ob-accent');
+            let selectorToFocus = '';
+            if (obEdge) {
+              machine.setEdge(obEdge);
+              selectorToFocus = `[data-ob-edge="${obEdge}"]`;
+            } else if (obTheme) {
+              machine.setTheme(obTheme);
+              selectorToFocus = `[data-ob-theme="${obTheme}"]`;
+            } else if (obAccent) {
+              machine.setAccent(obAccent);
+              machine.toggleCustomColorPopover(false);
+              selectorToFocus = `[data-ob-accent="${obAccent}"]`;
+            }
+            renderApp();
+            if (selectorToFocus) {
+              const updatedRadio = document.querySelector<HTMLElement>(selectorToFocus);
+              updatedRadio?.focus();
+            }
+          }
+          return;
+        }
+      }
+
+      if (ev.key === 'Enter' && !ev.ctrlKey && !ev.altKey && !ev.metaKey) {
+        if (activeEl?.id === 'flank-ob-color-hex') {
+          ev.preventDefault();
+          const hexVal = (activeEl as HTMLInputElement).value;
+          if (hexVal) machine.setAccent(hexVal);
+          machine.toggleCustomColorPopover(false);
+          renderApp();
+          return;
+        }
+        const activeAction = activeEl?.getAttribute('data-ob-action');
+        if (
+          activeAction === 'back' ||
+          activeAction === 'skip' ||
+          activeAction === 'expand-themes' ||
+          activeAction === 'toggle-custom-accent' ||
+          activeAction === 'apply-custom-accent'
+        ) {
+          return;
+        }
+        ev.preventDefault();
+        const snap = machine.getSnapshot();
+        if (snap.step === 5) {
+          const res = machine.finish();
+          await completeOnboardingFlow(res, false);
+        } else if (machine.canContinue()) {
+          machine.next();
+          renderApp();
+        }
+        return;
+      }
+      return;
+    }
+
     if (ev.ctrlKey && ev.altKey && (ev.code === 'KeyF' || ev.key.toLowerCase() === 'f')) {
       ev.preventDefault();
       toggleDockCollapse();
@@ -2096,6 +2509,10 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
     state.topProcesses = patch.topProcesses;
   }
   state.dataSource = 'live';
+
+  if (currentView === 'onboarding') {
+    return;
+  }
 
   // If currently viewing settings in the modal, only re-render when preferences or clock cities changed
   if (currentView === 'modal' && state.activeFullWindow === 'settings' && !prefsChanged && !patch.clock && !patch.weather) {

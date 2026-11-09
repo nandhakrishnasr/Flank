@@ -10,6 +10,14 @@
 
 ## Flank in Action on Windows 11
 
+<p align="center">
+  <a href="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/showcase/flank-promo.mp4" title="Watch Full 1080p60 Launch Film with Audio (MP4)">
+    <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/showcase/flank-promo.gif" alt="Flank — 35s Launch Film" width="840" />
+  </a>
+  <br/>
+  <sub>🎬 <a href="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/showcase/flank-promo.mp4"><strong>Watch the full 1080p60 launch film with audio (MP4)</strong></a></sub>
+</p>
+
 ### 1. Desktop & Live Flyouts
 
 | Liquid Glass / Aurora Weather Flyout | Glass Theme Settings & Weather Card |

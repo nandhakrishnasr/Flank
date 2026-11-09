@@ -32,9 +32,14 @@ def get_defined_vars():
         "--flank-glass-display",
     ])
 
-    # 1. Parse public/*.css
+    # 1. Parse public/*.css, themes/*.css, and src/**/*.css
     var_def_pattern = re.compile(r'(--flank-[a-zA-Z0-9_-]+)\s*:\s*([^;]+);')
-    for css_file in glob.glob(os.path.join(PUBLIC_DIR, "*.css")):
+    css_sources = list(glob.glob(os.path.join(PUBLIC_DIR, "*.css"))) + list(glob.glob(os.path.join(THEMES_DIR, "*.css")))
+    for root, _, files in os.walk(SRC_DIR):
+        for f in files:
+            if f.endswith(".css"):
+                css_sources.append(os.path.join(root, f))
+    for css_file in css_sources:
         with open(css_file, "r", encoding="utf-8") as f:
             content = f.read()
             for match in var_def_pattern.finditer(content):
@@ -78,9 +83,10 @@ def get_used_vars():
     files_to_check = []
     for ext in ("*.css",):
         files_to_check.extend(glob.glob(os.path.join(PUBLIC_DIR, ext)))
+        files_to_check.extend(glob.glob(os.path.join(THEMES_DIR, ext)))
     for root, _, files in os.walk(SRC_DIR):
         for f in files:
-            if f.endswith((".ts", ".tsx", ".js", ".mjs")):
+            if f.endswith((".ts", ".tsx", ".js", ".mjs", ".css")):
                 files_to_check.append(os.path.join(root, f))
 
     for fpath in files_to_check:

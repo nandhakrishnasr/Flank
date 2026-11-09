@@ -4904,6 +4904,11 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       description: "Prevents maximized windows from overlapping the dock.",
       controlHtml: Switch({ checked: Boolean(state2.reserveScreenSpace), actionAttr: 'data-toggle-appbar="1"' })
     })}
+        ${Row({
+      label: "Start Flank when Windows starts",
+      description: "Launches Flank automatically when you sign in to Windows.",
+      controlHtml: Switch({ checked: Boolean(state2.autostart), actionAttr: 'data-action="toggle-autostart"' })
+    })}
       </div>
     `;
   } else if (ui.settingsTab === "items") {
@@ -5099,7 +5104,10 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
             ${Button({ label: "GitHub Issues", variant: "ghost", actionAttr: 'data-action="open-link-issues"' })}
             ${Button({ label: "MIT License", variant: "ghost", actionAttr: 'data-action="open-link-license"' })}
           </div>
-          ${Button({ label: "Check for updates", variant: "secondary", actionAttr: 'data-action="check-updates"', style: "margin-top: 6px;" })}
+          <div style="display:flex; gap: 10px; margin-top: 6px;">
+            ${Button({ label: "Check for updates", variant: "secondary", actionAttr: 'data-action="check-updates"' })}
+            ${Button({ label: "Replay setup", variant: "secondary", actionAttr: 'data-action="replay-onboarding"' })}
+          </div>
         </div>
 
         ${Card({
@@ -5139,6 +5147,822 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
   </div>`;
 }
 
+// src/ui/onboarding/steps/welcome.ts
+function renderWelcomeStepHtml() {
+  const checkIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--flank-ob-status-ok)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>`;
+  return `
+    <div class="flank-ob-header flank-ob-header--welcome">
+      <span class="flank-ob-eyebrow">Welcome</span>
+      <h1 class="flank-ob-h1 flank-ob-h1--welcome" tabindex="-1" id="flank-ob-step-heading">A second dock, <span class="flank-ob-h1-accent">made for Windows.</span></h1>
+      <p class="flank-ob-lead flank-ob-lead--welcome">Keep your apps, shortcuts and live widgets on the edge of your screen. Setup takes under a minute.</p>
+    </div>
+    <ul class="flank-ob-checks">
+      <li class="flank-ob-check-row">${checkIcon}<span>Free and open source</span></li>
+      <li class="flank-ob-check-row">${checkIcon}<span>Everything stays on your PC</span></li>
+      <li class="flank-ob-check-row">${checkIcon}<span>Never steals focus from your apps</span></li>
+    </ul>
+  `;
+}
+
+// src/ui/onboarding/steps/edge.ts
+function renderEdgeStepHtml(edge) {
+  const isLeft = edge === "left";
+  const isRight = edge === "right";
+  return `
+    <div class="flank-ob-header flank-ob-header--edge">
+      <span class="flank-ob-eyebrow">Step 2 of 5 \xB7 Screen edge</span>
+      <h1 class="flank-ob-h1" tabindex="-1" id="flank-ob-step-heading">Where should Flank live?</h1>
+      <p class="flank-ob-lead">Pick the edge that stays out of your way. You can switch any time in Settings.</p>
+    </div>
+    <div class="flank-ob-edge-grid" role="radiogroup" aria-label="Screen edge" data-ob-radiogroup="edge">
+      <button type="button" class="flank-ob-edge-card" role="radio" aria-checked="${isLeft ? "true" : "false"}" tabindex="${isLeft ? "0" : "-1"}" data-ob-edge="left">
+        <span class="flank-ob-edge-schematic">
+          <i class="flank-ob-edge-bar flank-ob-edge-bar--left"></i>
+        </span>
+        <span class="flank-ob-edge-label-row">Left edge</span>
+      </button>
+      <button type="button" class="flank-ob-edge-card" role="radio" aria-checked="${isRight ? "true" : "false"}" tabindex="${isRight ? "0" : "-1"}" data-ob-edge="right">
+        <span class="flank-ob-edge-schematic">
+          <i class="flank-ob-edge-bar flank-ob-edge-bar--right"></i>
+        </span>
+        <span class="flank-ob-edge-label-row">
+          <span>Right edge</span>
+          <span class="flank-ob-suggested-pill">Suggested</span>
+        </span>
+      </button>
+    </div>
+    <p class="flank-ob-edge-note">Flank sits inside the work area, so it never covers the taskbar or maximised windows.</p>
+  `;
+}
+
+// src/ui/onboarding/steps/look.ts
+var PRIMARY_THEME_TILES = [
+  { id: "paper", label: "Paper", swatchClass: "flank-ob-theme-swatch--paper" },
+  { id: "liquid-glass", label: "Liquid Glass", swatchClass: "flank-ob-theme-swatch--liquid-glass" },
+  { id: "aurora", label: "Aurora", swatchClass: "flank-ob-theme-swatch--aurora" },
+  { id: "nord", label: "Nord", swatchClass: "flank-ob-theme-swatch--nord" },
+  { id: "terminal", label: "Terminal", swatchClass: "flank-ob-theme-swatch--terminal" }
+];
+var EXTRA_THEME_TILES = [
+  { id: "rail", label: "Rail", swatchClass: "flank-ob-theme-swatch--rail" },
+  { id: "glass", label: "Glass", swatchClass: "flank-ob-theme-swatch--glass" }
+];
+var ONBOARDING_ACCENT_SWATCHES = [
+  { id: "terracotta", label: "Terracotta", hex: "#D95D39", swatchClass: "flank-ob-swatch--terracotta" },
+  { id: "blue", label: "Blue", hex: "#2F4BFF", swatchClass: "flank-ob-swatch--blue" },
+  { id: "violet", label: "Violet", hex: "#7C5CFF", swatchClass: "flank-ob-swatch--violet" },
+  { id: "pink", label: "Pink", hex: "#FF4FA3", swatchClass: "flank-ob-swatch--pink" },
+  { id: "green", label: "Green", hex: "#1FB57A", swatchClass: "flank-ob-swatch--green" }
+];
+function renderLookStepHtml(props) {
+  const visibleThemes = props.themesExpanded ? [...PRIMARY_THEME_TILES, ...EXTRA_THEME_TILES] : PRIMARY_THEME_TILES;
+  const activeThemeId = visibleThemes.some((t) => t.id === props.themeId) ? props.themeId : "paper";
+  const themeTilesHtml = visibleThemes.map((t) => {
+    const checked = t.id === activeThemeId;
+    return `
+        <button type="button" class="flank-ob-theme-tile" role="radio" aria-checked="${checked ? "true" : "false"}" tabindex="${checked ? "0" : "-1"}" data-ob-theme="${escapeHtml4(t.id)}">
+          <span class="flank-ob-theme-swatch ${t.swatchClass}">
+            <i class="flank-ob-theme-swatch-dock"></i>
+          </span>
+          <span class="flank-ob-theme-name">${escapeHtml4(t.label)}</span>
+        </button>
+      `;
+  }).join("");
+  const moreBtnHtml = props.themesExpanded ? "" : `<button type="button" class="flank-ob-theme-more" data-ob-action="expand-themes">+ 2 more</button>`;
+  const normalizedAccent = (props.accent || "").toUpperCase();
+  const matchedPreset = ONBOARDING_ACCENT_SWATCHES.find((s) => s.hex.toUpperCase() === normalizedAccent);
+  const isCustomActive = !matchedPreset && Boolean(props.accent);
+  const swatchesHtml = ONBOARDING_ACCENT_SWATCHES.map((s, idx) => {
+    const checked = matchedPreset ? matchedPreset.id === s.id : false;
+    const roveZero = checked || !matchedPreset && !isCustomActive && idx === 1;
+    return `<button type="button" class="flank-ob-swatch ${s.swatchClass}" role="radio" aria-checked="${checked ? "true" : "false"}" tabindex="${roveZero ? "0" : "-1"}" aria-label="${escapeHtml4(s.label)}" data-ob-accent="${escapeHtml4(s.hex)}"></button>`;
+  }).join("");
+  const popoverHtml = props.customColorPopoverOpen ? `
+      <div class="flank-ob-color-popover" role="dialog" aria-label="Custom accent colour" id="flank-ob-color-popover">
+        <div class="flank-ob-color-popover-row">
+          <input type="color" id="flank-ob-color-native" value="${escapeHtml4(props.accent)}" aria-label="Colour picker" style="width: 30px; height: 30px; padding: 0; border: 0; background: none; cursor: pointer;" />
+          <input type="text" id="flank-ob-color-hex" class="flank-ob-color-input" value="${escapeHtml4(props.accent)}" maxlength="7" aria-label="Hex colour code" />
+          <button type="button" class="flank-ob-color-apply" data-ob-action="apply-custom-accent">Apply</button>
+        </div>
+      </div>
+    ` : "";
+  return `
+    <div class="flank-ob-header">
+      <span class="flank-ob-eyebrow">Step 3 of 5 \xB7 Look</span>
+      <h1 class="flank-ob-h1" tabindex="-1" id="flank-ob-step-heading">Choose a look.</h1>
+      <p class="flank-ob-lead">Start with a theme. More are in Settings.</p>
+    </div>
+    <div class="flank-ob-theme-grid${props.themesExpanded ? " is-expanded" : ""}" role="radiogroup" aria-label="Theme" data-ob-radiogroup="theme">
+      ${themeTilesHtml}
+      ${moreBtnHtml}
+    </div>
+    <div class="flank-ob-accent-section">
+      <div class="flank-ob-accent-label">Accent colour</div>
+      <div class="flank-ob-accent-row" role="radiogroup" aria-label="Accent colour" data-ob-radiogroup="accent">
+        ${swatchesHtml}
+        <button type="button" class="flank-ob-swatch-custom${isCustomActive ? " is-active" : ""}" aria-label="Pick a custom colour" aria-expanded="${props.customColorPopoverOpen ? "true" : "false"}" data-ob-action="toggle-custom-accent" ${isCustomActive ? `style="background: ${escapeHtml4(props.accent)};"` : ""}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${isCustomActive ? "var(--flank-ob-accent-ink)" : "var(--flank-ob-text-muted)"}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </div>
+      ${popoverHtml}
+    </div>
+  `;
+}
+
+// src/ui/onboarding/steps/widgets.ts
+var ONBOARDING_WIDGET_OPTIONS = [
+  {
+    kind: "weather",
+    itemId: "widget-weather",
+    label: "Weather",
+    defaultOn: true,
+    svgPaths: `<path d="M7 18a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 8.6 4.7 4.7 0 0 1 17 18z"></path>`
+  },
+  {
+    kind: "battery",
+    itemId: "widget-battery",
+    label: "Battery",
+    defaultOn: true,
+    svgPaths: `<rect x="2" y="7" width="17" height="10" rx="2.5"></rect><path d="M22 11v2"></path>`
+  },
+  {
+    kind: "audio",
+    itemId: "widget-audio",
+    label: "Audio",
+    defaultOn: true,
+    svgPaths: `<path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path>`
+  },
+  {
+    kind: "focus",
+    itemId: "widget-focus",
+    label: "Focus timer",
+    defaultOn: true,
+    svgPaths: `<circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle>`
+  },
+  {
+    kind: "clock",
+    itemId: "widget-clock",
+    label: "World clock",
+    defaultOn: true,
+    svgPaths: `<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>`
+  },
+  {
+    kind: "clipboard",
+    itemId: "widget-clipboard",
+    label: "Clipboard",
+    defaultOn: true,
+    svgPaths: `<rect x="6" y="4" width="12" height="17" rx="2.5"></rect><path d="M9 4h6v3H9z"></path>`
+  },
+  {
+    kind: "calendar",
+    itemId: "widget-calendar",
+    label: "Agenda",
+    defaultOn: false,
+    svgPaths: `<rect x="4" y="5" width="16" height="15" rx="2.5"></rect><path d="M4 10h16M9 3v4M15 3v4"></path>`
+  },
+  {
+    kind: "stats",
+    itemId: "widget-stats",
+    label: "System stats",
+    defaultOn: false,
+    svgPaths: `<rect x="6" y="6" width="12" height="12" rx="2.5"></rect><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path>`
+  }
+];
+function renderWidgetsStepHtml(props) {
+  const selectedSet = new Set(props.selectedWidgets);
+  const count = props.selectedWidgets.length;
+  const rowsHtml = ONBOARDING_WIDGET_OPTIONS.map((w) => {
+    const isOn = selectedSet.has(w.kind);
+    return `
+      <div class="flank-ob-widget-row${isOn ? " is-on" : ""}" data-ob-widget-row="${escapeHtml4(w.kind)}">
+        <svg class="flank-ob-widget-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${w.svgPaths}</svg>
+        <span class="flank-ob-widget-name">${escapeHtml4(w.label)}</span>
+        <button type="button" class="flank-ob-switch" role="switch" aria-checked="${isOn ? "true" : "false"}" aria-label="${escapeHtml4(w.label)}" data-ob-widget="${escapeHtml4(w.kind)}">
+          <i class="flank-ob-switch-thumb"></i>
+        </button>
+      </div>
+    `;
+  }).join("");
+  let counterText = `${count} of ${ONBOARDING_WIDGET_OPTIONS.length} selected. The dock holds up to 12 items.`;
+  let isWarn = false;
+  if (count === 0) {
+    counterText = "Turn on at least one widget";
+    isWarn = true;
+  } else if (props.capReachedWarning) {
+    counterText = `${count} of ${ONBOARDING_WIDGET_OPTIONS.length} selected. The dock holds up to 12 items (limit reached).`;
+    isWarn = true;
+  }
+  return `
+    <div class="flank-ob-header">
+      <span class="flank-ob-eyebrow">Step 4 of 5 \xB7 Widgets</span>
+      <h1 class="flank-ob-h1" tabindex="-1" id="flank-ob-step-heading">Pick your widgets.</h1>
+      <p class="flank-ob-lead">Each one shows a live value on the dock and opens a card on hover.</p>
+    </div>
+    <div class="flank-ob-widgets-grid">
+      ${rowsHtml}
+    </div>
+    <p class="flank-ob-widgets-counter${isWarn ? " is-warn" : ""}" id="flank-ob-widgets-counter">${escapeHtml4(counterText)}</p>
+  `;
+}
+
+// src/ui/onboarding/steps/ready.ts
+function renderHotkeyKeycapsHtml(combo) {
+  const parts = (combo || "").split("+").map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0) return "";
+  return `<span class="flank-ob-kbd-group">${parts.map((part) => `<kbd class="flank-ob-kbd">${escapeHtml4(part)}</kbd>`).join("")}</span>`;
+}
+function renderReadyStepHtml(props) {
+  const hideKbd = renderHotkeyKeycapsHtml(props.hideHotkey || "Ctrl+Alt+F");
+  const clipKbd = renderHotkeyKeycapsHtml(props.clipboardHotkey || "Ctrl+Alt+V");
+  return `
+    <div class="flank-ob-header">
+      <span class="flank-ob-eyebrow flank-ob-eyebrow--done">Step 5 of 5 \xB7 Done</span>
+      <h1 class="flank-ob-h1" tabindex="-1" id="flank-ob-step-heading">You're all set.</h1>
+      <p class="flank-ob-lead">Three things worth knowing before you start.</p>
+    </div>
+    <ul class="flank-ob-info-list">
+      <li class="flank-ob-info-item">
+        <span class="flank-ob-info-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg>
+        </span>
+        <span class="flank-ob-info-text">
+          <b class="flank-ob-info-title">Hide it with one click</b>
+          <span class="flank-ob-info-sub">Use the arrow, or press the hotkey</span>
+        </span>
+        ${hideKbd}
+      </li>
+      <li class="flank-ob-info-item">
+        <span class="flank-ob-info-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2.5"></rect><path d="M9 4h6v3H9z"></path></svg>
+        </span>
+        <span class="flank-ob-info-text">
+          <b class="flank-ob-info-title">Open clipboard history</b>
+          <span class="flank-ob-info-sub">From any app, any time</span>
+        </span>
+        ${clipKbd}
+      </li>
+      <li class="flank-ob-info-item">
+        <span class="flank-ob-info-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"></path></svg>
+        </span>
+        <span class="flank-ob-info-text">
+          <b class="flank-ob-info-title">Change anything later</b>
+          <span class="flank-ob-info-sub">Use the gear at the bottom of the dock</span>
+        </span>
+      </li>
+    </ul>
+    <div class="flank-ob-autostart-row" data-ob-action="toggle-autostart">
+      <button type="button" class="flank-ob-switch flank-ob-switch--lg" role="switch" aria-checked="${props.autostart ? "true" : "false"}" aria-label="Start Flank when Windows starts" data-ob-action="toggle-autostart">
+        <i class="flank-ob-switch-thumb"></i>
+      </button>
+      <span>Start Flank when Windows starts</span>
+    </div>
+  `;
+}
+
+// src/ui/onboarding/preview.ts
+function buildScopedThemeVars(themeId, edge, accent) {
+  const normalizedId = (themeId || "paper").replace(/_/g, "-");
+  const rawBase = BUNDLED_THEMES[normalizedId] || BUNDLED_THEMES.paper || PAPER_THEME;
+  const candidate = structuredClone(rawBase);
+  candidate.layout.edge = edge;
+  if (accent) {
+    const derived = deriveAccentTokens(accent);
+    if (derived) {
+      candidate.color.accent = derived.accent;
+      candidate.color.accentGradient = derived.accentGradient;
+      candidate.color.accentInk = derived.accentInk;
+      candidate.color.accentSoft = derived.accentSoft;
+      candidate.color.accentLine = derived.accentLine;
+      candidate.color.focusRing = derived.focusRing;
+    }
+  }
+  const vars = flattenThemeToCssVars(candidate);
+  const styleParts = Object.entries(vars).map(([k, v]) => `${k}: ${v}`);
+  let backdropKind = "light";
+  if (normalizedId === "liquid-glass" || normalizedId === "glass") {
+    backdropKind = "vivid";
+  } else if (normalizedId === "aurora") {
+    backdropKind = "aurora";
+  } else if (normalizedId === "terminal") {
+    backdropKind = "terminal";
+  } else if (normalizedId === "nord" || normalizedId === "rail") {
+    backdropKind = "dark";
+  }
+  return {
+    theme: candidate,
+    styleAttr: styleParts.join("; "),
+    backdropKind
+  };
+}
+function getWidgetMockValue(kind, _liveState) {
+  switch (kind) {
+    case "weather":
+      return "24\xB0";
+    case "battery":
+      return "80%";
+    case "audio":
+      return "68%";
+    case "focus":
+      return "25m";
+    case "clock":
+      return "17:20";
+    case "clipboard":
+      return "8";
+    case "calendar":
+      return "14:00";
+    case "stats":
+      return "18%";
+    default:
+      return "\u2014";
+  }
+}
+function renderOnboardingPreviewHtml(props) {
+  const { theme, styleAttr, backdropKind } = buildScopedThemeVars(
+    props.themeId,
+    props.edge,
+    props.accent
+  );
+  const isRight = props.edge === "right";
+  let fauxLeft = 22;
+  let fauxTop = 26;
+  let fauxWidth = 230;
+  let fauxHeight = 250;
+  let lineCount = 3;
+  if (props.step === 2) {
+    fauxLeft = 84;
+    fauxTop = 50;
+    fauxWidth = 240;
+    fauxHeight = 300;
+    lineCount = 3;
+  } else if (props.step === 3) {
+    fauxLeft = isRight ? 22 : 124;
+    fauxTop = 26;
+    fauxWidth = 230;
+    fauxHeight = 220;
+    lineCount = 2;
+  } else if (props.step === 4) {
+    fauxLeft = isRight ? 22 : 124;
+    fauxTop = 26;
+    fauxWidth = 230;
+    fauxHeight = 250;
+    lineCount = 2;
+  } else if (props.step === 5) {
+    fauxLeft = isRight ? 22 : 104;
+    fauxTop = 26;
+    fauxWidth = 260;
+    fauxHeight = 290;
+    lineCount = 4;
+  }
+  const lineWidths = ["92%", "80%", "86%", "70%"];
+  const skeletonLinesHtml = lineWidths.slice(0, lineCount).map((w) => `<i class="flank-ob-faux-line" style="width: ${w};"></i>`).join("");
+  const fauxWindowHtml = `
+    <div class="flank-ob-faux-window" style="left: ${fauxLeft}px; top: ${fauxTop}px; width: ${fauxWidth}px; height: ${fauxHeight}px;">
+      <div class="flank-ob-faux-dots">
+        <i class="flank-ob-faux-dot"></i>
+        <i class="flank-ob-faux-dot"></i>
+        <i class="flank-ob-faux-dot"></i>
+      </div>
+      <i class="flank-ob-faux-line flank-ob-faux-line--title"></i>
+      ${skeletonLinesHtml}
+    </div>
+  `;
+  if (props.step === 5) {
+    const formattedHotkey = (props.hideHotkey || "Ctrl+Alt+F").split("+").map((s) => s.trim()).filter(Boolean).join(" ");
+    const tabStyle = isRight ? "right: 0px; border-radius: 12px 0 0 12px; border-right: 0;" : "left: 0px; border-radius: 0 12px 12px 0; border-left: 0;";
+    const tabChevronPath = isRight ? "m15 5-7 7 7 7" : "m9 5 7 7-7 7";
+    const calloutPosStyle = isRight ? "right: 34px;" : "left: 34px;";
+    return `
+      <div class="flank-ob-right" aria-hidden="true">
+        <div class="flank-ob-preview-desktop" data-theme="${escapeHtml4(theme.id)}" data-mode="${escapeHtml4(theme.mode)}" data-edge="${escapeHtml4(props.edge)}" data-shape="${escapeHtml4(theme.layout.shape)}" data-preview-backdrop="${escapeHtml4(backdropKind)}" style="${escapeHtml4(styleAttr)}">
+          ${fauxWindowHtml}
+          <div class="flank-ob-callout" style="${calloutPosStyle}">
+            Click the tab to bring Flank back.<br />
+            <span class="flank-ob-callout-sub">Or press ${escapeHtml4(formattedHotkey)}.</span>
+          </div>
+          <div class="flank-ob-mock-tab" style="${tabStyle}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${tabChevronPath}"></path></svg>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  const previewWidgetKinds = props.step === 4 ? props.selectedWidgets : ["weather", "battery", "audio", "focus"];
+  const activeCardKind = props.step === 1 ? "weather" : props.step === 3 ? "focus" : null;
+  const isCompactDock = previewWidgetKinds.length > 6;
+  const tileHeight = isCompactDock ? 36 : 42;
+  const dockGap = isCompactDock ? 4 : 6;
+  const widgetTilesHtml = previewWidgetKinds.map((kind) => {
+    const opt = ONBOARDING_WIDGET_OPTIONS.find((o) => o.kind === kind);
+    if (!opt) return "";
+    const isActive = activeCardKind === kind;
+    const valText = getWidgetMockValue(kind, props.liveState);
+    return `
+        <span class="flank-ob-mock-tile${isActive ? " is-active" : ""}" style="height: ${tileHeight}px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${opt.svgPaths}</svg>
+          <b class="flank-ob-mock-tile-val">${escapeHtml4(valText)}</b>
+        </span>
+      `;
+  }).join("");
+  const nTiles = previewWidgetKinds.length;
+  const dockHeight = nTiles === 4 && !isCompactDock ? 340 : nTiles === 6 && !isCompactDock ? 424 : Math.min(500, 128 + nTiles * (tileHeight + dockGap));
+  const dockMarginTop = -Math.round(dockHeight / 2);
+  const dockLeftCss = isRight ? "calc(100% - 68px)" : "12px";
+  const collapseChevronPath = isRight ? "m9 5 7 7-7 7" : "m15 5-7 7 7 7";
+  let openCardHtml = "";
+  if (props.step === 1) {
+    const cardPos = isRight ? "right: 84px;" : "left: 84px;";
+    openCardHtml = `
+      <div class="flank-ob-mock-card" style="${cardPos} top: 130px; width: 170px; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
+          <span>Kyoto</span>
+          <span style="color: var(--flank-color-text-muted); font-weight: 500;">Now</span>
+        </div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+          <span style="font-size: 32px; line-height: 1; font-weight: 600; letter-spacing: -0.03em;">24\xB0</span>
+          <span style="font-size: 11px; color: var(--flank-color-text-muted); text-align: right;">Partly cloudy<br />H 27\xB0 L 18\xB0</span>
+        </div>
+      </div>
+    `;
+  } else if (props.step === 3) {
+    const cardPos = isRight ? "right: 84px;" : "left: 84px;";
+    openCardHtml = `
+      <div class="flank-ob-mock-card" style="${cardPos} top: 150px; width: 190px; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
+          <span>Focus timer</span>
+          <span style="color: var(--flank-color-text-muted); font-weight: 500; display: flex; align-items: center; gap: 5px;">
+            <i style="width: 6px; height: 6px; border-radius: 3px; background: var(--flank-color-accent);"></i>Ready
+          </span>
+        </div>
+        <div style="font-size: 36px; line-height: 1; font-weight: 600; letter-spacing: -0.04em; text-align: center; padding: 4px 0;">25:00</div>
+        <div style="height: 34px; border-radius: 10px; background: var(--flank-color-accent); color: var(--flank-color-accent-ink); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center;">Start focus</div>
+      </div>
+    `;
+  }
+  let step2ExtrasHtml = "";
+  if (props.step === 2) {
+    const ghostSide = isRight ? "left: 12px;" : "right: 12px;";
+    const pillPos = isRight ? "left: 84px;" : "right: 84px;";
+    const pillText = isRight ? "Moves to the right edge" : "Moves to the left edge";
+    step2ExtrasHtml = `
+      <div class="flank-ob-ghost-dock" style="${ghostSide}"></div>
+      <span class="flank-ob-edge-pill" style="${pillPos}">${escapeHtml4(pillText)}</span>
+    `;
+  }
+  return `
+    <div class="flank-ob-right" aria-hidden="true">
+      <div class="flank-ob-preview-desktop" data-theme="${escapeHtml4(theme.id)}" data-mode="${escapeHtml4(theme.mode)}" data-edge="${escapeHtml4(props.edge)}" data-shape="${escapeHtml4(theme.layout.shape)}" data-preview-backdrop="${escapeHtml4(backdropKind)}" style="${escapeHtml4(styleAttr)}">
+        ${fauxWindowHtml}
+        ${step2ExtrasHtml}
+        ${openCardHtml}
+        <div class="flank-ob-mock-dock" style="left: ${dockLeftCss}; margin-top: ${dockMarginTop}px; height: ${dockHeight}px; gap: ${dockGap}px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--flank-color-text-muted)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${collapseChevronPath}"></path></svg>
+          <span class="flank-ob-mock-app flank-ob-mock-app--terminal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--flank-ob-accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 7 5 5-5 5"></path><path d="M12 18h7"></path></svg>
+          </span>
+          <span class="flank-ob-mock-app flank-ob-mock-app--browser">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--flank-color-accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3.2 3.2 3.2 14.8 0 18M12 3c-3.2 3.2-3.2 14.8 0 18"></path></svg>
+          </span>
+          <span class="flank-ob-mock-divider"></span>
+          ${widgetTilesHtml}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// src/ui/onboarding/onboarding.ts
+var DEFAULT_ONBOARDING_WIDGETS = ONBOARDING_WIDGET_OPTIONS.filter((w) => w.defaultOn).map((w) => w.kind);
+var ALL_ONBOARDING_WIDGET_KINDS = ONBOARDING_WIDGET_OPTIONS.map((w) => w.kind);
+function applyOnboardingWidgetsToItems(existingItems, selectedWidgets, replay = false) {
+  const baseList = Array.isArray(existingItems) && existingItems.length > 0 ? structuredClone(existingItems) : structuredClone(createSampleState().items);
+  const selectedSet = new Set(selectedWidgets);
+  const onboardingSet = new Set(ALL_ONBOARDING_WIDGET_KINDS);
+  for (const item of baseList) {
+    if (item.kind === "widget" || item.group === "widgets") {
+      const wKind = item.widgetKind;
+      if (wKind && onboardingSet.has(wKind)) {
+        item.enabled = selectedSet.has(wKind);
+      } else if (!replay) {
+        item.enabled = false;
+      }
+    } else if (!replay && (item.kind === "app" || item.group === "apps")) {
+      item.enabled = true;
+    }
+  }
+  return baseList;
+}
+var OnboardingMachine = class {
+  state;
+  sourceItems;
+  constructor(options = {}) {
+    const replay = Boolean(options.replay);
+    const sample = createSampleState();
+    this.sourceItems = Array.isArray(options.items) && options.items.length > 0 ? structuredClone(options.items) : structuredClone(sample.items);
+    const maxDockItems = options.maxDockItems ?? 12;
+    let initialWidgets;
+    if (Array.isArray(options.selectedWidgets)) {
+      initialWidgets = [...options.selectedWidgets];
+    } else if (replay && Array.isArray(options.items) && options.items.length > 0) {
+      const onboardingSet = new Set(ALL_ONBOARDING_WIDGET_KINDS);
+      initialWidgets = options.items.filter((it) => it.enabled && it.widgetKind && onboardingSet.has(it.widgetKind)).map((it) => it.widgetKind);
+      if (initialWidgets.length === 0) {
+        initialWidgets = [...DEFAULT_ONBOARDING_WIDGETS];
+      }
+    } else {
+      initialWidgets = [...DEFAULT_ONBOARDING_WIDGETS];
+    }
+    const baseItemCount = options.baseItemCount !== void 0 ? options.baseItemCount : replay ? this.sourceItems.filter(
+      (it) => it.enabled && !(it.kind === "widget" && it.widgetKind && ALL_ONBOARDING_WIDGET_KINDS.includes(it.widgetKind))
+    ).length : this.sourceItems.filter((it) => it.enabled && (it.kind === "app" || it.group === "apps")).length;
+    const maxAllowedWidgets = Math.max(0, Math.min(maxDockItems, maxDockItems - baseItemCount));
+    if (initialWidgets.length > maxAllowedWidgets) {
+      initialWidgets = initialWidgets.slice(0, maxAllowedWidgets);
+    }
+    const themeId = (options.themeId || "paper").replace(/_/g, "-");
+    const isExtraTheme = EXTRA_THEME_TILES.some((t) => t.id === themeId);
+    const clipItem = this.sourceItems.find(
+      (it) => it.id === "widget-clipboard" || it.widgetKind === "clipboard"
+    );
+    this.state = {
+      step: 1,
+      direction: "none",
+      replay,
+      completed: false,
+      skipped: false,
+      edge: options.edge === "left" ? "left" : "right",
+      themeId,
+      themesExpanded: isExtraTheme,
+      accent: options.accent || "#2F4BFF",
+      customColorPopoverOpen: false,
+      selectedWidgets: initialWidgets,
+      baseItemCount,
+      maxDockItems,
+      capReachedWarning: false,
+      autostart: options.autostart !== void 0 ? Boolean(options.autostart) : true,
+      hideHotkey: options.hideHotkey || "Ctrl+Alt+F",
+      clipboardHotkey: options.clipboardHotkey || clipItem?.shortcut || "Ctrl+Alt+V"
+    };
+  }
+  getSnapshot() {
+    return {
+      ...this.state,
+      selectedWidgets: [...this.state.selectedWidgets]
+    };
+  }
+  canContinue() {
+    if (this.state.step === 4) {
+      return this.state.selectedWidgets.length >= 1 && this.state.baseItemCount + this.state.selectedWidgets.length <= this.state.maxDockItems;
+    }
+    return true;
+  }
+  next() {
+    if (!this.canContinue()) {
+      return this.getSnapshot();
+    }
+    if (this.state.step < 5) {
+      this.state.step = this.state.step + 1;
+      this.state.direction = "next";
+      this.state.customColorPopoverOpen = false;
+    }
+    return this.getSnapshot();
+  }
+  back() {
+    if (this.state.step > 1) {
+      this.state.step = this.state.step - 1;
+      this.state.direction = "back";
+      this.state.customColorPopoverOpen = false;
+    }
+    return this.getSnapshot();
+  }
+  goToStep(step) {
+    if (step === this.state.step) return this.getSnapshot();
+    this.state.direction = step > this.state.step ? "next" : "back";
+    this.state.step = step;
+    this.state.customColorPopoverOpen = false;
+    return this.getSnapshot();
+  }
+  setEdge(edge) {
+    this.state.edge = edge === "left" ? "left" : "right";
+    this.state.direction = "none";
+    return this.getSnapshot();
+  }
+  setTheme(themeId) {
+    const normalized = (themeId || "paper").replace(/_/g, "-");
+    this.state.themeId = normalized;
+    if (EXTRA_THEME_TILES.some((t) => t.id === normalized)) {
+      this.state.themesExpanded = true;
+    }
+    this.state.direction = "none";
+    return this.getSnapshot();
+  }
+  expandThemes() {
+    this.state.themesExpanded = true;
+    this.state.direction = "none";
+    return this.getSnapshot();
+  }
+  setAccent(hex) {
+    let cleaned = (hex || "").trim();
+    if (!cleaned.startsWith("#")) cleaned = `#${cleaned}`;
+    if (/^#[0-9A-Fa-f]{3}$/.test(cleaned)) {
+      cleaned = `#${cleaned[1]}${cleaned[1]}${cleaned[2]}${cleaned[2]}${cleaned[3]}${cleaned[3]}`;
+    }
+    if (/^#[0-9A-Fa-f]{6}$/.test(cleaned)) {
+      this.state.accent = cleaned.toUpperCase();
+    }
+    this.state.direction = "none";
+    return this.getSnapshot();
+  }
+  toggleCustomColorPopover(open) {
+    this.state.customColorPopoverOpen = open !== void 0 ? Boolean(open) : !this.state.customColorPopoverOpen;
+    this.state.direction = "none";
+    return this.getSnapshot();
+  }
+  handleEscape() {
+    if (this.state.customColorPopoverOpen) {
+      this.state.customColorPopoverOpen = false;
+      this.state.direction = "none";
+      return { closedPopover: true, skipped: false };
+    }
+    return { closedPopover: false, skipped: false };
+  }
+  toggleWidget(kind) {
+    this.state.direction = "none";
+    const idx = this.state.selectedWidgets.indexOf(kind);
+    if (idx >= 0) {
+      this.state.selectedWidgets.splice(idx, 1);
+      this.state.capReachedWarning = false;
+      return { ok: true, snapshot: this.getSnapshot() };
+    }
+    const totalItems = this.state.baseItemCount + this.state.selectedWidgets.length;
+    if (totalItems >= this.state.maxDockItems || this.state.selectedWidgets.length >= this.state.maxDockItems) {
+      this.state.capReachedWarning = true;
+      return { ok: false, reason: "cap_reached", snapshot: this.getSnapshot() };
+    }
+    const nextSet = /* @__PURE__ */ new Set([...this.state.selectedWidgets, kind]);
+    this.state.selectedWidgets = ALL_ONBOARDING_WIDGET_KINDS.filter((k) => nextSet.has(k));
+    if (!this.state.selectedWidgets.includes(kind)) {
+      this.state.selectedWidgets.push(kind);
+    }
+    this.state.capReachedWarning = false;
+    return { ok: true, snapshot: this.getSnapshot() };
+  }
+  setAutostart(enabled) {
+    this.state.autostart = Boolean(enabled);
+    this.state.direction = "none";
+    return this.getSnapshot();
+  }
+  /**
+   * Skip setup (steps 1-4 or closing window with X before finishing):
+   * Applies defaults (Right edge, Paper, blue accent #2F4BFF, recommended widgets),
+   * sets onboarding.completed = true, and shows the dock.
+   */
+  skip() {
+    this.state.edge = "right";
+    this.state.themeId = "paper";
+    this.state.accent = "#2F4BFF";
+    this.state.selectedWidgets = [...DEFAULT_ONBOARDING_WIDGETS];
+    this.state.completed = true;
+    this.state.skipped = true;
+    this.state.customColorPopoverOpen = false;
+    this.state.direction = "none";
+    const updatedItems = applyOnboardingWidgetsToItems(
+      this.sourceItems,
+      this.state.selectedWidgets,
+      false
+    );
+    const onboardingRecord = {
+      completed: true,
+      version: 1,
+      completedAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    const prefsPatch = {
+      themeId: "paper",
+      edgeOverride: "right",
+      accentOverride: "#2F4BFF",
+      items: updatedItems,
+      dockState: "expanded",
+      onboarding: onboardingRecord
+    };
+    return { prefsPatch, snapshot: this.getSnapshot() };
+  }
+  /**
+   * Open my dock (Step 5):
+   * Writes all choices in one settings write, sets onboarding.completed = true,
+   * and starts the dock in its normal expanded state.
+   */
+  finish() {
+    this.state.completed = true;
+    this.state.skipped = false;
+    this.state.customColorPopoverOpen = false;
+    this.state.direction = "none";
+    const updatedItems = applyOnboardingWidgetsToItems(
+      this.sourceItems,
+      this.state.selectedWidgets,
+      this.state.replay
+    );
+    const onboardingRecord = {
+      completed: true,
+      version: 1,
+      completedAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    const prefsPatch = {
+      themeId: this.state.themeId,
+      edgeOverride: this.state.edge,
+      accentOverride: this.state.accent,
+      autostart: this.state.autostart,
+      items: updatedItems,
+      dockState: "expanded",
+      onboarding: onboardingRecord
+    };
+    return { prefsPatch, snapshot: this.getSnapshot() };
+  }
+};
+function renderOnboardingBrandIconHtml() {
+  return `<svg class="flank-ob-logo" width="32" height="32" viewBox="0 0 128 128" role="img" aria-label="Flank"><rect width="128" height="128" rx="30" fill="var(--flank-ob-accent)"></rect><g transform="translate(28 17.92) scale(0.72)"><path d="M12 44 a38 38 0 0 1 76 0 V84 a38 38 0 0 1 -76 0 Z" fill="none" stroke="var(--flank-ob-accent-ink)" stroke-width="9"></path><path d="M37 42 a4 4 0 0 1 4 -4 H62 a7 7 0 0 1 0 14 H51 V60 H60 a6 6 0 0 1 0 12 H51 V86 a4 4 0 0 1 -4 4 H41 a4 4 0 0 1 -4 -4 Z" fill="var(--flank-ob-accent-ink)"></path></g></svg>`;
+}
+function renderOnboardingStepBodyHtml(snap) {
+  switch (snap.step) {
+    case 1:
+      return renderWelcomeStepHtml();
+    case 2:
+      return renderEdgeStepHtml(snap.edge);
+    case 3:
+      return renderLookStepHtml({
+        themeId: snap.themeId,
+        themesExpanded: snap.themesExpanded,
+        accent: snap.accent,
+        customColorPopoverOpen: snap.customColorPopoverOpen
+      });
+    case 4:
+      return renderWidgetsStepHtml({
+        selectedWidgets: snap.selectedWidgets,
+        capReachedWarning: snap.capReachedWarning
+      });
+    case 5:
+      return renderReadyStepHtml({
+        autostart: snap.autostart,
+        hideHotkey: snap.hideHotkey,
+        clipboardHotkey: snap.clipboardHotkey
+      });
+  }
+}
+function renderOnboardingFooterHtml(snap, canContinue) {
+  const dotsHtml = [1, 2, 3, 4, 5].map((idx) => {
+    const cls = idx === snap.step ? "flank-ob-dot is-active" : idx < snap.step ? "flank-ob-dot is-done" : "flank-ob-dot";
+    return `<i class="${cls}"></i>`;
+  }).join("");
+  const progressGroup = `<div class="flank-ob-dots" role="img" aria-label="Step ${snap.step} of 5">${dotsHtml}</div>`;
+  if (snap.step === 1) {
+    return `
+      ${progressGroup}
+      <button type="button" class="flank-ob-btn-primary" data-ob-action="next">
+        <span>Get started</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--flank-ob-accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </button>
+    `;
+  }
+  const primaryLabel = snap.step === 5 ? "Open my dock" : "Continue";
+  const primaryAction = snap.step === 5 ? "finish" : "next";
+  return `
+    <button type="button" class="flank-ob-btn-back" data-ob-action="back">Back</button>
+    ${progressGroup}
+    <button type="button" class="flank-ob-btn-primary" data-ob-action="${primaryAction}" ${canContinue ? "" : "disabled"}>${primaryLabel}</button>
+  `;
+}
+function renderOnboardingHtml(machine, liveState) {
+  const snap = machine.getSnapshot();
+  const canContinue = machine.canContinue();
+  const animClass = snap.direction === "next" ? " is-anim-next" : snap.direction === "back" ? " is-anim-back" : "";
+  const skipButtonHtml = snap.step <= 4 ? `<button type="button" class="flank-ob-skip" data-ob-action="skip">Skip setup</button>` : "";
+  const previewHtml = renderOnboardingPreviewHtml({
+    step: snap.step,
+    edge: snap.edge,
+    themeId: snap.themeId,
+    accent: snap.accent,
+    selectedWidgets: snap.selectedWidgets,
+    hideHotkey: snap.hideHotkey,
+    liveState
+  });
+  return `
+    <div class="flank-ob-shell" data-ob-step="${snap.step}">
+      <div class="flank-ob-left">
+        <div class="flank-ob-topbar" id="flank-ob-topbar">
+          ${renderOnboardingBrandIconHtml()}
+          ${skipButtonHtml}
+        </div>
+        <div class="flank-ob-step-body${animClass}" id="flank-ob-step-body">
+          ${renderOnboardingStepBodyHtml(snap)}
+        </div>
+        <div class="flank-ob-footer" id="flank-ob-footer">
+          ${renderOnboardingFooterHtml(snap, canContinue)}
+        </div>
+      </div>
+      ${previewHtml}
+    </div>
+  `;
+}
+
 // src/main.ts
 var lastNumValues = /* @__PURE__ */ new Map();
 function hslToHex(h, s, l) {
@@ -5176,6 +6000,43 @@ var state = createSampleState();
 if (currentView === "modal") {
   state.activeFullWindow = "settings";
 }
+var onboardingMachine = null;
+var lastRenderedOnboardingStep = null;
+function createOnboardingMachineFromState(opts) {
+  const replay = Boolean(opts?.replay);
+  const clipItem = state.items.find(
+    (it) => it.id === "widget-clipboard" || it.widgetKind === "clipboard"
+  );
+  const queryEdge = urlParams.get("edge");
+  const queryObTheme = urlParams.get("obTheme");
+  const queryObAccent = urlParams.get("obAccent");
+  const machine = new OnboardingMachine({
+    replay,
+    edge: queryEdge || (replay ? state.edgeOverride === "left" ? "left" : "right" : "right"),
+    themeId: queryObTheme || (replay ? state.themeId : "paper"),
+    accent: queryObAccent || (replay ? state.accentOverride || "#2F4BFF" : "#2F4BFF"),
+    items: state.items,
+    autostart: replay ? state.autostart : true,
+    hideHotkey: state.collapseHotkey || "Ctrl+Alt+F",
+    clipboardHotkey: clipItem?.shortcut || "Ctrl+Alt+V"
+  });
+  if (urlParams.get("expanded") === "1" || urlParams.get("expanded") === "true") {
+    machine.expandThemes();
+  }
+  const targetStep = opts?.step || Number(urlParams.get("step"));
+  if (targetStep && targetStep >= 1 && targetStep <= 5) {
+    machine.goToStep(targetStep);
+  }
+  return machine;
+}
+function ensureOnboardingMachine() {
+  if (!onboardingMachine) {
+    onboardingMachine = createOnboardingMachineFromState({
+      replay: urlParams.get("replay") === "1" || urlParams.get("replay") === "true"
+    });
+  }
+  return onboardingMachine;
+}
 var uiState = {
   clipboardQuery: "",
   clipboardFilter: "all",
@@ -5185,7 +6046,30 @@ var uiState = {
   shortcutConflictMsg: null,
   themeValidationMsg: null
 };
+window.flankStartOnboarding = (opts) => {
+  currentView = "onboarding";
+  document.body.setAttribute("data-view", "onboarding");
+  themeEngine.revertToPaper();
+  lastRenderedOnboardingStep = null;
+  onboardingMachine = createOnboardingMachineFromState(opts);
+  renderApp();
+};
+window.flankSkipOnboardingFromHost = () => {
+  const machine = ensureOnboardingMachine();
+  const res = machine.skip();
+  return res.prefsPatch;
+};
 window.flankOpenModal = (win) => {
+  if (win === "onboarding") {
+    window.flankStartOnboarding?.({ replay: false });
+    return;
+  }
+  if (currentView === "onboarding") {
+    currentView = "modal";
+    document.body.setAttribute("data-view", "modal");
+    lastRenderedOnboardingStep = null;
+    applyCurrentThemeSelection();
+  }
   state.activeFullWindow = win;
   renderApp();
 };
@@ -5450,6 +6334,85 @@ function renderApp(preserveSearchFocus = false) {
         );
       }
     });
+  } else if (currentView === "onboarding") {
+    themeEngine.revertToPaper();
+    const machine = ensureOnboardingMachine();
+    const snap = machine.getSnapshot();
+    const canContinue = machine.canContinue();
+    const existingShell = stage.querySelector(".flank-ob-shell");
+    const stepChanged = lastRenderedOnboardingStep !== snap.step;
+    if (existingShell && !stepChanged) {
+      const stepBodyEl = existingShell.querySelector("#flank-ob-step-body");
+      const footerEl = existingShell.querySelector("#flank-ob-footer");
+      if (stepBodyEl) {
+        stepBodyEl.classList.remove("is-anim-next", "is-anim-back");
+        stepBodyEl.innerHTML = renderOnboardingStepBodyHtml(snap);
+      }
+      if (footerEl) {
+        footerEl.innerHTML = renderOnboardingFooterHtml(snap, canContinue);
+      }
+      const newPreviewHtml = renderOnboardingPreviewHtml({
+        step: snap.step,
+        edge: snap.edge,
+        themeId: snap.themeId,
+        accent: snap.accent,
+        selectedWidgets: snap.selectedWidgets,
+        hideHotkey: snap.hideHotkey,
+        liveState: state
+      });
+      const tmp = document.createElement("div");
+      tmp.innerHTML = newPreviewHtml.trim();
+      const nextDesktop = tmp.querySelector(".flank-ob-preview-desktop");
+      const curDesktop = existingShell.querySelector(".flank-ob-preview-desktop");
+      if (curDesktop && nextDesktop) {
+        for (const attr of [
+          "data-theme",
+          "data-mode",
+          "data-edge",
+          "data-shape",
+          "data-preview-backdrop",
+          "style"
+        ]) {
+          const val = nextDesktop.getAttribute(attr);
+          if (val !== null) curDesktop.setAttribute(attr, val);
+        }
+        const curDock = curDesktop.querySelector(".flank-ob-mock-dock");
+        const nextDock = nextDesktop.querySelector(".flank-ob-mock-dock");
+        if (curDock && nextDock) {
+          curDock.setAttribute("style", nextDock.getAttribute("style") || "");
+          curDock.innerHTML = nextDock.innerHTML;
+        }
+        for (const sel of [
+          ".flank-ob-faux-window",
+          ".flank-ob-ghost-dock",
+          ".flank-ob-edge-pill",
+          ".flank-ob-mock-card",
+          ".flank-ob-callout",
+          ".flank-ob-mock-tab"
+        ]) {
+          const curNode = curDesktop.querySelector(sel);
+          const nextNode = nextDesktop.querySelector(sel);
+          if (curNode && nextNode) {
+            curNode.setAttribute("style", nextNode.getAttribute("style") || "");
+            curNode.innerHTML = nextNode.innerHTML;
+          }
+        }
+      } else {
+        const curRight = existingShell.querySelector(".flank-ob-right");
+        const nextRight = tmp.querySelector(".flank-ob-right");
+        if (curRight && nextRight) {
+          curRight.replaceWith(nextRight);
+        }
+      }
+    } else {
+      stage.innerHTML = renderOnboardingHtml(machine, state);
+      lastRenderedOnboardingStep = snap.step;
+      const headingEl = document.getElementById("flank-ob-step-heading");
+      headingEl?.focus();
+      requestAnimationFrame(() => {
+        document.getElementById("flank-ob-step-heading")?.focus();
+      });
+    }
   } else if (currentView === "modal") {
     let windowHtml = "";
     if (state.activeFullWindow === "clipboard") {
@@ -5553,6 +6516,10 @@ function saveUserPrefs() {
   });
 }
 function applyCurrentThemeSelection() {
+  if (currentView === "onboarding") {
+    themeEngine.revertToPaper();
+    return;
+  }
   const res = themeEngine.switchTheme(state.themeId, {
     edge: state.edgeOverride ?? void 0,
     accent: state.accentOverride ?? void 0
@@ -5561,6 +6528,31 @@ function applyCurrentThemeSelection() {
     uiState.themeValidationMsg = `Theme fell back to Paper: ${res.errors.join(" ")}`;
   } else {
     uiState.themeValidationMsg = null;
+  }
+}
+async function completeOnboardingFlow(result, skipped) {
+  const patch = result.prefsPatch;
+  if (typeof patch.themeId === "string") {
+    state.themeId = patch.themeId;
+  }
+  if (patch.edgeOverride === "left" || patch.edgeOverride === "right") {
+    state.edgeOverride = patch.edgeOverride;
+  }
+  if (typeof patch.accentOverride === "string") {
+    state.accentOverride = patch.accentOverride;
+  }
+  if (typeof patch.autostart === "boolean") {
+    state.autostart = patch.autostart;
+  }
+  if (Array.isArray(patch.items)) {
+    state.items = normalizeDockItems(patch.items);
+  }
+  setDockState("expanded");
+  if (window.pywebview?.api?.complete_onboarding) {
+    await window.pywebview.api.complete_onboarding(patch, skipped);
+  } else {
+    await window.pywebview?.api?.save_preferences?.(patch);
+    await window.pywebview?.api?.close_window?.();
   }
 }
 function setupEventDelegation() {
@@ -5796,9 +6788,9 @@ function setupEventDelegation() {
       });
       return;
     }
-    if (currentView === "modal") {
-      const titlebar = target.closest(".flank-titlebar");
-      if (titlebar && !target.closest("button, input, a, select, textarea, [data-action]") && flankMachines.pointerInteraction.canStartWindowDrag()) {
+    if (currentView === "modal" || currentView === "onboarding") {
+      const titlebar = target.closest(".flank-titlebar, .flank-ob-topbar");
+      if (titlebar && !target.closest("button, input, a, select, textarea, [data-action], [data-ob-action]") && flankMachines.pointerInteraction.canStartWindowDrag()) {
         flankMachines.pointerInteraction.send({ type: "START_WINDOW_DRAG" });
         window.pywebview?.api?.drag_modal_window?.();
       }
@@ -5816,6 +6808,86 @@ function setupEventDelegation() {
   stage.addEventListener("click", async (ev) => {
     const target = ev.target;
     if (!target) return;
+    if (currentView === "onboarding") {
+      const machine = ensureOnboardingMachine();
+      const obBtn = target.closest(
+        "[data-ob-action], [data-ob-edge], [data-ob-theme], [data-ob-accent], [data-ob-widget], [data-ob-widget-row]"
+      );
+      if (obBtn) {
+        const obAction = obBtn.getAttribute("data-ob-action");
+        if (obAction === "next") {
+          machine.next();
+          renderApp();
+          return;
+        }
+        if (obAction === "back") {
+          machine.back();
+          renderApp();
+          return;
+        }
+        if (obAction === "skip") {
+          const res = machine.skip();
+          await completeOnboardingFlow(res, true);
+          return;
+        }
+        if (obAction === "finish") {
+          const res = machine.finish();
+          await completeOnboardingFlow(res, false);
+          return;
+        }
+        if (obAction === "expand-themes") {
+          machine.expandThemes();
+          renderApp();
+          return;
+        }
+        if (obAction === "toggle-custom-accent") {
+          machine.toggleCustomColorPopover();
+          renderApp();
+          return;
+        }
+        if (obAction === "apply-custom-accent") {
+          const hexInput = document.getElementById("flank-ob-color-hex");
+          if (hexInput?.value) {
+            machine.setAccent(hexInput.value);
+          }
+          machine.toggleCustomColorPopover(false);
+          renderApp();
+          return;
+        }
+        if (obAction === "toggle-autostart") {
+          const snap = machine.getSnapshot();
+          machine.setAutostart(!snap.autostart);
+          renderApp();
+          return;
+        }
+        const obEdge = obBtn.getAttribute("data-ob-edge");
+        if (obEdge) {
+          machine.setEdge(obEdge);
+          renderApp();
+          return;
+        }
+        const obTheme = obBtn.getAttribute("data-ob-theme");
+        if (obTheme) {
+          machine.setTheme(obTheme);
+          renderApp();
+          return;
+        }
+        const obAccent = obBtn.getAttribute("data-ob-accent");
+        if (obAccent) {
+          machine.setAccent(obAccent);
+          machine.toggleCustomColorPopover(false);
+          renderApp();
+          return;
+        }
+        const obWidget = obBtn.getAttribute("data-ob-widget") || obBtn.getAttribute("data-ob-widget-row");
+        if (obWidget) {
+          machine.toggleWidget(obWidget);
+          renderApp();
+          return;
+        }
+      }
+      return;
+    }
     const expandBtn = target.closest('[data-action="expand-dock"], .flank-dock-tab');
     if (expandBtn) {
       ev.preventDefault();
@@ -5921,6 +6993,14 @@ function setupEventDelegation() {
       applyCurrentThemeSelection();
       saveUserPrefs();
       renderApp();
+      return;
+    }
+    if (action === "replay-onboarding") {
+      if (window.pywebview?.api?.open_onboarding) {
+        await window.pywebview.api.open_onboarding(true);
+        return;
+      }
+      window.flankStartOnboarding?.({ replay: true });
       return;
     }
     if (action === "toggle-auto-collapse") {
@@ -6697,6 +7777,25 @@ function setupEventDelegation() {
           renderApp(true);
         }, 350);
       }
+    } else if (target.id === "flank-ob-color-native") {
+      const hex = target.value.toUpperCase();
+      const hexInput = document.getElementById("flank-ob-color-hex");
+      if (hexInput) hexInput.value = hex;
+      if (currentView === "onboarding") {
+        const machine = ensureOnboardingMachine();
+        machine.setAccent(hex);
+        renderApp(true);
+      }
+    } else if (target.id === "flank-ob-color-hex") {
+      let hex = target.value.trim();
+      if (!hex.startsWith("#")) hex = `#${hex}`;
+      if (/^#[0-9A-Fa-f]{6}$/.test(hex) && currentView === "onboarding") {
+        const nativePicker = document.getElementById("flank-ob-color-native");
+        if (nativePicker) nativePicker.value = hex;
+        const machine = ensureOnboardingMachine();
+        machine.setAccent(hex);
+        renderApp(true);
+      }
     } else if (target.id === "flank-native-color-input") {
       const hex = target.value.toUpperCase();
       state.colorpicker.currentHex = hex;
@@ -6709,6 +7808,86 @@ function setupEventDelegation() {
     }
   });
   window.addEventListener("keydown", async (ev) => {
+    if (currentView === "onboarding") {
+      const machine = ensureOnboardingMachine();
+      if (ev.key === "Escape") {
+        ev.preventDefault();
+        const res = machine.handleEscape();
+        if (res.closedPopover) {
+          renderApp();
+        }
+        return;
+      }
+      if (ev.altKey && ev.key === "ArrowLeft") {
+        ev.preventDefault();
+        machine.back();
+        renderApp();
+        return;
+      }
+      const activeEl = document.activeElement;
+      const radioGroup = activeEl?.closest('[role="radiogroup"]');
+      if (radioGroup && (ev.key === "ArrowRight" || ev.key === "ArrowDown" || ev.key === "ArrowLeft" || ev.key === "ArrowUp")) {
+        const radios = Array.from(radioGroup.querySelectorAll('[role="radio"]'));
+        if (radios.length > 0) {
+          ev.preventDefault();
+          const curIdx = Math.max(
+            0,
+            radios.findIndex((r) => r === activeEl || r.contains(activeEl))
+          );
+          const delta = ev.key === "ArrowRight" || ev.key === "ArrowDown" ? 1 : -1;
+          const nextIdx = (curIdx + delta + radios.length) % radios.length;
+          const nextRadio = radios[nextIdx];
+          if (nextRadio) {
+            const obEdge = nextRadio.getAttribute("data-ob-edge");
+            const obTheme = nextRadio.getAttribute("data-ob-theme");
+            const obAccent = nextRadio.getAttribute("data-ob-accent");
+            let selectorToFocus = "";
+            if (obEdge) {
+              machine.setEdge(obEdge);
+              selectorToFocus = `[data-ob-edge="${obEdge}"]`;
+            } else if (obTheme) {
+              machine.setTheme(obTheme);
+              selectorToFocus = `[data-ob-theme="${obTheme}"]`;
+            } else if (obAccent) {
+              machine.setAccent(obAccent);
+              machine.toggleCustomColorPopover(false);
+              selectorToFocus = `[data-ob-accent="${obAccent}"]`;
+            }
+            renderApp();
+            if (selectorToFocus) {
+              const updatedRadio = document.querySelector(selectorToFocus);
+              updatedRadio?.focus();
+            }
+          }
+          return;
+        }
+      }
+      if (ev.key === "Enter" && !ev.ctrlKey && !ev.altKey && !ev.metaKey) {
+        if (activeEl?.id === "flank-ob-color-hex") {
+          ev.preventDefault();
+          const hexVal = activeEl.value;
+          if (hexVal) machine.setAccent(hexVal);
+          machine.toggleCustomColorPopover(false);
+          renderApp();
+          return;
+        }
+        const activeAction = activeEl?.getAttribute("data-ob-action");
+        if (activeAction === "back" || activeAction === "skip" || activeAction === "expand-themes" || activeAction === "toggle-custom-accent" || activeAction === "apply-custom-accent") {
+          return;
+        }
+        ev.preventDefault();
+        const snap = machine.getSnapshot();
+        if (snap.step === 5) {
+          const res = machine.finish();
+          await completeOnboardingFlow(res, false);
+        } else if (machine.canContinue()) {
+          machine.next();
+          renderApp();
+        }
+        return;
+      }
+      return;
+    }
     if (ev.ctrlKey && ev.altKey && (ev.code === "KeyF" || ev.key.toLowerCase() === "f")) {
       ev.preventDefault();
       toggleDockCollapse();
@@ -7000,6 +8179,9 @@ window.flankReceiveHostUpdate = (patch) => {
     state.topProcesses = patch.topProcesses;
   }
   state.dataSource = "live";
+  if (currentView === "onboarding") {
+    return;
+  }
   if (currentView === "modal" && state.activeFullWindow === "settings" && !prefsChanged && !patch.clock && !patch.weather) {
     return;
   }

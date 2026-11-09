@@ -806,6 +806,11 @@ export function renderSettingsWindowHtml(
           description: 'Prevents maximized windows from overlapping the dock.',
           controlHtml: Switch({ checked: Boolean(state.reserveScreenSpace), actionAttr: 'data-toggle-appbar="1"' }),
         })}
+        ${Row({
+          label: 'Start Flank when Windows starts',
+          description: 'Launches Flank automatically when you sign in to Windows.',
+          controlHtml: Switch({ checked: Boolean(state.autostart), actionAttr: 'data-action="toggle-autostart"' }),
+        })}
       </div>
     `;
   } else if (ui.settingsTab === 'items') {
@@ -1008,7 +1013,10 @@ export function renderSettingsWindowHtml(
             ${Button({ label: 'GitHub Issues', variant: 'ghost', actionAttr: 'data-action="open-link-issues"' })}
             ${Button({ label: 'MIT License', variant: 'ghost', actionAttr: 'data-action="open-link-license"' })}
           </div>
-          ${Button({ label: 'Check for updates', variant: 'secondary', actionAttr: 'data-action="check-updates"', style: 'margin-top: 6px;' })}
+          <div style="display:flex; gap: 10px; margin-top: 6px;">
+            ${Button({ label: 'Check for updates', variant: 'secondary', actionAttr: 'data-action="check-updates"' })}
+            ${Button({ label: 'Replay setup', variant: 'secondary', actionAttr: 'data-action="replay-onboarding"' })}
+          </div>
         </div>
 
         ${Card({

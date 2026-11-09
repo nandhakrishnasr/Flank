@@ -658,6 +658,7 @@ class FlankHostApi:
     def __init__(self, app_data_dir: str):
         self.app_data_dir = app_data_dir
         os.makedirs(app_data_dir, exist_ok=True)
+        self.settings_path = os.path.join(app_data_dir, 'settings.json')
         self.config_path = os.path.join(app_data_dir, 'config.json')
         self._clipboard = ClipboardService(os.path.join(app_data_dir, 'clipboard.db'))
         self._providers = SystemProviders(app_data_dir)
@@ -671,6 +672,8 @@ class FlankHostApi:
         self._card_open: bool = False
         self._card_pinned: bool = False
         self._modal_open: bool = False
+        self._onboarding_active: bool = self.should_run_onboarding()
+        self._dock_hidden_for_onboarding: bool = self._onboarding_active
         # Logical (DIP) card and dock shape sizes & window padding (0 for clean borderless shape)
         self._dock_window_padding: int = 0
         self._card_window_padding: int = 0
@@ -678,15 +681,61 @@ class FlankHostApi:
         self._card_shape_size: tuple[int, int, int] = (292, 240, 20)
         self._dock_shape_rect: tuple[int, int, int, int] = (0, 0, 60, 660)
         self._wallpaper_mgr = WallpaperManager()
-        self._is_collapsed = self.prefs.get('dockState') == 'collapsed' or self.prefs.get('startCollapsed', False)
+        self._is_collapsed = (
+            False
+            if self._onboarding_active
+            else (self.prefs.get('dockState') == 'collapsed' or self.prefs.get('startCollapsed', False))
+        )
         self._tray: FlankTray | None = None
         self._collapsed_due_to_fullscreen = False
 
+    def should_run_onboarding(self) -> bool:
+        if '--onboarding' in sys.argv or os.environ.get('FLANK_FORCE_ONBOARDING') == '1':
+            return True
+        ob = self.prefs.get('onboarding')
+        if not isinstance(ob, dict):
+            return True
+        return ob.get('completed') is not True
+
+    def _write_prefs_to_disk(self) -> None:
+        for path in (self.settings_path, self.config_path):
+            try:
+                with open(path, 'w', encoding='utf-8') as wf:
+                    json.dump(self.prefs, wf, indent=2)
+            except Exception as e:
+                _log_debug(f"_write_prefs_to_disk({path}) error: {e}")
+
     def _load_prefs(self) -> Dict[str, Any]:
-        if os.path.isfile(self.config_path):
+        # Prefer settings.json per spec; if missing or corrupt, treat as first run
+        settings_exists = os.path.isfile(self.settings_path)
+        source_path = self.settings_path if settings_exists else self.config_path
+        prefs: Dict[str, Any] | None = None
+
+        if settings_exists:
+            try:
+                with open(self.settings_path, 'r', encoding='utf-8') as f:
+                    loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    prefs = loaded
+                else:
+                    _log_debug("settings.json is not a JSON object; treating as first run")
+            except Exception as e:
+                _log_debug(f"settings.json is corrupt ({e}); treating as first run")
+                prefs = None
+        elif os.path.isfile(self.config_path):
             try:
                 with open(self.config_path, 'r', encoding='utf-8') as f:
-                    prefs = json.load(f)
+                    loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    prefs = loaded
+                    # Ensure missing settings.json triggers first-run onboarding unless already set
+                    if not isinstance(prefs.get('onboarding'), dict):
+                        prefs['onboarding'] = {'completed': False, 'version': 1}
+            except Exception:
+                prefs = None
+
+        if isinstance(prefs, dict):
+            try:
                 items = prefs.get('items')
                 if isinstance(items, list) and len(items) > 0:
                     existing_ids = set()
@@ -722,7 +771,6 @@ class FlankHostApi:
                     for def_item in DEFAULT_ITEMS:
                         did = def_item['id']
                         if did not in existing_ids and did not in migrated_ids:
-                            # Insert before widget-ai if present, else append
                             ai_idx = next((idx for idx, it in enumerate(items) if it.get('id') == 'widget-ai'), len(items))
                             items.insert(ai_idx, dict(def_item))
                             migrated_ids.add(did)
@@ -731,9 +779,9 @@ class FlankHostApi:
                             migrated_ids.add(did)
                             changed = True
                     prefs['migratedWidgets'] = list(migrated_ids)
-                    if changed:
+                    if changed and settings_exists:
                         try:
-                            with open(self.config_path, 'w', encoding='utf-8') as wf:
+                            with open(source_path, 'w', encoding='utf-8') as wf:
                                 json.dump(prefs, wf, indent=2)
                         except Exception:
                             pass
@@ -749,6 +797,8 @@ class FlankHostApi:
             'accentOverride': None,
             'reserveScreenSpace': False,
             'autostart': False,
+            'collapseHotkey': 'Ctrl+Alt+F',
+            'onboarding': {'completed': False, 'version': 1},
             'items': [dict(it) for it in DEFAULT_ITEMS],
             'migratedWidgets': [it['id'] for it in DEFAULT_ITEMS],
         }
@@ -1327,6 +1377,9 @@ class FlankHostApi:
             else:
                 user32.SetWindowRgn(hwnd, 0, True)
 
+            if self._dock_hidden_for_onboarding:
+                user32.ShowWindow(hwnd, 0)
+
             # Update backdrop for glass mode
             try:
                 sw = user32.GetSystemMetrics(0) or 1920
@@ -1496,6 +1549,9 @@ class FlankHostApi:
         self._card_hide_timer.start()
 
     def open_window(self, win_name: str) -> None:
+        if win_name == 'onboarding':
+            self.open_onboarding(replay=False)
+            return
         _log_debug(f"open_window called with: {win_name}")
         self.close_hover_card()
         if self._card_hide_timer:
@@ -1512,11 +1568,11 @@ class FlankHostApi:
         modal = windows.get('modal')
         if modal:
             try:
+                self._onboarding_active = False
                 self._modal_open = True
                 if hasattr(modal, 'native') and modal.native:
                     hwnd = modal.native.Handle.ToInt32()
                     scale = user32.GetDpiForWindow(hwnd) / 96.0 if user32.GetDpiForWindow(hwnd) > 0 else 1.0
-                    pad = self._modal_window_padding
                     shape_w, shape_h = 960, 680
                     wx, wy, ww, wh = get_work_area()
                     logical_wx = int(round(wx / scale))
@@ -1554,8 +1610,122 @@ class FlankHostApi:
             except Exception as e:
                 _log_debug(f"open_window error: {e}")
 
+    def open_onboarding(self, replay: bool = False) -> None:
+        _log_debug(f"open_onboarding called (replay={replay})")
+        self.close_hover_card()
+        if self._card_hide_timer:
+            self._card_hide_timer.cancel()
+            self._card_hide_timer = None
+        modal = windows.get('modal')
+        if not modal:
+            return
+        try:
+            self._onboarding_active = True
+            self._modal_open = True
+            if hasattr(modal, 'native') and modal.native:
+                hwnd = modal.native.Handle.ToInt32()
+                scale = user32.GetDpiForWindow(hwnd) / 96.0 if user32.GetDpiForWindow(hwnd) > 0 else 1.0
+                shape_w, shape_h = 880, 600
+                wx, wy, ww, wh = get_work_area()
+                logical_wx = int(round(wx / scale))
+                logical_wy = int(round(wy / scale))
+                logical_ww = int(round(ww / scale))
+                logical_wh = int(round(wh / scale))
+
+                shape_x = logical_wx + (logical_ww - shape_w) // 2
+                shape_y = logical_wy + (logical_wh - shape_h) // 2
+
+                pw = int(round(shape_w * scale))
+                ph = int(round(shape_h * scale))
+                px = int(round(shape_x * scale))
+                py = int(round(shape_y * scale))
+
+                setup_transparency(modal.native)
+                _dwm_set(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND)
+                user32.SetWindowRgn(hwnd, 0, True)
+
+                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0040)
+                user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+                user32.SetForegroundWindow(hwnd)
+                _log_debug("open_onboarding: modal window positioned at 880x600")
+
+            replay_js = 'true' if replay else 'false'
+            def _do_start():
+                try:
+                    modal.evaluate_js(
+                        f"window.flankStartOnboarding && window.flankStartOnboarding({{ replay: {replay_js} }})"
+                    )
+                except Exception as err:
+                    _log_debug(f"open_onboarding evaluate_js error: {err}")
+            threading.Thread(target=_do_start, daemon=True).start()
+        except Exception as e:
+            _log_debug(f"open_onboarding error: {e}")
+
+    def complete_onboarding(self, prefs_patch: Dict[str, Any], skipped: bool = False) -> Dict[str, Any]:
+        _log_debug(f"complete_onboarding called (skipped={skipped})")
+        self._onboarding_active = False
+        self._dock_hidden_for_onboarding = False
+        self._is_collapsed = False
+        if isinstance(prefs_patch, dict):
+            self.prefs.update(prefs_patch)
+        if not isinstance(self.prefs.get('onboarding'), dict) or not self.prefs['onboarding'].get('completed'):
+            self.prefs['onboarding'] = {
+                'completed': True,
+                'version': 1,
+                'completedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            }
+        self.prefs['dockState'] = 'expanded'
+        res = self.save_preferences(self.prefs)
+        self.close_window()
+
+        dock = windows.get('dock')
+        if dock and hasattr(dock, 'native') and dock.native:
+            try:
+                dock_hwnd = dock.native.Handle.ToInt32()
+                self.set_dock_state('expanded')
+                user32.ShowWindow(dock_hwnd, 4)  # SW_SHOWNOACTIVATE
+                remove_from_taskbar(dock_hwnd)
+                dock.evaluate_js("window.flankSetDockState && window.flankSetDockState('expanded')")
+            except Exception as e:
+                _log_debug(f"complete_onboarding show dock error: {e}")
+        return res
+
+    def skip_onboarding_on_close(self) -> None:
+        """Called when the user closes the onboarding window with X / Alt+F4 before finishing."""
+        if not self._onboarding_active:
+            return
+        _log_debug("skip_onboarding_on_close: applying skip defaults")
+        default_on_kinds = {'weather', 'battery', 'audio', 'focus', 'clock', 'clipboard'}
+        items = self.prefs.get('items') or [dict(it) for it in DEFAULT_ITEMS]
+        updated_items = []
+        for it in items:
+            if not isinstance(it, dict):
+                continue
+            copy_it = dict(it)
+            if copy_it.get('kind') == 'widget' or copy_it.get('group') == 'widgets':
+                wkind = copy_it.get('widgetKind') or copy_it.get('widget')
+                copy_it['enabled'] = wkind in default_on_kinds
+            elif copy_it.get('kind') == 'app' or copy_it.get('group') == 'apps':
+                copy_it['enabled'] = True
+            updated_items.append(copy_it)
+
+        patch = {
+            'themeId': 'paper',
+            'edgeOverride': 'right',
+            'accentOverride': '#2F4BFF',
+            'items': updated_items,
+            'dockState': 'expanded',
+            'onboarding': {
+                'completed': True,
+                'version': 1,
+                'completedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            },
+        }
+        self.complete_onboarding(patch, skipped=True)
+
     def close_window(self) -> None:
         self._modal_open = False
+        self._onboarding_active = False
         modal = windows.get('modal')
         if modal:
             try:
@@ -1710,8 +1880,7 @@ class FlankHostApi:
     def save_preferences(self, prefs: Dict[str, Any]) -> Dict[str, Any]:
         self.prefs.update(prefs)
         try:
-            with open(self.config_path, 'w', encoding='utf-8') as f:
-                json.dump(self.prefs, f, indent=2)
+            self._write_prefs_to_disk()
             self._apply_autostart(bool(self.prefs.get('autostart', False)))
 
             # Broadcast full preferences & items list to all open windows (dock, card, modal)
@@ -1727,23 +1896,17 @@ class FlankHostApi:
             self._broadcast_update(sync_payload)
 
             tid = self.prefs.get('themeId')
-            if tid:
-                for w in list(windows.values()):
-                    try:
-                        w.evaluate_js(f"window.flankSwitchTheme && window.flankSwitchTheme('{tid}')")
-                    except Exception:
-                        pass
-                if tid == 'liquid-glass':
-                    try:
-                        sw = user32.GetSystemMetrics(0) or 1920
-                        sh = user32.GetSystemMetrics(1) or 1080
-                        dock_x, dock_y, dock_w, dock_h = self._dock_shape_rect
-                        backdrop = self._wallpaper_mgr.get_backdrop(sw, sh, dock_x, dock_y, dock_w or 64, dock_h or 660)
-                        dock = windows.get('dock')
-                        if dock:
-                            dock.evaluate_js(f"window.flankUpdateBackdrop && window.flankUpdateBackdrop({json.dumps(backdrop)})")
-                    except Exception:
-                        pass
+            if tid == 'liquid-glass':
+                try:
+                    sw = user32.GetSystemMetrics(0) or 1920
+                    sh = user32.GetSystemMetrics(1) or 1080
+                    dock_x, dock_y, dock_w, dock_h = self._dock_shape_rect
+                    backdrop = self._wallpaper_mgr.get_backdrop(sw, sh, dock_x, dock_y, dock_w or 64, dock_h or 660)
+                    dock = windows.get('dock')
+                    if dock:
+                        dock.evaluate_js(f"window.flankUpdateBackdrop && window.flankUpdateBackdrop({json.dumps(backdrop)})")
+                except Exception:
+                    pass
 
             if self.hotkey_thread_id:
                 try:
@@ -1759,8 +1922,7 @@ class FlankHostApi:
         recommended = [dict(it) for it in DEFAULT_ITEMS]
         self.prefs['items'] = recommended
         try:
-            with open(self.config_path, 'w', encoding='utf-8') as f:
-                json.dump(self.prefs, f, indent=2)
+            self._write_prefs_to_disk()
             self._broadcast_update({'items': recommended})
         except Exception:
             pass
@@ -1769,8 +1931,7 @@ class FlankHostApi:
     def set_widgets_collapsed(self, collapsed: bool) -> Dict[str, Any]:
         self.prefs['widgetsCollapsed'] = bool(collapsed)
         try:
-            with open(self.config_path, 'w', encoding='utf-8') as f:
-                json.dump(self.prefs, f, indent=2)
+            self._write_prefs_to_disk()
             self._broadcast_update({'widgetsCollapsed': bool(collapsed)})
         except Exception:
             pass
@@ -1817,10 +1978,12 @@ def start_hotkey_listener(api: FlankHostApi) -> None:
             pass
         user32.RegisterHotKey(None, HOTKEY_SETTINGS, MOD_ALT | MOD_NOREPEAT, 0xBC)
 
-        collapse_combo = api.prefs.get('collapseHotkey', 'Ctrl+Alt+F')
+        collapse_combo = api.prefs.get('collapseHotkey') or 'Ctrl+Alt+F'
+        api.prefs['collapseHotkey'] = collapse_combo
         parsed_c = parse_shortcut_combo(collapse_combo)
         if parsed_c:
-            user32.RegisterHotKey(None, HOTKEY_COLLAPSE, parsed_c[0], parsed_c[1])
+            if not user32.RegisterHotKey(None, HOTKEY_COLLAPSE, parsed_c[0], parsed_c[1]):
+                _log_debug(f"WARNING: Hide hotkey '{collapse_combo}' could not be registered (already taken by another application).")
 
         items = api.prefs.get('items', [])
         for idx, item in enumerate(items):
@@ -1985,14 +2148,18 @@ def main() -> None:
         resizable=False,
     )
 
+    initial_modal_view = 'onboarding' if api._onboarding_active else 'modal'
+    initial_modal_w = 880 if api._onboarding_active else 960
+    initial_modal_h = 600 if api._onboarding_active else 680
+
     modal_window = webview.create_window(
-        title='Flank Settings',
-        url=f'{index_url}#modal',
+        title='Flank',
+        url=f'{index_url}#{initial_modal_view}',
         js_api=api,
         x=-9999,
         y=-9999,
-        width=960,
-        height=680,
+        width=initial_modal_w,
+        height=initial_modal_h,
         frameless=True,
         easy_drag=False,
         on_top=True,
@@ -2052,7 +2219,10 @@ def main() -> None:
             remove_from_taskbar(hwnd)
             _log_debug("on_dock_shown: remove_from_taskbar complete")
 
-            if api._is_collapsed:
+            if api._dock_hidden_for_onboarding:
+                _log_debug("on_dock_shown: hiding dock for first-run onboarding")
+                user32.ShowWindow(hwnd, 0)
+            elif api._is_collapsed:
                 _log_debug("on_dock_shown: starting collapsed")
                 api.set_dock_state('collapsed')
                 dock_window.evaluate_js("window.flankSetDockState && window.flankSetDockState('collapsed')")
@@ -2132,7 +2302,9 @@ def main() -> None:
             apply_window_icon(modal_window.native, icon_p)
             remove_from_taskbar(hwnd)
             setup_transparency(modal_window.native)
-            if not api._modal_open:
+            if api._onboarding_active:
+                api.open_onboarding(replay=False)
+            elif not api._modal_open:
                 user32.ShowWindow(hwnd, 0)
         except Exception:
             pass
@@ -2142,14 +2314,26 @@ def main() -> None:
             user32.ShowWindow(card_window.native.Handle.ToInt32(), 0)
 
     def on_modal_loaded():
-        if not api._modal_open and hasattr(modal_window, 'native') and modal_window.native:
+        if api._onboarding_active:
+            api.open_onboarding(replay=False)
+        elif not api._modal_open and hasattr(modal_window, 'native') and modal_window.native:
             user32.ShowWindow(modal_window.native.Handle.ToInt32(), 0)
+
+    def on_modal_closing():
+        if api._onboarding_active:
+            threading.Thread(target=api.skip_onboarding_on_close, daemon=True).start()
+            return False
+        if api._modal_open:
+            api.close_window()
+            return False
+        return True
 
     dock_window.events.shown += on_dock_shown
     card_window.events.shown += on_card_shown
     modal_window.events.shown += on_modal_shown
     card_window.events.loaded += on_card_loaded
     modal_window.events.loaded += on_modal_loaded
+    modal_window.events.closing += on_modal_closing
 
     _log_debug("webview.start() calling...")
     webview.start(gui='edgechromium', debug=False)

@@ -11,6 +11,14 @@
 
 ## Flank in Action
 
+<p align="center">
+  <a href="docs/screens/showcase/flank-promo.mp4" title="Watch Full 1080p60 Launch Film with Audio (MP4)">
+    <img src="docs/screens/showcase/flank-promo.gif" alt="Flank — 35s Launch Film" width="840" />
+  </a>
+  <br/>
+  <sub>🎬 <a href="docs/screens/showcase/flank-promo.mp4"><strong>Watch the full 1080p60 launch film with audio (MP4)</strong></a></sub>
+</p>
+
 ### Desktop Overview & Themes
 
 | Aurora / Liquid Glass Desktop | Settings & Live Weather Flyout |

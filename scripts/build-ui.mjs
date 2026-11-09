@@ -7,6 +7,18 @@ const rootDir = 'C:\\Users\\NANDHA KRISHNA\\Documents\\GitHub\\Flank';
 const entryFile = path.join(rootDir, 'src', 'main.ts');
 const outFile = path.join(rootDir, 'public', 'bundle.js');
 
+const tokensSrc = path.join(rootDir, 'themes', 'tokens.css');
+const tokensDst = path.join(rootDir, 'public', 'tokens.css');
+if (fs.existsSync(tokensSrc)) {
+  fs.copyFileSync(tokensSrc, tokensDst);
+}
+
+const onboardingCssSrc = path.join(rootDir, 'src', 'ui', 'onboarding', 'onboarding.css');
+const onboardingCssDst = path.join(rootDir, 'public', 'onboarding.css');
+if (fs.existsSync(onboardingCssSrc)) {
+  fs.copyFileSync(onboardingCssSrc, onboardingCssDst);
+}
+
 if (fs.existsSync(esbuildExe)) {
   execFileSync(
     esbuildExe,
