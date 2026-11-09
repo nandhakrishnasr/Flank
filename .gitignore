@@ -2,20 +2,55 @@
 node_modules/
 __pycache__/
 *.pyc
+.venv/
+venv/
 
-# Build outputs
+# Build & packaging outputs
 build/
 dist/
 *.spec
 *.zip
 *.rar
-!website/assets/brand/**/*.png
+*.exe
+*.msi
 
-# Logs
+# Logs & local runtime state
 *.log
 flank_debug.log
 flank_stderr.log
 flank_stdout.log
+.env
+.env.*
+
+# Internal agent prompts, design canvas mockups & QA dumps
+AGENT_PROMPT.md
+*PROMPT*.md
+reference/
+docs/design/AGENT_PROMPT.md
+docs/design/ANTIGRAVITY_PROMPT.md
+docs/design/reference/
+docs/design/qa/
+docs/design/verification/
+docs/design/themes/
+docs/QA_LAYOUT.md
+docs/QA_REPORT.md
+docs/screenshots/
+assets/brand/legacy/
+public/_screenshot_harness.html
+scripts/package_claude_bundle.py
+scripts/verify_part_a.py
+scripts/verify_part_b.py
+scripts/capture_layout_verification.py
+scripts/capture_all_screens.py
+scripts/capture_brand_screens.py
+scripts/render_promo_video.py
+
+# Redundant raw QA sweep screenshot dumps (keep curated docs/screens/ showcase, brand, onboarding & widget galleries)
+docs/screens/liquid_glass_100/
+docs/screens/liquid_glass_150/
+docs/screens/paper_100/
+docs/screens/paper_150/
+docs/screens/showcase/brand_*.png
 
 # Temporary test captures and screen snips
 *.png
@@ -23,6 +58,14 @@ flank_stdout.log
 !assets/**/*.png
 !docs/screens/**/*.png
 !docs/screens/**/*.jpg
+!docs/screens/**/*.gif
+!docs/screens/**/*.mp4
+assets/brand/legacy/**
+docs/screens/liquid_glass_100/**
+docs/screens/liquid_glass_150/**
+docs/screens/paper_100/**
+docs/screens/paper_150/**
+docs/screens/showcase/brand_*.png
 test_output.png
 test_*.png
 snap_*.png
