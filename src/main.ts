@@ -229,8 +229,8 @@ window.flankOpenModal = (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'set
     currentView = 'modal';
     document.body.setAttribute('data-view', 'modal');
     lastRenderedOnboardingStep = null;
-    applyCurrentThemeSelection();
   }
+  applyCurrentThemeSelection();
   state.activeFullWindow = win;
   renderApp();
 };

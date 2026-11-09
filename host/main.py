@@ -1401,7 +1401,16 @@ class FlankHostApi:
         setup_transparency(windows['card'].native)
         radius = cradius if cradius > 0 else 20
         diameter = int(round(radius * 2 * scale))
-        user32.SetWindowPos(hwnd, 0, 0, 0, pw, ph, 0x0002 | 0x0010)  # SWP_NOMOVE | SWP_NOACTIVATE
+        wx, wy, ww, wh = get_work_area()
+        rc = RECT()
+        if user32.GetWindowRect(hwnd, ctypes.byref(rc)):
+            px = rc.left
+            py = rc.top
+            if py + ph > wy + wh - 10:
+                py = max(wy + 10, wy + wh - ph - 10)
+            user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010)  # SWP_NOZORDER | SWP_NOACTIVATE
+        else:
+            user32.SetWindowPos(hwnd, 0, 0, 0, pw, ph, 0x0002 | 0x0010)  # SWP_NOMOVE | SWP_NOACTIVATE
         rgn = gdi32.CreateRoundRectRgn(0, 0, pw + 1, ph + 1, diameter, diameter)
         user32.SetWindowRgn(hwnd, rgn, True)
         if not self._card_open:
@@ -1448,18 +1457,18 @@ class FlankHostApi:
 
         CARD_HEIGHTS = {
             'stats': 380,
-            'audio': 295,
+            'audio': 320,
             'calendar': 340,
             'agenda': 340,
             'weather': 260,
             'battery': 275,
-            'player': 235,
+            'player': 240,
             'focus': 240,
             'network': 290,
-            'bluetooth': 290,
+            'bluetooth': 520,
             'ai_usage': 270,
             'scratchpad': 290,
-            'clipboard': 300,
+            'clipboard': 320,
             'clock': 245,
         }
         cw, _, cradius = self._card_shape_size
@@ -1485,6 +1494,8 @@ class FlankHostApi:
         py = int(round(shape_card_y * scale))
 
         try:
+            tid = self.prefs.get('themeId', 'paper')
+            card.evaluate_js(f"window.flankSwitchTheme && window.flankSwitchTheme('{tid}')")
             card.evaluate_js(f"window.flankShowCard && window.flankShowCard('{kind}')")
             if hasattr(card, 'native') and card.native:
                 hwnd = card.native.Handle.ToInt32()
@@ -1602,8 +1613,20 @@ class FlankHostApi:
                 # Asynchronously trigger JS navigation without blocking the UI thread
                 def _do_nav():
                     try:
+                        tid = self.prefs.get('themeId', 'paper')
+                        sync_payload = {
+                            'themeId': tid,
+                            'edgeOverride': self.prefs.get('edgeOverride'),
+                            'accentOverride': self.prefs.get('accentOverride'),
+                            'reserveScreenSpace': bool(self.prefs.get('reserveScreenSpace', False)),
+                            'autostart': bool(self.prefs.get('autostart', False)),
+                            'widgetsCollapsed': bool(self.prefs.get('widgetsCollapsed', False)),
+                            'items': self.prefs.get('items', []),
+                        }
+                        modal.evaluate_js(f'window.flankReceiveHostUpdate && window.flankReceiveHostUpdate({json.dumps(sync_payload)})')
+                        modal.evaluate_js(f"window.flankSwitchTheme && window.flankSwitchTheme('{tid}')")
                         modal.evaluate_js(f"window.flankOpenModal && window.flankOpenModal('{win_name}')")
-                        _log_debug(f"open_window: evaluated flankOpenModal('{win_name}')")
+                        _log_debug(f"open_window: evaluated flankOpenModal('{win_name}') with theme {tid}")
                     except Exception as err:
                         _log_debug(f"open_window evaluate_js error: {err}")
                 threading.Thread(target=_do_nav, daemon=True).start()
@@ -2335,14 +2358,25 @@ def main() -> None:
             pass
 
     def on_card_loaded():
+        try:
+            tid = api.prefs.get('themeId', 'paper')
+            card_window.evaluate_js(f"window.flankSwitchTheme && window.flankSwitchTheme('{tid}')")
+        except Exception:
+            pass
         if not api._card_open and hasattr(card_window, 'native') and card_window.native:
             user32.ShowWindow(card_window.native.Handle.ToInt32(), 0)
 
     def on_modal_loaded():
         if api._onboarding_active:
             api.open_onboarding(replay=False)
-        elif not api._modal_open and hasattr(modal_window, 'native') and modal_window.native:
-            user32.ShowWindow(modal_window.native.Handle.ToInt32(), 0)
+        else:
+            try:
+                tid = api.prefs.get('themeId', 'paper')
+                modal_window.evaluate_js(f"window.flankSwitchTheme && window.flankSwitchTheme('{tid}')")
+            except Exception:
+                pass
+            if not api._modal_open and hasattr(modal_window, 'native') and modal_window.native:
+                user32.ShowWindow(modal_window.native.Handle.ToInt32(), 0)
 
     def on_modal_closing():
         if api._onboarding_active:

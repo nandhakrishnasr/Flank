@@ -155,31 +155,31 @@ body[data-view="dock"] [data-edge] .flank-dock {
    - Glass themes: Glass, Liquid Glass, Aurora (translucent + backdrop filter + rim)
    ============================================================================ */
 
-/* Solid themes: STRICTLY disable backdrop-filter to eliminate wallpaper stripes */
+/* Solid themes & Glass theme: STRICTLY disable backdrop-filter to eliminate wallpaper stripes / transparent Skia whiteout */
 html[data-theme="paper"] body[data-view="dock"] .flank-dock,
 html[data-theme="nord"] body[data-view="dock"] .flank-dock,
 html[data-theme="terminal"] body[data-view="dock"] .flank-dock,
 html[data-theme="rail"] body[data-view="dock"] .flank-dock,
+html[data-theme="glass"] body[data-view="dock"] .flank-dock,
 html[data-theme="paper"] body[data-view="card"] .flank-card,
 html[data-theme="nord"] body[data-view="card"] .flank-card,
 html[data-theme="terminal"] body[data-view="card"] .flank-card,
 html[data-theme="rail"] body[data-view="card"] .flank-card,
+html[data-theme="glass"] body[data-view="card"] .flank-card,
 html[data-theme="paper"] body[data-view="modal"] .flank-window,
 html[data-theme="nord"] body[data-view="modal"] .flank-window,
 html[data-theme="terminal"] body[data-view="modal"] .flank-window,
-html[data-theme="rail"] body[data-view="modal"] .flank-window {
+html[data-theme="rail"] body[data-view="modal"] .flank-window,
+html[data-theme="glass"] body[data-view="modal"] .flank-window {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* Glass themes: translucent backdrop blur */
-html[data-theme="glass"] body[data-view="dock"] .flank-dock,
+/* Sampled backdrop glass themes: translucent backdrop blur */
 html[data-theme="liquid-glass"] body[data-view="dock"] .flank-dock,
 html[data-theme="aurora"] body[data-view="dock"] .flank-dock,
-html[data-theme="glass"] body[data-view="card"] .flank-card,
 html[data-theme="liquid-glass"] body[data-view="card"] .flank-card,
 html[data-theme="aurora"] body[data-view="card"] .flank-card,
-html[data-theme="glass"] body[data-view="modal"] .flank-window,
 html[data-theme="liquid-glass"] body[data-view="modal"] .flank-window,
 html[data-theme="aurora"] body[data-view="modal"] .flank-window {
   backdrop-filter: blur(var(--flank-surface-backdrop-blur, 30px)) saturate(var(--flank-surface-backdrop-saturate, 1.8)) !important;
@@ -358,7 +358,7 @@ body[data-view="card"] .flank-stage {
 }
 
 body[data-view="card"] .flank-card {
-  position: static !important;
+  position: relative !important;
   width: var(--flank-surface-card-width) !important;
   height: auto !important;
   max-height: none !important;
@@ -2377,8 +2377,8 @@ a:focus-visible,
   padding: 0 10px;
   border-radius: var(--flank-scale-radius-8, 8px);
   border: var(--flank-scale-hairline) solid var(--flank-color-divider);
-  background: var(--flank-color-tile-bg-hover, rgba(128, 128, 128, 0.1));
-  color: var(--flank-color-text);
+  background: var(--flank-color-tile-bg-hover, rgba(255, 255, 255, 0.08));
+  color: var(--flank-color-text, #ffffff);
   font-size: var(--flank-scale-font-body-sm, 12px);
   outline: none;
   transition: border-color 120ms ease, box-shadow 120ms ease;
@@ -3312,12 +3312,12 @@ html[data-theme="paper"] body[data-view="card"] .flank-card {
   box-shadow: inset 0 1px 0 #ffffff, 0 8px 24px rgba(60, 50, 30, 0.14), 0 2px 6px rgba(60, 50, 30, 0.08) !important;
 }
 
-/* Glass: Frosted Crystal Ice Prism Gradient */
+/* Glass: Frosted Crystal Ice Prism Gradient with dark translucent backing */
 html[data-theme="glass"] .flank-card,
 html[data-theme="glass"] body[data-view="card"] .flank-card {
-  background: linear-gradient(168deg, rgba(255, 255, 255, 0.26) 0%, rgba(235, 245, 255, 0.14) 45%, rgba(205, 225, 255, 0.08) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.38) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 24px rgba(255, 255, 255, 0.16), 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+  background: linear-gradient(168deg, rgba(255, 255, 255, 0.22) 0%, rgba(200, 225, 255, 0.10) 45%, rgba(160, 200, 255, 0.05) 100%), rgba(16, 24, 44, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 0 20px rgba(255, 255, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
 }
 
 /* Liquid Glass: Deep Obsidian Neon Mint Refractive Gradient */
