@@ -125,6 +125,7 @@ declare global {
     flankOpenModal?: (win: 'clipboard' | 'stats' | 'battery' | 'clock' | 'settings' | 'onboarding') => void;
     flankStartOnboarding?: (opts?: { replay?: boolean; step?: OnboardingStep }) => void;
     flankSkipOnboardingFromHost?: () => Record<string, unknown> | null;
+    flankSyncPreferences?: (prefs: Partial<FlankState>) => void;
     flankUpdateBackdrop?: (backdrop: any) => void;
     flankSetDockState?: (state: string) => void;
     flankGetDockState?: () => string;
@@ -772,20 +773,19 @@ async function completeOnboardingFlow(
 }
 
 function setupEventDelegation(): void {
-  // Capture-phase click listener on document guarantees clicking the collapsed edge tab always expands dock
-  document.addEventListener(
-    'click',
-    (ev) => {
-      const target = ev.target as HTMLElement | null;
-      const expandBtn = target?.closest<HTMLElement>('[data-action="expand-dock"], .flank-dock-tab');
-      if (expandBtn || (currentView === 'dock' && isDockCollapsed() && target?.closest('#flank-dock'))) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        expandDock();
-      }
-    },
-    true
-  );
+  // Capture-phase click & pointerdown listeners on document guarantee clicking the collapsed edge tab always expands dock
+  const handleDockExpand = (ev: Event) => {
+    const target = ev.target as HTMLElement | null;
+    const expandBtn = target?.closest<HTMLElement>('[data-action="expand-dock"], .flank-dock-tab');
+    if (expandBtn || (currentView === 'dock' && isDockCollapsed())) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      expandDock();
+    }
+  };
+
+  document.addEventListener('click', handleDockExpand, true);
+  document.addEventListener('pointerdown', handleDockExpand, true);
 
   const stage = document.getElementById('flank-stage');
   if (!stage) return;
@@ -2413,6 +2413,11 @@ window.flankOnIconResolved = (data: { id: string; iconUri: string; iconPath?: st
 
 window.flankSetDockState = (newState: string) => {
   setDockState(newState as any);
+  renderApp();
+};
+
+window.flankSyncPreferences = (payload: Partial<FlankState>) => {
+  window.flankReceiveHostUpdate?.(payload);
   renderApp();
 };
 

@@ -6572,19 +6572,17 @@ async function completeOnboardingFlow(result, skipped) {
   }
 }
 function setupEventDelegation() {
-  document.addEventListener(
-    "click",
-    (ev) => {
-      const target = ev.target;
-      const expandBtn = target?.closest('[data-action="expand-dock"], .flank-dock-tab');
-      if (expandBtn || currentView === "dock" && isDockCollapsed() && target?.closest("#flank-dock")) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        expandDock();
-      }
-    },
-    true
-  );
+  const handleDockExpand = (ev) => {
+    const target = ev.target;
+    const expandBtn = target?.closest('[data-action="expand-dock"], .flank-dock-tab');
+    if (expandBtn || currentView === "dock" && isDockCollapsed()) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      expandDock();
+    }
+  };
+  document.addEventListener("click", handleDockExpand, true);
+  document.addEventListener("pointerdown", handleDockExpand, true);
   const stage = document.getElementById("flank-stage");
   if (!stage) return;
   let draggedItemId = null;
@@ -8091,6 +8089,10 @@ window.flankOnIconResolved = (data) => {
 };
 window.flankSetDockState = (newState) => {
   setDockState(newState);
+  renderApp();
+};
+window.flankSyncPreferences = (payload) => {
+  window.flankReceiveHostUpdate?.(payload);
   renderApp();
 };
 window.flankReceiveHostUpdate = (patch) => {

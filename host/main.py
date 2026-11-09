@@ -2107,12 +2107,36 @@ def main() -> None:
     api._card_window_padding = pad
     api._modal_window_padding = pad
 
+    scale = 1.0
+    try:
+        shcore = ctypes.windll.shcore
+        shcore.SetProcessDpiAwareness(2)
+        dpi = user32.GetDpiForSystem()
+        if dpi > 0:
+            scale = dpi / 96.0
+    except Exception:
+        scale = 1.0
+
+    logical_wx = int(round(wx / scale))
+    logical_wy = int(round(wy / scale))
+    logical_ww = int(round(ww / scale))
+    logical_wh = int(round(wh / scale))
+
+    edge = api.prefs.get('edgeOverride') or 'right'
     enabled_count = len([it for it in api.prefs.get('items', []) if isinstance(it, dict) and it.get('enabled', True)])
-    dock_w = 64
-    dock_h = max(120, min(wh - 16, enabled_count * 48 + 52))
-    dock_x = wx + ww - dock_w - 12
-    dock_y = wy + (wh - dock_h) // 2
-    api._dock_shape_rect = (dock_x, dock_y, dock_w, dock_h)
+    logical_dock_w = 64
+    logical_dock_h = max(120, min(logical_wh - 16, enabled_count * 48 + 52))
+    if edge == 'left':
+        logical_dock_x = logical_wx + 12
+    else:
+        logical_dock_x = logical_wx + logical_ww - logical_dock_w - 12
+    logical_dock_y = logical_wy + (logical_wh - logical_dock_h) // 2
+    api._dock_shape_rect = (logical_dock_x, logical_dock_y, logical_dock_w, logical_dock_h)
+
+    dock_x = int(round(logical_dock_x * scale))
+    dock_y = int(round(logical_dock_y * scale))
+    dock_w = int(round(logical_dock_w * scale))
+    dock_h = int(round(logical_dock_h * scale))
 
     dock_window = webview.create_window(
         title='Flank',
@@ -2300,8 +2324,9 @@ def main() -> None:
             hwnd = modal_window.native.Handle.ToInt32()
             icon_p = resolve_icon_path()
             apply_window_icon(modal_window.native, icon_p)
-            remove_from_taskbar(hwnd)
-            setup_transparency(modal_window.native)
+            if not api._onboarding_active:
+                remove_from_taskbar(hwnd)
+                setup_transparency(modal_window.native)
             if api._onboarding_active:
                 api.open_onboarding(replay=False)
             elif not api._modal_open:

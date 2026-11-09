@@ -591,17 +591,28 @@ html[data-theme="aurora"] .flank-dock-tab:hover {
   background: var(--flank-surface-dock-bg);
 }
 
-html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab {
+html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab,
+html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab:hover,
+html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab.has-logo,
+html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab.has-logo:hover {
   width: 100% !important;
   height: 100% !important;
   min-height: 100% !important;
   max-height: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
   opacity: 0.92;
 }
 
 html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab:hover {
-  width: 100% !important;
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 /* Edge-specific tab borders & inward radii */
