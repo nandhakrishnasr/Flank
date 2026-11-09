@@ -262,7 +262,10 @@ window.flankUpdateBackdrop = (data: {
   useTextShadow?: boolean;
 }) => {
   const root = document.documentElement;
-  if (!data || data.solidFallback || !data.enabled) {
+  const curTheme = themeEngine.getCurrentTheme();
+  const isWallpaperSampled = curTheme.id !== 'glass' && Boolean(curTheme.glass && curTheme.glass.mode === 'wallpaper-sampled');
+
+  if (!data || data.solidFallback || !data.enabled || !isWallpaperSampled) {
     if (data?.solidFallback) {
       root.setAttribute('data-transparency-effects', 'disabled');
     } else {
@@ -739,6 +742,12 @@ function applyCurrentThemeSelection(): void {
     uiState.themeValidationMsg = `Theme fell back to Paper: ${res.errors.join(' ')}`;
   } else {
     uiState.themeValidationMsg = null;
+  }
+  const cur = themeEngine.getCurrentTheme();
+  if (cur.id !== 'liquid-glass' && (!cur.glass || cur.glass.mode !== 'wallpaper-sampled')) {
+    document.documentElement.style.removeProperty('--flank-glass-wallpaper-url');
+    document.documentElement.style.removeProperty('--flank-glass-wallpaper-size');
+    document.documentElement.style.removeProperty('--flank-glass-wallpaper-pos');
   }
 }
 

@@ -48,7 +48,7 @@
     "selected": "rgba(255,255,255,0.26)"
   },
   "glass": {
-    "mode": "wallpaper-sampled",
+    "mode": "css-only",
     "tintRgb": "245,250,255",
     "tintAlpha": 0.18,
     "tintAlphaMin": 0.12,

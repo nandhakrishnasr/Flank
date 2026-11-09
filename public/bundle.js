@@ -123,7 +123,7 @@ var GLASS_THEME = {
     selected: "rgba(255,255,255,0.26)"
   },
   glass: {
-    mode: "wallpaper-sampled",
+    mode: "css-only",
     tintRgb: "245,250,255",
     tintAlpha: 0.18,
     tintAlphaMin: 0.12,
@@ -429,47 +429,47 @@ var AURORA_THEME = {
     windowPadding: "16px"
   },
   surface: {
-    dockBg: "#160a2e",
-    dockBorder: "rgba(255,255,255,0.20)",
-    dockShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 10px rgba(0,0,0,0.35)",
+    dockBg: "rgba(24, 12, 48, 0.85)",
+    dockBorder: "rgba(255,255,255,0.18)",
+    dockShadow: "inset 0 1px 0 rgba(255,255,255,0.30), inset 0 0 14px rgba(168,85,247,0.15), 0 4px 12px rgba(0,0,0,0.40)",
     backdropBlur: "26px",
     backdropSaturate: "1.5",
-    cardBg: "#1c0f38",
-    cardBorder: "rgba(255,255,255,0.20)",
-    cardShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 10px rgba(0,0,0,0.40)",
+    cardBg: "rgba(28, 14, 56, 0.88)",
+    cardBorder: "rgba(255,255,255,0.18)",
+    cardShadow: "inset 0 1px 0 rgba(255,255,255,0.30), inset 0 0 16px rgba(168,85,247,0.15), 0 4px 12px rgba(0,0,0,0.40)",
     cardRadius: "16px",
     cardPadding: "18px",
     cardWidth: "292px",
     cardGap: "14px",
     cardOffset: "10px",
-    solidFallbackBg: "#160a2e",
-    opacity: 1,
-    highlight: "inset 0 1px 0 rgba(255,255,255,0.25)",
-    hover: "rgba(255,255,255,0.08)",
-    active: "rgba(255,255,255,0.16)",
-    selected: "rgba(255,255,255,0.24)"
+    solidFallbackBg: "#180c30",
+    opacity: 0.85,
+    highlight: "inset 0 1px 0 rgba(255,255,255,0.30)",
+    hover: "rgba(255,255,255,0.10)",
+    active: "rgba(255,255,255,0.18)",
+    selected: "rgba(255,255,255,0.26)"
   },
   color: {
     text: "#ffffff",
-    textMuted: "#ddd3f5",
-    tileBg: "rgba(255,255,255,0.12)",
-    tileBgHover: "rgba(255,255,255,0.20)",
-    tileBgPressed: "rgba(255,255,255,0.28)",
+    textMuted: "#bfaedb",
+    tileBg: "rgba(255,255,255,0.08)",
+    tileBgHover: "rgba(255,255,255,0.16)",
+    tileBgPressed: "rgba(255,255,255,0.24)",
     tileIcon: "#ffffff",
-    tileActiveBg: "linear-gradient(135deg,#db2777,#7c3aed)",
+    tileActiveBg: "linear-gradient(135deg,#a855f7,#ec4899)",
     tileActiveIcon: "#ffffff",
-    divider: "rgba(255,255,255,0.10)",
-    dividerSoft: "rgba(255,255,255,0.06)",
-    trackBg: "rgba(255,255,255,0.14)",
+    divider: "rgba(255,255,255,0.14)",
+    dividerSoft: "rgba(255,255,255,0.08)",
+    trackBg: "rgba(255,255,255,0.16)",
     accent: "#f472b6",
     accent2: "#8b5cf6",
     accentCyan: "#67e8f9",
     accentPink: "#f0abfc",
     accentGradient: "linear-gradient(90deg,#f472b6,#8b5cf6)",
-    accentInk: "#ffffff",
+    accentInk: "#18062b",
     accentSoft: "rgba(244,114,182,0.16)",
     accentLine: "rgba(244,114,182,0.4)",
-    focusRing: "#f0abfc",
+    focusRing: "#c084fc",
     iconPlate: "rgba(255,255,255,0.10)",
     iconPlateBorder: "rgba(255,255,255,0.18)",
     iconPlateShadow: "0 2px 6px rgba(0,0,0,0.25)"
@@ -6131,7 +6131,9 @@ window.flankSwitchTheme = (themeId) => {
 };
 window.flankUpdateBackdrop = (data) => {
   const root = document.documentElement;
-  if (!data || data.solidFallback || !data.enabled) {
+  const curTheme = themeEngine.getCurrentTheme();
+  const isWallpaperSampled = curTheme.id !== "glass" && Boolean(curTheme.glass && curTheme.glass.mode === "wallpaper-sampled");
+  if (!data || data.solidFallback || !data.enabled || !isWallpaperSampled) {
     if (data?.solidFallback) {
       root.setAttribute("data-transparency-effects", "disabled");
     } else {
@@ -6153,9 +6155,9 @@ window.flankUpdateBackdrop = (data) => {
     root.style.setProperty("--flank-glass-wallpaper-pos", `-${data.shapeX}px -${data.shapeY}px`);
   }
   if (data.adaptiveAlpha !== void 0) {
-    const curTheme = themeEngine.getCurrentTheme();
-    if (curTheme.glass) {
-      const tintRgb = curTheme.glass.tintRgb || "16,20,42";
+    const curTheme2 = themeEngine.getCurrentTheme();
+    if (curTheme2.glass) {
+      const tintRgb = curTheme2.glass.tintRgb || "16,20,42";
       root.style.setProperty("--flank-surface-dock-bg", `rgba(${tintRgb}, ${data.adaptiveAlpha})`);
       root.style.setProperty("--flank-surface-card-bg", `rgba(${tintRgb}, ${data.adaptiveAlpha})`);
     }
@@ -6573,6 +6575,12 @@ function applyCurrentThemeSelection() {
     uiState.themeValidationMsg = `Theme fell back to Paper: ${res.errors.join(" ")}`;
   } else {
     uiState.themeValidationMsg = null;
+  }
+  const cur = themeEngine.getCurrentTheme();
+  if (cur.id !== "liquid-glass" && (!cur.glass || cur.glass.mode !== "wallpaper-sampled")) {
+    document.documentElement.style.removeProperty("--flank-glass-wallpaper-url");
+    document.documentElement.style.removeProperty("--flank-glass-wallpaper-size");
+    document.documentElement.style.removeProperty("--flank-glass-wallpaper-pos");
   }
 }
 async function completeOnboardingFlow(result, skipped) {
