@@ -225,6 +225,8 @@ html[data-edge="left"] [data-edge] .flank-dock {
   display: var(--flank-glass-display, none);
   position: absolute;
   inset: 0;
+  width: 100% !important;
+  height: 100% !important;
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;

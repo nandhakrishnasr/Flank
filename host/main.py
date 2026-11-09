@@ -585,6 +585,25 @@ def setup_transparency(form) -> None:
         pass
 
 
+def _sync_card_form_size(form, pw: int, ph: int) -> None:
+    """Synchronize WinForms Form and its WebView2 child control bounds to match the native window size."""
+    if not form or not Drawing or not System:
+        return
+    try:
+        def _do_sync():
+            try:
+                form.ClientSize = Drawing.Size(pw, ph)
+                form.PerformLayout()
+            except Exception:
+                pass
+        if form.InvokeRequired:
+            form.BeginInvoke(System.Action(_do_sync))
+        else:
+            _do_sync()
+    except Exception:
+        pass
+
+
 def strip_dwm_chrome(hwnd: int) -> None:
     """Disable DWM's own rounded corners and border."""
     _dwm_set(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_DONOTROUND)
@@ -678,7 +697,7 @@ class FlankHostApi:
         self._dock_window_padding: int = 0
         self._card_window_padding: int = 0
         self._modal_window_padding: int = 0
-        self._card_shape_size: tuple[int, int, int] = (292, 240, 20)
+        self._card_shape_size: tuple[int, int, int] = (320, 292, 20)
         self._dock_shape_rect: tuple[int, int, int, int] = (0, 0, 60, 660)
         self._wallpaper_mgr = WallpaperManager()
         self._is_collapsed = (
@@ -1415,11 +1434,13 @@ class FlankHostApi:
             user32.SetWindowPos(hwnd, 0, 0, 0, pw, ph, 0x0002 | 0x0010)  # SWP_NOMOVE | SWP_NOACTIVATE
         rgn = gdi32.CreateRoundRectRgn(0, 0, pw + 1, ph + 1, diameter, diameter)
         user32.SetWindowRgn(hwnd, rgn, True)
+        card = windows.get('card')
+        if card and hasattr(card, 'native') and card.native:
+            _sync_card_form_size(card.native, pw, ph)
         if not self._card_open:
             user32.ShowWindow(hwnd, 0)
         else:
             try:
-                card = windows.get('card')
                 if card:
                     sw = user32.GetSystemMetrics(0) or 1920
                     sh = user32.GetSystemMetrics(1) or 1080
@@ -1468,24 +1489,29 @@ class FlankHostApi:
         logical_wh = int(round(wh / scale))
 
         CARD_HEIGHTS = {
-            'stats': 390,
-            'audio': 330,
+            'stats': 400,
+            'audio': 340,
             'calendar': 360,
             'agenda': 360,
-            'weather': 270,
-            'battery': 280,
-            'player': 240,
-            'focus': 240,
-            'network': 300,
-            'bluetooth': 520,
-            'ai_usage': 280,
-            'scratchpad': 300,
-            'clipboard': 340,
-            'clock': 400,
+            'weather': 290,
+            'battery': 290,
+            'player': 250,
+            'focus': 292,
+            'network': 310,
+            'bluetooth': 540,
+            'ai_usage': 290,
+            'ai': 290,
+            'scratchpad': 310,
+            'clipboard': 350,
+            'clock': 420,
+            'activity': 320,
+            'colorpicker': 290,
         }
+        cur_theme = self.prefs.get('themeId', 'paper')
+        default_cw = 320 if cur_theme in ('glass', 'liquid-glass') else 292
         cw, _, cradius = self._card_shape_size
-        cw = max(304, cw)
-        ch = CARD_HEIGHTS.get(kind, 280)
+        cw = max(default_cw, cw)
+        ch = CARD_HEIGHTS.get(kind, 292)
         self._card_shape_size = (cw, ch, cradius)
 
         dock_x, dock_y, dock_w, dock_h = self._dock_shape_rect
@@ -1518,6 +1544,7 @@ class FlankHostApi:
                 user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | 0x0040)
                 rgn = gdi32.CreateRoundRectRgn(0, 0, pw + 1, ph + 1, diameter, diameter)
                 user32.SetWindowRgn(hwnd, rgn, True)
+                _sync_card_form_size(card.native, pw, ph)
                 user32.ShowWindow(hwnd, 4)  # SW_SHOWNOACTIVATE
 
                 try:
@@ -2196,8 +2223,8 @@ def main() -> None:
         js_api=api,
         x=-9999,
         y=-9999,
-        width=292,
-        height=240,
+        width=320,
+        height=600,
         min_size=(10, 10),
         frameless=True,
         easy_drag=False,
