@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/png/fflank-wordmark-white-1600.png" alt="Flank" width="340" />
+  <img src="assets/brand/png/flank-wordmark-white-1600.png" alt="Flank" width="340" />
 </p>
 
 <p align="center">
