@@ -361,10 +361,10 @@ body[data-view="card"] .flank-card {
   overflow: hidden !important;
   transform: none !important;
   animation: none !important;
-  box-shadow: var(--flank-surface-highlight, none) !important;
+  box-shadow: var(--flank-surface-card-shadow, var(--flank-surface-highlight, none)) !important;
   border-radius: var(--flank-surface-card-radius) !important;
   border: var(--flank-scale-hairline) solid var(--flank-surface-card-border) !important;
-  background: var(--flank-surface-card-bg) !important;
+  background: var(--flank-surface-card-gradient, var(--flank-surface-card-bg)) !important;
   margin: 0 !important;
   box-sizing: border-box !important;
 }
@@ -3203,62 +3203,62 @@ html[data-theme="liquid-glass"] body[data-view="modal"] .flank-stat-label {
 }
 
 /* Form controls & inputs: High-contrast visibility across light and dark modal views */
-html[data-theme="paper"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="paper"] body[data-view="modal"] .flank-input,
-html[data-theme="paper"] body[data-view="modal"] select.flank-input,
-html[data-theme="paper"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+html[data-theme="paper"] .flank-ui-input,
+html[data-theme="paper"] .flank-input,
+html[data-theme="paper"] select.flank-input,
+html[data-theme="paper"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
   background: #ffffff !important;
   border: var(--flank-scale-hairline) solid var(--flank-color-divider, #e2ded4) !important;
   color: #1f1e1b !important;
 }
 
-html[data-theme="paper"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="paper"] body[data-view="modal"] .flank-input::placeholder {
+html[data-theme="paper"] .flank-ui-input::placeholder,
+html[data-theme="paper"] .flank-input::placeholder {
   color: #6b665c !important;
   opacity: 0.7 !important;
 }
 
-html[data-theme="rail"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="rail"] body[data-view="modal"] .flank-input,
-html[data-theme="rail"] body[data-view="modal"] select.flank-input,
-html[data-theme="rail"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html[data-theme="nord"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="nord"] body[data-view="modal"] .flank-input,
-html[data-theme="nord"] body[data-view="modal"] select.flank-input,
-html[data-theme="nord"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html[data-theme="terminal"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="terminal"] body[data-view="modal"] .flank-input,
-html[data-theme="terminal"] body[data-view="modal"] select.flank-input,
-html[data-theme="terminal"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html[data-theme="aurora"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="aurora"] body[data-view="modal"] .flank-input,
-html[data-theme="aurora"] body[data-view="modal"] select.flank-input,
-html[data-theme="aurora"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html[data-theme="glass"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="glass"] body[data-view="modal"] .flank-input,
-html[data-theme="glass"] body[data-view="modal"] select.flank-input,
-html[data-theme="glass"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="liquid-glass"] body[data-view="modal"] .flank-input,
-html[data-theme="liquid-glass"] body[data-view="modal"] select.flank-input,
-html[data-theme="liquid-glass"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+html[data-theme="rail"] .flank-ui-input,
+html[data-theme="rail"] .flank-input,
+html[data-theme="rail"] select.flank-input,
+html[data-theme="rail"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="nord"] .flank-ui-input,
+html[data-theme="nord"] .flank-input,
+html[data-theme="nord"] select.flank-input,
+html[data-theme="nord"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="terminal"] .flank-ui-input,
+html[data-theme="terminal"] .flank-input,
+html[data-theme="terminal"] select.flank-input,
+html[data-theme="terminal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="aurora"] .flank-ui-input,
+html[data-theme="aurora"] .flank-input,
+html[data-theme="aurora"] select.flank-input,
+html[data-theme="aurora"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="glass"] .flank-ui-input,
+html[data-theme="glass"] .flank-input,
+html[data-theme="glass"] select.flank-input,
+html[data-theme="glass"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="liquid-glass"] .flank-ui-input,
+html[data-theme="liquid-glass"] .flank-input,
+html[data-theme="liquid-glass"] select.flank-input,
+html[data-theme="liquid-glass"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid var(--flank-color-divider, rgba(255, 255, 255, 0.16)) !important;
   color: var(--flank-color-text, #ffffff) !important;
 }
 
-html[data-theme="rail"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="rail"] body[data-view="modal"] .flank-input::placeholder,
-html[data-theme="nord"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="nord"] body[data-view="modal"] .flank-input::placeholder,
-html[data-theme="terminal"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="terminal"] body[data-view="modal"] .flank-input::placeholder,
-html[data-theme="aurora"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="aurora"] body[data-view="modal"] .flank-input::placeholder,
-html[data-theme="glass"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="glass"] body[data-view="modal"] .flank-input::placeholder,
-html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-input::placeholder,
-html[data-theme="liquid-glass"] body[data-view="modal"] .flank-input::placeholder {
+html[data-theme="rail"] .flank-ui-input::placeholder,
+html[data-theme="rail"] .flank-input::placeholder,
+html[data-theme="nord"] .flank-ui-input::placeholder,
+html[data-theme="nord"] .flank-input::placeholder,
+html[data-theme="terminal"] .flank-ui-input::placeholder,
+html[data-theme="terminal"] .flank-input::placeholder,
+html[data-theme="aurora"] .flank-ui-input::placeholder,
+html[data-theme="aurora"] .flank-input::placeholder,
+html[data-theme="glass"] .flank-ui-input::placeholder,
+html[data-theme="glass"] .flank-input::placeholder,
+html[data-theme="liquid-glass"] .flank-ui-input::placeholder,
+html[data-theme="liquid-glass"] .flank-input::placeholder {
   color: var(--flank-color-text-muted, rgba(255, 255, 255, 0.70)) !important;
   opacity: 0.7 !important;
 }
@@ -3270,6 +3270,66 @@ select.flank-input option {
 html[data-theme="paper"] select.flank-input option {
   background: #ffffff !important;
   color: #1f1e1b !important;
+}
+
+/* ============================================================================
+   HIGH-QUALITY GRADIENT FLYOUT CARDS (Tailored per Theme)
+   ============================================================================ */
+
+/* Rail: Deep Obsidian Navy Gradient with Crisp Top Specular Highlight */
+html[data-theme="rail"] .flank-card,
+html[data-theme="rail"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, #222b3e 0%, #151b2a 45%, #0a0e18 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 16px rgba(255, 255, 255, 0.02), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Nord: Arctic Polar Night Gradient */
+html[data-theme="nord"] .flank-card,
+html[data-theme="nord"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, #384152 0%, #2b313d 45%, #1d212a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 18px rgba(136, 192, 208, 0.04), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Terminal: CRT Phosphor Deep Gradient */
+html[data-theme="terminal"] .flank-card,
+html[data-theme="terminal"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, #15241b 0%, #0c1510 48%, #050806 100%) !important;
+  border: 1px solid rgba(51, 255, 119, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(51, 255, 119, 0.28), inset 0 0 16px rgba(51, 255, 119, 0.05), 0 8px 24px rgba(0, 0, 0, 0.60) !important;
+}
+
+/* Paper: Tactile Editorial Parchment Gradient */
+html[data-theme="paper"] .flank-card,
+html[data-theme="paper"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, #ffffff 0%, #faf7f2 45%, #ede6d8 100%) !important;
+  border: 1px solid #dfd8cb !important;
+  box-shadow: inset 0 1px 0 #ffffff, 0 8px 24px rgba(60, 50, 30, 0.14), 0 2px 6px rgba(60, 50, 30, 0.08) !important;
+}
+
+/* Glass: Frosted Crystal Ice Prism Gradient */
+html[data-theme="glass"] .flank-card,
+html[data-theme="glass"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, rgba(255, 255, 255, 0.26) 0%, rgba(235, 245, 255, 0.14) 45%, rgba(205, 225, 255, 0.08) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.38) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 24px rgba(255, 255, 255, 0.16), 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Liquid Glass: Deep Obsidian Neon Mint Refractive Gradient */
+html[data-theme="liquid-glass"] .flank-card,
+html[data-theme="liquid-glass"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, rgba(26, 36, 72, 0.84) 0%, rgba(13, 19, 42, 0.76) 48%, rgba(6, 9, 22, 0.88) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 0 22px rgba(124, 240, 200, 0.14), 0 8px 24px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* Aurora: Cosmic Boreal Indigo-Violet Gradient */
+html[data-theme="aurora"] .flank-card,
+html[data-theme="aurora"] body[data-view="card"] .flank-card {
+  background: linear-gradient(168deg, rgba(48, 32, 90, 0.84) 0%, rgba(22, 24, 58, 0.74) 50%, rgba(10, 12, 30, 0.86) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52), inset 0 0 22px rgba(138, 92, 246, 0.16), 0 8px 24px rgba(0, 0, 0, 0.55) !important;
 }
 
 /* Glass & Liquid Glass Flyouts: Frosted Subcards, Pills, Numerals & High Contrast Controls */

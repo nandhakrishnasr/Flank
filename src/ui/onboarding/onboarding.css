@@ -997,7 +997,49 @@ body[data-view="onboarding"] .flank-stage {
   font-family: var(--flank-type-ui);
   display: flex;
   flex-direction: column;
-  transition: opacity 200ms var(--flank-motion-easing-standard), background-color 160ms var(--flank-motion-easing-standard), border-color 160ms var(--flank-motion-easing-standard), left 240ms var(--flank-motion-easing-standard), right 240ms var(--flank-motion-easing-standard);
+  transition: opacity 200ms var(--flank-motion-easing-standard), background 160ms var(--flank-motion-easing-standard), border-color 160ms var(--flank-motion-easing-standard), left 240ms var(--flank-motion-easing-standard), right 240ms var(--flank-motion-easing-standard);
+}
+
+.flank-ob-preview-desktop[data-theme="rail"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, #222b3e 0%, #151b2a 45%, #0a0e18 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 16px rgba(255, 255, 255, 0.02), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+.flank-ob-preview-desktop[data-theme="nord"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, #384152 0%, #2b313d 45%, #1d212a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 18px rgba(136, 192, 208, 0.04), 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+.flank-ob-preview-desktop[data-theme="terminal"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, #15241b 0%, #0c1510 48%, #050806 100%) !important;
+  border: 1px solid rgba(51, 255, 119, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(51, 255, 119, 0.28), inset 0 0 16px rgba(51, 255, 119, 0.05), 0 8px 24px rgba(0, 0, 0, 0.60) !important;
+}
+
+.flank-ob-preview-desktop[data-theme="paper"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, #ffffff 0%, #faf7f2 45%, #ede6d8 100%) !important;
+  border: 1px solid #dfd8cb !important;
+  box-shadow: inset 0 1px 0 #ffffff, 0 8px 24px rgba(60, 50, 30, 0.14), 0 2px 6px rgba(60, 50, 30, 0.08) !important;
+}
+
+.flank-ob-preview-desktop[data-theme="glass"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, rgba(255, 255, 255, 0.26) 0%, rgba(235, 245, 255, 0.14) 45%, rgba(205, 225, 255, 0.08) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.38) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 24px rgba(255, 255, 255, 0.16), 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+}
+
+.flank-ob-preview-desktop[data-theme="liquid-glass"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, rgba(26, 36, 72, 0.84) 0%, rgba(13, 19, 42, 0.76) 48%, rgba(6, 9, 22, 0.88) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 0 22px rgba(124, 240, 200, 0.14), 0 8px 24px rgba(0, 0, 0, 0.55) !important;
+}
+
+.flank-ob-preview-desktop[data-theme="aurora"] .flank-ob-mock-card {
+  background: linear-gradient(168deg, rgba(48, 32, 90, 0.84) 0%, rgba(22, 24, 58, 0.74) 50%, rgba(10, 12, 30, 0.86) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52), inset 0 0 22px rgba(138, 92, 246, 0.16), 0 8px 24px rgba(0, 0, 0, 0.55) !important;
 }
 
 .flank-ob-ghost-dock {
