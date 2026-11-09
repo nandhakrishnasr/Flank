@@ -9,6 +9,11 @@ export type DockState = DockPhase;
 
 let isReducedMotion = false;
 let collapseTimer: number | null = null;
+let stateChangeListener: ((state: DockState) => void) | null = null;
+
+export function onDockStateChange(listener: (state: DockState) => void): void {
+  stateChangeListener = listener;
+}
 
 export function getDockState(): DockState {
   return flankMachines.dockCollapse.getPhase();
@@ -35,12 +40,15 @@ export function initDockState(initialState: DockState = 'expanded'): void {
 
 export function setDockState(next: DockState, reason?: CollapseReason): void {
   const prev = getDockState();
-  if (prev === next) return;
+  const root = document.documentElement;
+  const domState = root.getAttribute('data-dock-state');
 
   flankMachines.dockCollapse.send({ type: 'SYNC_HOST', phase: next, reason });
-
-  const root = document.documentElement;
   root.setAttribute('data-dock-state', next);
+
+  if (prev === next && domState === next) {
+    return;
+  }
 
   if (collapseTimer !== null) {
     clearTimeout(collapseTimer);
@@ -60,35 +68,44 @@ export function setDockState(next: DockState, reason?: CollapseReason): void {
     } catch { }
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
-      flankMachines.dockCollapse.send({ type: 'COLLAPSE_ANIMATION_DONE' });
+      setDockState('collapsed', reason);
       try {
         (window as any).pywebview?.api?.dock_collapse_done?.();
-      } catch {
-        setDockState('collapsed');
-      }
+      } catch { }
     }, duration);
   } else if (next === 'expanding') {
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
-      flankMachines.dockCollapse.send({ type: 'EXPAND_ANIMATION_DONE' });
+      setDockState('expanded');
       try {
         (window as any).pywebview?.api?.dock_expand_done?.();
-      } catch {
-        setDockState('expanded');
-      }
+      } catch { }
     }, duration);
   }
+
+  stateChangeListener?.(next);
+}
+
+export function collapseDock(reason: CollapseReason = 'manual'): void {
+  const phase = getDockState();
+  if (phase === 'collapsed' || phase === 'collapsing') return;
+  setDockState('collapsing', reason);
+}
+
+export function expandDock(): void {
+  const phase = getDockState();
+  if (phase === 'expanded' || phase === 'expanding') return;
+  setDockState('expanding');
+  try {
+    (window as any).pywebview?.api?.expand_dock?.();
+  } catch { }
 }
 
 export function toggleDockCollapse(): void {
   const phase = getDockState();
   if (phase === 'expanded' || phase === 'expanding') {
-    setDockState('collapsing', 'manual');
+    collapseDock('manual');
   } else {
-    try {
-      (window as any).pywebview?.api?.expand_dock?.();
-    } catch {
-      setDockState('expanding');
-    }
+    expandDock();
   }
 }

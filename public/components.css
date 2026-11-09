@@ -574,17 +574,34 @@ body[data-view="modal"] .flank-window {
 
 /* Glass theme support for tab */
 html[data-theme="liquid-glass"] .flank-dock-tab,
+html[data-theme="glass"] .flank-dock-tab,
+html[data-theme="aurora"] .flank-dock-tab,
 .flank-dock-tab.glass {
-  background: rgba(16, 20, 42, 0.22);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: var(--flank-surface-dock-bg);
+  backdrop-filter: blur(var(--flank-surface-backdrop-blur, 20px)) saturate(var(--flank-surface-backdrop-saturate, 1.8));
+  -webkit-backdrop-filter: blur(var(--flank-surface-backdrop-blur, 20px)) saturate(var(--flank-surface-backdrop-saturate, 1.8));
+  border: var(--flank-scale-hairline) solid var(--flank-surface-dock-border);
+  color: var(--flank-color-text) !important;
+  box-shadow: var(--flank-surface-highlight, none);
 }
 
-html[data-theme="liquid-glass"] .flank-dock-tab:hover {
-  background: rgba(16, 20, 42, 0.32);
+html[data-theme="liquid-glass"] .flank-dock-tab:hover,
+html[data-theme="glass"] .flank-dock-tab:hover,
+html[data-theme="aurora"] .flank-dock-tab:hover {
+  background: var(--flank-surface-dock-bg);
+}
+
+html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  opacity: 0.92;
+}
+
+html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab:hover {
+  width: 100% !important;
+  opacity: 1;
 }
 
 /* Edge-specific tab borders & inward radii */

@@ -58,7 +58,7 @@ export function renderReadyStepHtml(props: ReadyStepProps): string {
         </span>
       </li>
     </ul>
-    <div class="flank-ob-autostart-row" data-ob-action="toggle-autostart">
+    <div class="flank-ob-autostart-row" data-ob-autostart-row="true">
       <button type="button" class="flank-ob-switch flank-ob-switch--lg" role="switch" aria-checked="${props.autostart ? 'true' : 'false'}" aria-label="Start Flank when Windows starts" data-ob-action="toggle-autostart">
         <i class="flank-ob-switch-thumb"></i>
       </button>

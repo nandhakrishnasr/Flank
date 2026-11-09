@@ -705,15 +705,18 @@ body[data-view="onboarding"] .flank-stage {
 
 .flank-ob-info-title {
   display: block;
-  font-size: var(--flank-scale-font-body);
+  font-size: var(--flank-scale-font-body-sm);
   font-weight: 600;
   color: var(--flank-ob-text);
+  line-height: 1.25;
 }
 
 .flank-ob-info-sub {
-  font-size: var(--flank-scale-font-label);
+  display: block;
+  font-size: var(--flank-scale-font-caption);
   color: var(--flank-ob-text-muted);
-  white-space: nowrap;
+  line-height: 1.3;
+  margin-top: 2px;
 }
 
 .flank-ob-kbd-group {

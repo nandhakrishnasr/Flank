@@ -3954,6 +3954,10 @@ var flankMachines = {
 // src/ui/dockState.ts
 var isReducedMotion2 = false;
 var collapseTimer = null;
+var stateChangeListener = null;
+function onDockStateChange(listener) {
+  stateChangeListener = listener;
+}
 function getDockState() {
   return flankMachines.dockCollapse.getPhase();
 }
@@ -3973,10 +3977,13 @@ function initDockState(initialState = "expanded") {
 }
 function setDockState(next, reason) {
   const prev = getDockState();
-  if (prev === next) return;
-  flankMachines.dockCollapse.send({ type: "SYNC_HOST", phase: next, reason });
   const root = document.documentElement;
+  const domState = root.getAttribute("data-dock-state");
+  flankMachines.dockCollapse.send({ type: "SYNC_HOST", phase: next, reason });
   root.setAttribute("data-dock-state", next);
+  if (prev === next && domState === next) {
+    return;
+  }
   if (collapseTimer !== null) {
     clearTimeout(collapseTimer);
     collapseTimer = null;
@@ -3992,35 +3999,44 @@ function setDockState(next, reason) {
     }
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
-      flankMachines.dockCollapse.send({ type: "COLLAPSE_ANIMATION_DONE" });
+      setDockState("collapsed", reason);
       try {
         window.pywebview?.api?.dock_collapse_done?.();
       } catch {
-        setDockState("collapsed");
       }
     }, duration);
   } else if (next === "expanding") {
     collapseTimer = window.setTimeout(() => {
       collapseTimer = null;
-      flankMachines.dockCollapse.send({ type: "EXPAND_ANIMATION_DONE" });
+      setDockState("expanded");
       try {
         window.pywebview?.api?.dock_expand_done?.();
       } catch {
-        setDockState("expanded");
       }
     }, duration);
+  }
+  stateChangeListener?.(next);
+}
+function collapseDock(reason = "manual") {
+  const phase = getDockState();
+  if (phase === "collapsed" || phase === "collapsing") return;
+  setDockState("collapsing", reason);
+}
+function expandDock() {
+  const phase = getDockState();
+  if (phase === "expanded" || phase === "expanding") return;
+  setDockState("expanding");
+  try {
+    window.pywebview?.api?.expand_dock?.();
+  } catch {
   }
 }
 function toggleDockCollapse() {
   const phase = getDockState();
   if (phase === "expanded" || phase === "expanding") {
-    setDockState("collapsing", "manual");
+    collapseDock("manual");
   } else {
-    try {
-      window.pywebview?.api?.expand_dock?.();
-    } catch {
-      setDockState("expanding");
-    }
+    expandDock();
   }
 }
 
@@ -5411,7 +5427,7 @@ function renderReadyStepHtml(props) {
         </span>
       </li>
     </ul>
-    <div class="flank-ob-autostart-row" data-ob-action="toggle-autostart">
+    <div class="flank-ob-autostart-row" data-ob-autostart-row="true">
       <button type="button" class="flank-ob-switch flank-ob-switch--lg" role="switch" aria-checked="${props.autostart ? "true" : "false"}" aria-label="Start Flank when Windows starts" data-ob-action="toggle-autostart">
         <i class="flank-ob-switch-thumb"></i>
       </button>
@@ -6557,27 +6573,14 @@ async function completeOnboardingFlow(result, skipped) {
 }
 function setupEventDelegation() {
   document.addEventListener(
-    "pointerdown",
-    (ev) => {
-      const target = ev.target;
-      const expandBtn = target?.closest('[data-action="expand-dock"], .flank-dock-tab');
-      if (expandBtn) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        toggleDockCollapse();
-      }
-    },
-    true
-  );
-  document.addEventListener(
     "click",
     (ev) => {
       const target = ev.target;
       const expandBtn = target?.closest('[data-action="expand-dock"], .flank-dock-tab');
-      if (expandBtn) {
+      if (expandBtn || currentView === "dock" && isDockCollapsed() && target?.closest("#flank-dock")) {
         ev.preventDefault();
         ev.stopPropagation();
-        toggleDockCollapse();
+        expandDock();
       }
     },
     true
@@ -6811,10 +6814,10 @@ function setupEventDelegation() {
     if (currentView === "onboarding") {
       const machine = ensureOnboardingMachine();
       const obBtn = target.closest(
-        "[data-ob-action], [data-ob-edge], [data-ob-theme], [data-ob-accent], [data-ob-widget], [data-ob-widget-row]"
+        "[data-ob-action], [data-ob-autostart-row], [data-ob-edge], [data-ob-theme], [data-ob-accent], [data-ob-widget], [data-ob-widget-row]"
       );
       if (obBtn) {
-        const obAction = obBtn.getAttribute("data-ob-action");
+        const obAction = obBtn.getAttribute("data-ob-action") || (obBtn.hasAttribute("data-ob-autostart-row") ? "toggle-autostart" : null);
         if (obAction === "next") {
           machine.next();
           renderApp();
@@ -6892,14 +6895,14 @@ function setupEventDelegation() {
     if (expandBtn) {
       ev.preventDefault();
       ev.stopPropagation();
-      toggleDockCollapse();
+      expandDock();
       return;
     }
     const collapseBtn = target.closest('[data-action="collapse-dock"], .flank-dock-collapse-handle');
     if (collapseBtn) {
       ev.preventDefault();
       ev.stopPropagation();
-      toggleDockCollapse();
+      collapseDock("manual");
       return;
     }
     const btn = target.closest("button");
@@ -6939,11 +6942,11 @@ function setupEventDelegation() {
     }
     const action = btn.getAttribute("data-action");
     if (action === "collapse-dock") {
-      toggleDockCollapse();
+      collapseDock("manual");
       return;
     }
     if (action === "expand-dock") {
-      toggleDockCollapse();
+      expandDock();
       return;
     }
     if (action === "refresh-item-icon") {
@@ -8230,6 +8233,11 @@ async function bootstrap() {
     if (state.bluetooth) state.bluetooth.devices = [];
   }
   initDockState(state.dockState || (state.startCollapsed ? "collapsed" : "expanded"));
+  onDockStateChange((nextDockState) => {
+    if (nextDockState === "expanded" || nextDockState === "collapsed") {
+      renderApp();
+    }
+  });
   applyCurrentThemeSelection();
   setupEventDelegation();
   renderApp();

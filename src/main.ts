@@ -4,7 +4,16 @@ import { type DockItem, type FlankState, type WidgetKind } from './providers/typ
 import { renderDockHtml } from './ui/dock.ts';
 import { renderHoverCardHtml } from './ui/cards.ts';
 import { attachDockMagnification } from './ui/magnification.ts';
-import { initDockState, setDockState, toggleDockCollapse, getDockState, isDockCollapsed } from './ui/dockState.ts';
+import {
+  initDockState,
+  setDockState,
+  collapseDock,
+  expandDock,
+  toggleDockCollapse,
+  getDockState,
+  isDockCollapsed,
+  onDockStateChange,
+} from './ui/dockState.ts';
 import { flankMachines } from './state/machines.ts';
 import { showDockTooltip, hideDockTooltip, suppressDockTooltip } from './ui/tooltip.ts';
 import { deriveAccentTokens, parseColor, contrastRatio } from './theme/contrast.ts';
@@ -763,30 +772,16 @@ async function completeOnboardingFlow(
 }
 
 function setupEventDelegation(): void {
-  // Capture-phase listener on document guarantees clicking or tapping the edge tab always expands dock
-  document.addEventListener(
-    'pointerdown',
-    (ev) => {
-      const target = ev.target as HTMLElement | null;
-      const expandBtn = target?.closest<HTMLElement>('[data-action="expand-dock"], .flank-dock-tab');
-      if (expandBtn) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        toggleDockCollapse();
-      }
-    },
-    true
-  );
-
+  // Capture-phase click listener on document guarantees clicking the collapsed edge tab always expands dock
   document.addEventListener(
     'click',
     (ev) => {
       const target = ev.target as HTMLElement | null;
       const expandBtn = target?.closest<HTMLElement>('[data-action="expand-dock"], .flank-dock-tab');
-      if (expandBtn) {
+      if (expandBtn || (currentView === 'dock' && isDockCollapsed() && target?.closest('#flank-dock'))) {
         ev.preventDefault();
         ev.stopPropagation();
-        toggleDockCollapse();
+        expandDock();
       }
     },
     true
@@ -1054,10 +1049,12 @@ function setupEventDelegation(): void {
     if (currentView === 'onboarding') {
       const machine = ensureOnboardingMachine();
       const obBtn = target.closest<HTMLElement>(
-        '[data-ob-action], [data-ob-edge], [data-ob-theme], [data-ob-accent], [data-ob-widget], [data-ob-widget-row]'
+        '[data-ob-action], [data-ob-autostart-row], [data-ob-edge], [data-ob-theme], [data-ob-accent], [data-ob-widget], [data-ob-widget-row]'
       );
       if (obBtn) {
-        const obAction = obBtn.getAttribute('data-ob-action');
+        const obAction =
+          obBtn.getAttribute('data-ob-action') ||
+          (obBtn.hasAttribute('data-ob-autostart-row') ? 'toggle-autostart' : null);
         if (obAction === 'next') {
           machine.next();
           renderApp();
@@ -1141,7 +1138,7 @@ function setupEventDelegation(): void {
     if (expandBtn) {
       ev.preventDefault();
       ev.stopPropagation();
-      toggleDockCollapse();
+      expandDock();
       return;
     }
 
@@ -1149,7 +1146,7 @@ function setupEventDelegation(): void {
     if (collapseBtn) {
       ev.preventDefault();
       ev.stopPropagation();
-      toggleDockCollapse();
+      collapseDock('manual');
       return;
     }
 
@@ -1197,11 +1194,11 @@ function setupEventDelegation(): void {
     // 3. Named actions
     const action = btn.getAttribute('data-action');
     if (action === 'collapse-dock') {
-      toggleDockCollapse();
+      collapseDock('manual');
       return;
     }
     if (action === 'expand-dock') {
-      toggleDockCollapse();
+      expandDock();
       return;
     }
     if (action === 'refresh-item-icon') {
@@ -2584,6 +2581,11 @@ async function bootstrap(): Promise<void> {
   }
 
   initDockState((state.dockState as any) || (state.startCollapsed ? 'collapsed' : 'expanded'));
+  onDockStateChange((nextDockState) => {
+    if (nextDockState === 'expanded' || nextDockState === 'collapsed') {
+      renderApp();
+    }
+  });
   applyCurrentThemeSelection();
   setupEventDelegation();
   renderApp();
