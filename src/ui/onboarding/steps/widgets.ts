@@ -53,6 +53,13 @@ export const ONBOARDING_WIDGET_OPTIONS: OnboardingWidgetOption[] = [
     svgPaths: `<rect x="6" y="4" width="12" height="17" rx="2.5"></rect><path d="M9 4h6v3H9z"></path>`,
   },
   {
+    kind: 'bluetooth',
+    itemId: 'widget-bluetooth',
+    label: 'Bluetooth',
+    defaultOn: true,
+    svgPaths: `<path d="m7 7 10 10-5 5V2l5 5L7 17"></path>`,
+  },
+  {
     kind: 'calendar',
     itemId: 'widget-calendar',
     label: 'Agenda',

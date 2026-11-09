@@ -81,7 +81,7 @@ var GLASS_THEME = {
   name: "Glass",
   mode: "dark",
   default: false,
-  description: "Apple Liquid Glass (iOS 26 Control Center UI) with iridescent specular reflections and frosted depth.",
+  description: "Pure crystalline frosted glass with bright specular refraction, crisp prism edges, and ice-blue reflections.",
   layout: {
     edge: "right",
     orientation: "vertical",
@@ -102,63 +102,63 @@ var GLASS_THEME = {
     windowPadding: "40px"
   },
   surface: {
-    dockBg: "rgba(16,20,42,0.42)",
-    dockBorder: "transparent",
-    dockShadow: "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 22px rgba(255,255,255,0.10), 0 8px 24px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22)",
-    backdropBlur: "30px",
-    backdropSaturate: "1.8",
-    cardBg: "rgba(16,20,42,0.42)",
-    cardBorder: "transparent",
-    cardShadow: "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 26px rgba(255,255,255,0.08), 0 8px 24px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22)",
+    dockBg: "rgba(255,255,255,0.14)",
+    dockBorder: "rgba(255,255,255,0.30)",
+    dockShadow: "inset 0 1px 0 rgba(255,255,255,0.90), inset 0 0 20px rgba(255,255,255,0.20), 0 8px 24px rgba(0,0,0,0.22)",
+    backdropBlur: "36px",
+    backdropSaturate: "1.3",
+    cardBg: "rgba(255,255,255,0.14)",
+    cardBorder: "rgba(255,255,255,0.30)",
+    cardShadow: "inset 0 1px 0 rgba(255,255,255,0.90), inset 0 0 20px rgba(255,255,255,0.18), 0 8px 24px rgba(0,0,0,0.22)",
     cardRadius: "16px",
     cardPadding: "20px",
     cardWidth: "320px",
     cardGap: "14px",
     cardOffset: "14px",
-    solidFallbackBg: "#1b2038",
-    opacity: 0.42,
-    highlight: "inset 0 1px 0 rgba(255,255,255,0.55)",
-    hover: "rgba(255,255,255,0.08)",
-    active: "rgba(255,255,255,0.15)",
-    selected: "rgba(255,255,255,0.22)"
+    solidFallbackBg: "#1e2638",
+    opacity: 0.55,
+    highlight: "inset 0 1px 0 rgba(255,255,255,0.90)",
+    hover: "rgba(255,255,255,0.12)",
+    active: "rgba(255,255,255,0.20)",
+    selected: "rgba(255,255,255,0.26)"
   },
   glass: {
     mode: "wallpaper-sampled",
-    tintRgb: "16,20,42",
-    tintAlpha: 0.42,
-    tintAlphaMin: 0.16,
-    tintAlphaMax: 0.42,
-    blur: "30px",
-    saturate: "1.8",
+    tintRgb: "245,250,255",
+    tintAlpha: 0.18,
+    tintAlphaMin: 0.12,
+    tintAlphaMax: 0.3,
+    blur: "36px",
+    saturate: "1.3",
     rimWidth: "1.5px",
-    rim: "linear-gradient(165deg, rgba(255,255,255,0.85), rgba(255,255,255,0.12) 28%, rgba(255,255,255,0.04) 55%, rgba(255,255,255,0.45))",
-    sheen: "linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0))",
+    rim: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.30) 45%, rgba(255,255,255,0.70))",
+    sheen: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0))",
     sheenHeight: "130px",
     textShadowWhenLowContrast: "0 1px 2px rgba(0,0,0,0.35)"
   },
   color: {
     text: "#ffffff",
-    textMuted: "rgba(255,255,255,0.82)",
+    textMuted: "rgba(255,255,255,0.85)",
     tileBg: "transparent",
-    tileBgHover: "rgba(255,255,255,0.12)",
-    tileBgPressed: "rgba(255,255,255,0.18)",
-    tileIcon: "rgba(255,255,255,0.94)",
-    tileActiveBg: "linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0.12))",
-    tileActiveShadow: "inset 0 1px 0 rgba(255,255,255,0.65), inset 0 0 12px rgba(255,255,255,0.12), 0 4px 12px rgba(6,8,24,0.25)",
+    tileBgHover: "rgba(255,255,255,0.14)",
+    tileBgPressed: "rgba(255,255,255,0.22)",
+    tileIcon: "rgba(255,255,255,0.95)",
+    tileActiveBg: "linear-gradient(180deg, rgba(255,255,255,0.40), rgba(255,255,255,0.18))",
+    tileActiveShadow: "inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 12px rgba(0,0,0,0.20)",
     tileActiveIcon: "#ffffff",
-    divider: "rgba(255,255,255,0.18)",
-    dividerSoft: "rgba(255,255,255,0.10)",
+    divider: "rgba(255,255,255,0.22)",
+    dividerSoft: "rgba(255,255,255,0.12)",
     trackBg: "rgba(255,255,255,0.25)",
-    chipBg: "rgba(255,255,255,0.08)",
-    chipActiveBg: "rgba(255,255,255,0.16)",
-    accent: "#7CF0C8",
-    accentGradient: "linear-gradient(135deg, #7CF0C8 0%, #38bdf8 100%)",
-    accentInk: "#06231f",
-    accentSoft: "rgba(124,240,200,0.16)",
-    accentLine: "rgba(124,240,200,0.40)",
-    focusRing: "#ffffff",
+    chipBg: "rgba(255,255,255,0.12)",
+    chipActiveBg: "rgba(255,255,255,0.24)",
+    accent: "#38BDF8",
+    accentGradient: "linear-gradient(135deg, #38BDF8 0%, #2563EB 100%)",
+    accentInk: "#031525",
+    accentSoft: "rgba(56,189,248,0.20)",
+    accentLine: "rgba(56,189,248,0.50)",
+    focusRing: "#38BDF8",
     iconPlate: "#ffffff",
-    iconPlateBorder: "rgba(255,255,255,0.40)",
+    iconPlateBorder: "rgba(255,255,255,0.50)",
     iconPlateShadow: "0 1px 3px rgba(0,0,0,0.12)"
   },
   type: {
@@ -490,7 +490,7 @@ var LIQUID_GLASS_THEME = {
   name: "Liquid Glass",
   mode: "dark",
   default: false,
-  description: "iOS-style liquid glass: tinted translucent capsule, bright rim light, soft inner glow, large radii, fluid motion. Fully rounded silhouette on a transparent window.",
+  description: "iOS-style liquid glass: deep obsidian tinted capsule, bright neon rim light, soft inner glow, large radii, fluid motion. Fully rounded silhouette on a transparent window.",
   layout: {
     edge: "right",
     orientation: "vertical",
@@ -511,22 +511,22 @@ var LIQUID_GLASS_THEME = {
     windowPadding: "40px"
   },
   surface: {
-    dockBg: "rgba(16,20,42,0.42)",
+    dockBg: "rgba(10,14,32,0.60)",
     dockBorder: "transparent",
-    dockShadow: "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 22px rgba(255,255,255,0.10), 0 8px 24px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22)",
-    backdropBlur: "30px",
-    backdropSaturate: "1.8",
-    cardBg: "rgba(16,20,42,0.42)",
+    dockShadow: "inset 0 1px 0 rgba(255,255,255,0.50), inset 0 0 20px rgba(124,240,200,0.12), 0 8px 24px rgba(0,0,0,0.45)",
+    backdropBlur: "26px",
+    backdropSaturate: "2.0",
+    cardBg: "rgba(10,14,32,0.60)",
     cardBorder: "transparent",
-    cardShadow: "inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(255,255,255,0.12), inset 0 0 26px rgba(255,255,255,0.08), 0 8px 24px rgba(6,8,24,0.38), 0 2px 6px rgba(6,8,24,0.22)",
+    cardShadow: "inset 0 1px 0 rgba(255,255,255,0.50), inset 0 0 20px rgba(124,240,200,0.12), 0 8px 24px rgba(0,0,0,0.45)",
     cardRadius: "16px",
     cardPadding: "20px",
     cardWidth: "320px",
     cardGap: "14px",
     cardOffset: "14px",
-    solidFallbackBg: "#1b2038",
-    opacity: 0.42,
-    highlight: "inset 0 1px 0 rgba(255,255,255,0.55)",
+    solidFallbackBg: "#0d1326",
+    opacity: 0.6,
+    highlight: "inset 0 1px 0 rgba(255,255,255,0.50)",
     hover: "rgba(255,255,255,0.08)",
     active: "rgba(255,255,255,0.15)",
     selected: "rgba(255,255,255,0.22)"
@@ -534,15 +534,15 @@ var LIQUID_GLASS_THEME = {
   glass: {
     mode: "wallpaper-sampled",
     modeNote: "css-only | wallpaper-sampled (default) | flat. See ANTIGRAVITY_PROMPT.md part B.",
-    tintRgb: "16,20,42",
-    tintAlpha: 0.42,
-    tintAlphaMin: 0.16,
-    tintAlphaMax: 0.42,
-    blur: "30px",
-    saturate: "1.8",
-    rimWidth: "1px",
-    rim: "linear-gradient(135deg, rgba(255,255,255,0.80), rgba(255,255,255,0.12) 60%, rgba(255,255,255,0.35))",
-    sheen: "linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0))",
+    tintRgb: "10,14,32",
+    tintAlpha: 0.6,
+    tintAlphaMin: 0.4,
+    tintAlphaMax: 0.7,
+    blur: "26px",
+    saturate: "2.0",
+    rimWidth: "1.5px",
+    rim: "linear-gradient(135deg, rgba(124,240,200,0.85), rgba(255,255,255,0.15) 50%, rgba(56,189,248,0.40))",
+    sheen: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0))",
     sheenHeight: "130px",
     sheenRadiusRule: "must equal the shape radius; never use a larger bottom radius (CSS scales all radii down and the corners bulge)",
     textShadowWhenLowContrast: "0 1px 2px rgba(0,0,0,0.35)"
@@ -563,11 +563,11 @@ var LIQUID_GLASS_THEME = {
     chipBg: "rgba(255,255,255,0.08)",
     chipActiveBg: "rgba(255,255,255,0.16)",
     accent: "#7CF0C8",
-    accentGradient: "linear-gradient(135deg, #7CF0C8 0%, #38bdf8 100%)",
+    accentGradient: "linear-gradient(135deg, #7CF0C8 0%, #00F0FF 100%)",
     accentInk: "#06231f",
     accentSoft: "rgba(124,240,200,0.16)",
     accentLine: "rgba(124,240,200,0.40)",
-    focusRing: "#ffffff",
+    focusRing: "#7CF0C8",
     iconPlate: "rgba(255,255,255,0.12)",
     iconPlateBorder: "rgba(255,255,255,0.20)",
     iconPlateShadow: "0 2px 6px rgba(0,0,0,0.25)"
@@ -1458,6 +1458,17 @@ function createSampleState() {
         icon: "focus",
         widgetKind: "focus",
         shortcut: "Alt+F",
+        enabled: true
+      },
+      {
+        id: "widget-bluetooth",
+        group: "widgets",
+        kind: "widget",
+        label: "Bluetooth & peripherals",
+        shortCode: "bt",
+        icon: "bluetooth",
+        widgetKind: "bluetooth",
+        shortcut: "Alt+E",
         enabled: true
       },
       {
@@ -5052,6 +5063,15 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       controlHtml: `<div class="flank-chip-row" style="flex-wrap: wrap; max-width: 320px; justify-content: flex-end; gap: 6px;">${clockChips || '<span class="flank-card-muted">None</span>'}</div>`
     })}
         ${Row({
+      label: "Bluetooth & peripherals",
+      description: "Scans for connected Bluetooth keyboards, mice, audio devices and controllers.",
+      controlHtml: `
+            <button type="button" class="flank-ui-btn is-secondary" data-item-kind="link" data-item-id="win-bluetooth-settings" data-target="ms-settings:bluetooth">
+              <span>Open Windows Bluetooth settings</span>
+            </button>
+          `
+    })}
+        ${Row({
       label: "Clipboard history",
       description: "Removes all unpinned entries from local database.",
       controlHtml: Button({ label: "Clear unpinned items", variant: "secondary", actionAttr: 'data-action="clear-clipboard"' })
@@ -5070,7 +5090,7 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       label: "AI Subscription / Plan",
       description: "Provider to monitor in the AI widget.",
       controlHtml: `
-            <select id="flank-ai-provider-select" class="flank-input" style="width: 220px; height: 32px; background: var(--flank-color-icon-plate); color: var(--flank-color-text);">
+            <select id="flank-ai-provider-select" class="flank-input" style="width: 220px; height: 32px;">
               <option value="google" selected>Google AI Pro (Gemini 2.0 / 1.5)</option>
               <option value="google-one">Google One AI Premium</option>
               <option value="openai">OpenAI ChatGPT Plus</option>
@@ -5093,7 +5113,7 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       description: "Configures model breakdown and monthly cycle.",
       controlHtml: `
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 8px;">
-              <select id="flank-ai-plan-select" class="flank-input" style="width: 260px; height: 32px; background: var(--flank-color-icon-plate); color: var(--flank-color-text);">
+              <select id="flank-ai-plan-select" class="flank-input" style="width: 260px; height: 32px;">
                 <option value="pro" selected>Google AI Pro (2,000,000 tokens)</option>
                 <option value="premium">Google One AI Premium (2M context)</option>
                 <option value="flash">Gemini Flash Pay-as-you-go</option>
@@ -5330,6 +5350,13 @@ var ONBOARDING_WIDGET_OPTIONS = [
     svgPaths: `<rect x="6" y="4" width="12" height="17" rx="2.5"></rect><path d="M9 4h6v3H9z"></path>`
   },
   {
+    kind: "bluetooth",
+    itemId: "widget-bluetooth",
+    label: "Bluetooth",
+    defaultOn: true,
+    svgPaths: `<path d="m7 7 10 10-5 5V2l5 5L7 17"></path>`
+  },
+  {
     kind: "calendar",
     itemId: "widget-calendar",
     label: "Agenda",
@@ -5485,6 +5512,8 @@ function getWidgetMockValue(kind, _liveState) {
       return "17:20";
     case "clipboard":
       return "8";
+    case "bluetooth":
+      return "2d";
     case "calendar":
       return "14:00";
     case "stats":

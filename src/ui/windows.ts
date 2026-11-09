@@ -945,6 +945,15 @@ export function renderSettingsWindowHtml(
           controlHtml: `<div class="flank-chip-row" style="flex-wrap: wrap; max-width: 320px; justify-content: flex-end; gap: 6px;">${clockChips || '<span class="flank-card-muted">None</span>'}</div>`,
         })}
         ${Row({
+          label: 'Bluetooth & peripherals',
+          description: 'Scans for connected Bluetooth keyboards, mice, audio devices and controllers.',
+          controlHtml: `
+            <button type="button" class="flank-ui-btn is-secondary" data-item-kind="link" data-item-id="win-bluetooth-settings" data-target="ms-settings:bluetooth">
+              <span>Open Windows Bluetooth settings</span>
+            </button>
+          `,
+        })}
+        ${Row({
           label: 'Clipboard history',
           description: 'Removes all unpinned entries from local database.',
           controlHtml: Button({ label: 'Clear unpinned items', variant: 'secondary', actionAttr: 'data-action="clear-clipboard"' }),
@@ -963,7 +972,7 @@ export function renderSettingsWindowHtml(
           label: 'AI Subscription / Plan',
           description: 'Provider to monitor in the AI widget.',
           controlHtml: `
-            <select id="flank-ai-provider-select" class="flank-input" style="width: 220px; height: 32px; background: var(--flank-color-icon-plate); color: var(--flank-color-text);">
+            <select id="flank-ai-provider-select" class="flank-input" style="width: 220px; height: 32px;">
               <option value="google" selected>Google AI Pro (Gemini 2.0 / 1.5)</option>
               <option value="google-one">Google One AI Premium</option>
               <option value="openai">OpenAI ChatGPT Plus</option>
@@ -986,7 +995,7 @@ export function renderSettingsWindowHtml(
           description: 'Configures model breakdown and monthly cycle.',
           controlHtml: `
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 8px;">
-              <select id="flank-ai-plan-select" class="flank-input" style="width: 260px; height: 32px; background: var(--flank-color-icon-plate); color: var(--flank-color-text);">
+              <select id="flank-ai-plan-select" class="flank-input" style="width: 260px; height: 32px;">
                 <option value="pro" selected>Google AI Pro (2,000,000 tokens)</option>
                 <option value="premium">Google One AI Premium (2M context)</option>
                 <option value="flash">Gemini Flash Pay-as-you-go</option>

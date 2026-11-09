@@ -2373,16 +2373,22 @@ a:focus-visible,
   padding: 0 10px;
   border-radius: var(--flank-scale-radius-8, 8px);
   border: var(--flank-scale-hairline) solid var(--flank-color-divider);
-  background: var(--flank-color-icon-plate, #ffffff);
+  background: var(--flank-color-tile-bg-hover, rgba(128, 128, 128, 0.1));
   color: var(--flank-color-text);
   font-size: var(--flank-scale-font-body-sm, 12px);
   outline: none;
-  transition: border-color 120ms ease;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
   box-sizing: border-box;
 }
 
 .flank-ui-input:focus {
   border-color: var(--flank-color-accent);
+  box-shadow: 0 0 0 2px var(--flank-color-accent-soft, rgba(47, 75, 255, 0.2));
+}
+
+.flank-ui-input::placeholder {
+  color: var(--flank-color-text-muted);
+  opacity: 0.7;
 }
 
 .flank-ui-chip {
@@ -3196,13 +3202,74 @@ html[data-theme="liquid-glass"] body[data-view="modal"] .flank-stat-label {
   text-shadow: none !important;
 }
 
+/* Form controls & inputs: High-contrast visibility across light and dark modal views */
+html[data-theme="paper"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="paper"] body[data-view="modal"] .flank-input,
+html[data-theme="paper"] body[data-view="modal"] select.flank-input,
+html[data-theme="paper"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+  background: #ffffff !important;
+  border: var(--flank-scale-hairline) solid var(--flank-color-divider, #e2ded4) !important;
+  color: #1f1e1b !important;
+}
+
+html[data-theme="paper"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="paper"] body[data-view="modal"] .flank-input::placeholder {
+  color: #6b665c !important;
+  opacity: 0.7 !important;
+}
+
+html[data-theme="rail"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="rail"] body[data-view="modal"] .flank-input,
+html[data-theme="rail"] body[data-view="modal"] select.flank-input,
+html[data-theme="rail"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="nord"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="nord"] body[data-view="modal"] .flank-input,
+html[data-theme="nord"] body[data-view="modal"] select.flank-input,
+html[data-theme="nord"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="terminal"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="terminal"] body[data-view="modal"] .flank-input,
+html[data-theme="terminal"] body[data-view="modal"] select.flank-input,
+html[data-theme="terminal"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="aurora"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="aurora"] body[data-view="modal"] .flank-input,
+html[data-theme="aurora"] body[data-view="modal"] select.flank-input,
+html[data-theme="aurora"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 html[data-theme="glass"] body[data-view="modal"] .flank-ui-input,
+html[data-theme="glass"] body[data-view="modal"] .flank-input,
+html[data-theme="glass"] body[data-view="modal"] select.flank-input,
+html[data-theme="glass"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-input,
-html[data-theme="glass"] body[data-view="modal"] input,
-html[data-theme="liquid-glass"] body[data-view="modal"] input {
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-input,
+html[data-theme="liquid-glass"] body[data-view="modal"] select.flank-input,
+html[data-theme="liquid-glass"] body[data-view="modal"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
   background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border: 1px solid var(--flank-color-divider, rgba(255, 255, 255, 0.16)) !important;
+  color: var(--flank-color-text, #ffffff) !important;
+}
+
+html[data-theme="rail"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="rail"] body[data-view="modal"] .flank-input::placeholder,
+html[data-theme="nord"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="nord"] body[data-view="modal"] .flank-input::placeholder,
+html[data-theme="terminal"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="terminal"] body[data-view="modal"] .flank-input::placeholder,
+html[data-theme="aurora"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="aurora"] body[data-view="modal"] .flank-input::placeholder,
+html[data-theme="glass"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="glass"] body[data-view="modal"] .flank-input::placeholder,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-ui-input::placeholder,
+html[data-theme="liquid-glass"] body[data-view="modal"] .flank-input::placeholder {
+  color: var(--flank-color-text-muted, rgba(255, 255, 255, 0.70)) !important;
+  opacity: 0.7 !important;
+}
+
+select.flank-input option {
+  background: #161c2c !important;
   color: #ffffff !important;
+}
+html[data-theme="paper"] select.flank-input option {
+  background: #ffffff !important;
+  color: #1f1e1b !important;
 }
 
 /* Glass & Liquid Glass Flyouts: Frosted Subcards, Pills, Numerals & High Contrast Controls */

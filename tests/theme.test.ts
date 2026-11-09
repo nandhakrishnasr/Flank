@@ -36,9 +36,17 @@ describe('Flank Theme Engine & Validator', () => {
     const vars = flattenThemeToCssVars(res.theme);
     assert.equal(vars['--flank-glass-display'], 'block');
     assert.equal(vars['--flank-glass-mode'], 'wallpaper-sampled');
-    assert.equal(vars['--flank-glass-tint-rgb'], '16,20,42');
-    assert.equal(vars['--flank-glass-blur'], '30px');
+    assert.equal(vars['--flank-glass-tint-rgb'], '10,14,32');
+    assert.equal(vars['--flank-glass-blur'], '26px');
     assert.equal(vars['--flank-layout-window-padding'], '40px');
+  });
+
+  it('maintains distinct aesthetic and tokens between glass and liquid-glass', () => {
+    const glass = JSON.parse(fs.readFileSync(path.resolve('themes', 'glass.json'), 'utf-8'));
+    const liquid = JSON.parse(fs.readFileSync(path.resolve('themes', 'liquid-glass.json'), 'utf-8'));
+    assert.notEqual(glass.glass.tintRgb, liquid.glass.tintRgb, 'Glass and Liquid Glass must have distinct tint RGB');
+    assert.notEqual(glass.color.accent, liquid.color.accent, 'Glass and Liquid Glass must have distinct accents');
+    assert.notEqual(glass.surface.dockBg, liquid.surface.dockBg, 'Glass and Liquid Glass must have distinct dockBg');
   });
 
   it('computes accurate WCAG 2.1 contrast ratios', () => {

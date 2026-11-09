@@ -72,6 +72,8 @@ function getWidgetMockValue(kind: WidgetKind, _liveState?: FlankState): string {
       return '17:20';
     case 'clipboard':
       return '8';
+    case 'bluetooth':
+      return '2d';
     case 'calendar':
       return '14:00';
     case 'stats':

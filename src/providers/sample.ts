@@ -116,6 +116,17 @@ export function createSampleState(): FlankState {
         enabled: true,
       },
       {
+        id: 'widget-bluetooth',
+        group: 'widgets',
+        kind: 'widget',
+        label: 'Bluetooth & peripherals',
+        shortCode: 'bt',
+        icon: 'bluetooth',
+        widgetKind: 'bluetooth',
+        shortcut: 'Alt+E',
+        enabled: true,
+      },
+      {
         id: 'widget-calendar',
         group: 'widgets',
         kind: 'widget',

@@ -770,12 +770,12 @@ class FlankHostApi:
                     migrated_ids = set(prefs.get('migratedWidgets') or [])
                     for def_item in DEFAULT_ITEMS:
                         did = def_item['id']
-                        if did not in existing_ids and did not in migrated_ids:
+                        if did not in existing_ids:
                             ai_idx = next((idx for idx, it in enumerate(items) if it.get('id') == 'widget-ai'), len(items))
                             items.insert(ai_idx, dict(def_item))
                             migrated_ids.add(did)
                             changed = True
-                        elif did in existing_ids and did not in migrated_ids:
+                        elif did not in migrated_ids:
                             migrated_ids.add(did)
                             changed = True
                     prefs['migratedWidgets'] = list(migrated_ids)
