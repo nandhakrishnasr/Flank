@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>The second dock Windows never shipped.</strong><br/>
+  <strong>Flank. The second dock Windows never shipped.</strong><br/>
   Apps, shortcuts, clipboard history, and live interactive widgets on the edge of your Windows 11 screen.
 </p>
 
