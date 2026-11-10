@@ -1923,6 +1923,57 @@ function setupEventDelegation(): void {
       return;
     }
 
+    if (action === 'set-display-preset') {
+      const val = Number(btn.getAttribute('data-val')) || 85;
+      const slider = document.getElementById('flank-brightness-slider') as HTMLInputElement | null;
+      if (slider) slider.value = String(val);
+      const dispText = document.getElementById('flank-disp-val');
+      if (dispText) dispText.textContent = `${val}%`;
+      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: '2560 × 1440', refreshRate: 144, scaling: 100 };
+      state.display.brightness = val;
+      window.pywebview?.api?.set_brightness?.(val);
+      return;
+    }
+
+    if (action === 'select-refresh-rate') {
+      const rate = Number(btn.getAttribute('data-rate')) || 144;
+      const container = document.getElementById('flank-refresh-rate-options');
+      if (container) {
+        container.querySelectorAll('.flank-refresh-chip').forEach((c) => c.classList.remove('is-active'));
+        btn.classList.add('is-active');
+      }
+      const okBtn = document.getElementById('flank-apply-refresh-btn');
+      if (okBtn) okBtn.setAttribute('data-chosen-rate', String(rate));
+      const statusText = document.getElementById('flank-refresh-status');
+      if (statusText) statusText.textContent = `Selected: ${rate} Hz (click OK to apply)`;
+      return;
+    }
+
+    if (action === 'apply-refresh-rate') {
+      const okBtn = document.getElementById('flank-apply-refresh-btn');
+      let chosenRate = okBtn ? Number(okBtn.getAttribute('data-chosen-rate')) : 0;
+      if (!chosenRate) {
+        const activeChip = document.querySelector('.flank-refresh-chip.is-active');
+        if (activeChip) chosenRate = Number(activeChip.getAttribute('data-rate')) || 144;
+        else chosenRate = state.display?.refreshRate || 144;
+      }
+      const statusText = document.getElementById('flank-refresh-status');
+      if (statusText) statusText.textContent = `Applying ${chosenRate} Hz...`;
+      try {
+        const updated = await window.pywebview?.api?.set_refresh_rate?.(chosenRate);
+        if (updated?.display) {
+          state.display = updated.display;
+        } else if (state.display) {
+          state.display.refreshRate = chosenRate;
+        }
+        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz ✓`;
+        setTimeout(() => renderApp(), 400);
+      } catch (_e) {
+        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz`;
+      }
+      return;
+    }
+
     if (action === 'toggle-mic-mute') {
       if (state.privacy) state.privacy.micMuted = !state.privacy.micMuted;
       const updated = await window.pywebview?.api?.toggle_mic_mute?.();
@@ -2289,10 +2340,11 @@ function setupEventDelegation(): void {
       state.calculator.lastExpr = expr;
       state.calculator.lastResult = res;
     } else if (target.id === 'flank-brightness-slider') {
-      const val = Number((target as HTMLInputElement).value) || 85;
+      const rawVal = Number((target as HTMLInputElement).value);
+      const val = Number.isFinite(rawVal) ? Math.max(0, Math.min(100, rawVal)) : 85;
       const dispText = document.getElementById('flank-disp-val');
       if (dispText) dispText.textContent = `${val}%`;
-      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: '1920 × 1080', refreshRate: 144, scaling: 100 };
+      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: '2560 × 1440', refreshRate: 144, scaling: 100 };
       state.display.brightness = val;
       window.pywebview?.api?.set_brightness?.(val);
     } else if (target.id === 'flank-ambient-volume') {

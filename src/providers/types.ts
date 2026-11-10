@@ -294,11 +294,14 @@ export interface StoragePayload {
 }
 
 export interface DisplayPayload {
+  monitorName?: string;
   brightness: number;
   nightLight: boolean;
   resolution: string;
   refreshRate: number;
+  supportedRefreshRates?: number[];
   scaling: number;
+  statusMessage?: string;
 }
 
 export interface PrivacyPayload {

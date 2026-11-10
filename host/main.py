@@ -1958,6 +1958,12 @@ class FlankHostApi:
         self._broadcast_update(payload)
         return payload
 
+    def set_refresh_rate(self, rate: int) -> Dict[str, Any]:
+        data = self._providers.set_refresh_rate(rate)
+        payload = {'display': data}
+        self._broadcast_update(payload)
+        return payload
+
     def toggle_night_light(self) -> Dict[str, Any]:
         data = self._providers.toggle_night_light()
         payload = {'display': data}

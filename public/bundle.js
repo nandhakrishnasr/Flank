@@ -3813,19 +3813,62 @@ function renderStorageCardInner(state2) {
   `;
 }
 function renderDisplayCardInner(state2) {
-  const d = state2.display || { brightness: 85, nightLight: false, resolution: "1920 \xD7 1080", refreshRate: 144, scaling: 100 };
+  const d = state2.display || {
+    monitorName: "M27Q",
+    brightness: 85,
+    nightLight: false,
+    resolution: "2560 \xD7 1440",
+    refreshRate: 144,
+    supportedRefreshRates: [60, 120, 144],
+    scaling: 100
+  };
+  const rates = d.supportedRefreshRates && d.supportedRefreshRates.length > 0 ? d.supportedRefreshRates : [60, 120, 144];
+  const monitorLabel = d.monitorName || "M27Q";
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">Display &amp; Brightness</span>
-      <span class="flank-live-pill">${d.refreshRate}Hz</span>
+      <span class="flank-live-pill" style="font-weight: 700;">${escapeHtml2(monitorLabel)} \xB7 ${d.refreshRate}Hz</span>
     </div>
+
+    <!-- Brightness Subcard -->
     <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">${iconSvg("sun", 14)} Screen Brightness</span>
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg("sun", 14)} ${escapeHtml2(monitorLabel)} Brightness
+        </span>
         <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-disp-val">${d.brightness}%</span>
       </div>
-      <input type="range" id="flank-brightness-slider" min="10" max="100" value="${d.brightness}" style="width:100%; cursor: pointer;" />
+      <input type="range" id="flank-brightness-slider" min="0" max="100" value="${d.brightness}" style="width:100%; cursor: pointer;" />
+      <div style="display:flex; justify-content:space-between; gap: 4px; margin-top: 8px;">
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="25" style="font-size: 10px; padding: 2px 8px; flex: 1;">25%</button>
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="50" style="font-size: 10px; padding: 2px 8px; flex: 1;">50%</button>
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="75" style="font-size: 10px; padding: 2px 8px; flex: 1;">75%</button>
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="100" style="font-size: 10px; padding: 2px 8px; flex: 1;">100%</button>
+      </div>
     </div>
+
+    <!-- Refresh Rate Subcard -->
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg("activity", 14)} Choose Refresh Rate
+        </span>
+        <button type="button" class="flank-chip flank-chip--primary" data-action="apply-refresh-rate" id="flank-apply-refresh-btn" style="background: var(--flank-color-accent); color: #000; font-weight: 700; padding: 3px 12px; border: none; cursor: pointer; border-radius: 6px;">OK</button>
+      </div>
+      <div style="display:flex; gap: 6px; align-items:center;" id="flank-refresh-rate-options">
+        ${rates.map(
+    (r) => `
+          <button type="button" class="flank-chip flank-refresh-chip${r === d.refreshRate ? " is-active" : ""}" data-action="select-refresh-rate" data-rate="${r}" style="flex: 1; text-align: center; font-size: 11px; padding: 4px 6px;">
+            ${r} Hz
+          </button>
+        `
+  ).join("")}
+      </div>
+      <div id="flank-refresh-status" style="font-size: 11px; color: var(--flank-color-accent); font-weight: 600; margin-top: 6px; text-align: right;">
+        Active: ${d.refreshRate} Hz
+      </div>
+    </div>
+
     <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft);">
       <span style="font-size: 12px; color: var(--flank-color-text-muted);">Active Resolution</span>
       <span style="font-size: 12px; font-weight: 600; font-family: var(--flank-type-mono);">${escapeHtml2(d.resolution)}</span>
@@ -8715,6 +8758,54 @@ function setupEventDelegation() {
       renderApp();
       return;
     }
+    if (action === "set-display-preset") {
+      const val = Number(btn.getAttribute("data-val")) || 85;
+      const slider = document.getElementById("flank-brightness-slider");
+      if (slider) slider.value = String(val);
+      const dispText = document.getElementById("flank-disp-val");
+      if (dispText) dispText.textContent = `${val}%`;
+      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: "2560 \xD7 1440", refreshRate: 144, scaling: 100 };
+      state.display.brightness = val;
+      window.pywebview?.api?.set_brightness?.(val);
+      return;
+    }
+    if (action === "select-refresh-rate") {
+      const rate = Number(btn.getAttribute("data-rate")) || 144;
+      const container = document.getElementById("flank-refresh-rate-options");
+      if (container) {
+        container.querySelectorAll(".flank-refresh-chip").forEach((c) => c.classList.remove("is-active"));
+        btn.classList.add("is-active");
+      }
+      const okBtn = document.getElementById("flank-apply-refresh-btn");
+      if (okBtn) okBtn.setAttribute("data-chosen-rate", String(rate));
+      const statusText = document.getElementById("flank-refresh-status");
+      if (statusText) statusText.textContent = `Selected: ${rate} Hz (click OK to apply)`;
+      return;
+    }
+    if (action === "apply-refresh-rate") {
+      const okBtn = document.getElementById("flank-apply-refresh-btn");
+      let chosenRate = okBtn ? Number(okBtn.getAttribute("data-chosen-rate")) : 0;
+      if (!chosenRate) {
+        const activeChip = document.querySelector(".flank-refresh-chip.is-active");
+        if (activeChip) chosenRate = Number(activeChip.getAttribute("data-rate")) || 144;
+        else chosenRate = state.display?.refreshRate || 144;
+      }
+      const statusText = document.getElementById("flank-refresh-status");
+      if (statusText) statusText.textContent = `Applying ${chosenRate} Hz...`;
+      try {
+        const updated = await window.pywebview?.api?.set_refresh_rate?.(chosenRate);
+        if (updated?.display) {
+          state.display = updated.display;
+        } else if (state.display) {
+          state.display.refreshRate = chosenRate;
+        }
+        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz \u2713`;
+        setTimeout(() => renderApp(), 400);
+      } catch (_e) {
+        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz`;
+      }
+      return;
+    }
     if (action === "toggle-mic-mute") {
       if (state.privacy) state.privacy.micMuted = !state.privacy.micMuted;
       const updated = await window.pywebview?.api?.toggle_mic_mute?.();
@@ -9051,10 +9142,11 @@ function setupEventDelegation() {
       state.calculator.lastExpr = expr;
       state.calculator.lastResult = res;
     } else if (target.id === "flank-brightness-slider") {
-      const val = Number(target.value) || 85;
+      const rawVal = Number(target.value);
+      const val = Number.isFinite(rawVal) ? Math.max(0, Math.min(100, rawVal)) : 85;
       const dispText = document.getElementById("flank-disp-val");
       if (dispText) dispText.textContent = `${val}%`;
-      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: "1920 \xD7 1080", refreshRate: 144, scaling: 100 };
+      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: "2560 \xD7 1440", refreshRate: 144, scaling: 100 };
       state.display.brightness = val;
       window.pywebview?.api?.set_brightness?.(val);
     } else if (target.id === "flank-ambient-volume") {

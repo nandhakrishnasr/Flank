@@ -977,20 +977,65 @@ function renderStorageCardInner(state: FlankState): string {
 }
 
 function renderDisplayCardInner(state: FlankState): string {
-  const d = state.display || { brightness: 85, nightLight: false, resolution: '1920 × 1080', refreshRate: 144, scaling: 100 };
+  const d = state.display || {
+    monitorName: 'M27Q',
+    brightness: 85,
+    nightLight: false,
+    resolution: '2560 × 1440',
+    refreshRate: 144,
+    supportedRefreshRates: [60, 120, 144],
+    scaling: 100,
+  };
+  const rates = d.supportedRefreshRates && d.supportedRefreshRates.length > 0 ? d.supportedRefreshRates : [60, 120, 144];
+  const monitorLabel = d.monitorName || 'M27Q';
 
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">Display &amp; Brightness</span>
-      <span class="flank-live-pill">${d.refreshRate}Hz</span>
+      <span class="flank-live-pill" style="font-weight: 700;">${escapeHtml(monitorLabel)} · ${d.refreshRate}Hz</span>
     </div>
+
+    <!-- Brightness Subcard -->
     <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">${iconSvg('sun', 14)} Screen Brightness</span>
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg('sun', 14)} ${escapeHtml(monitorLabel)} Brightness
+        </span>
         <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-disp-val">${d.brightness}%</span>
       </div>
-      <input type="range" id="flank-brightness-slider" min="10" max="100" value="${d.brightness}" style="width:100%; cursor: pointer;" />
+      <input type="range" id="flank-brightness-slider" min="0" max="100" value="${d.brightness}" style="width:100%; cursor: pointer;" />
+      <div style="display:flex; justify-content:space-between; gap: 4px; margin-top: 8px;">
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="25" style="font-size: 10px; padding: 2px 8px; flex: 1;">25%</button>
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="50" style="font-size: 10px; padding: 2px 8px; flex: 1;">50%</button>
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="75" style="font-size: 10px; padding: 2px 8px; flex: 1;">75%</button>
+        <button type="button" class="flank-chip" data-action="set-display-preset" data-val="100" style="font-size: 10px; padding: 2px 8px; flex: 1;">100%</button>
+      </div>
     </div>
+
+    <!-- Refresh Rate Subcard -->
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg('activity', 14)} Choose Refresh Rate
+        </span>
+        <button type="button" class="flank-chip flank-chip--primary" data-action="apply-refresh-rate" id="flank-apply-refresh-btn" style="background: var(--flank-color-accent); color: #000; font-weight: 700; padding: 3px 12px; border: none; cursor: pointer; border-radius: 6px;">OK</button>
+      </div>
+      <div style="display:flex; gap: 6px; align-items:center;" id="flank-refresh-rate-options">
+        ${rates
+          .map(
+            (r) => `
+          <button type="button" class="flank-chip flank-refresh-chip${r === d.refreshRate ? ' is-active' : ''}" data-action="select-refresh-rate" data-rate="${r}" style="flex: 1; text-align: center; font-size: 11px; padding: 4px 6px;">
+            ${r} Hz
+          </button>
+        `
+          )
+          .join('')}
+      </div>
+      <div id="flank-refresh-status" style="font-size: 11px; color: var(--flank-color-accent); font-weight: 600; margin-top: 6px; text-align: right;">
+        Active: ${d.refreshRate} Hz
+      </div>
+    </div>
+
     <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft);">
       <span style="font-size: 12px; color: var(--flank-color-text-muted);">Active Resolution</span>
       <span style="font-size: 12px; font-weight: 600; font-family: var(--flank-type-mono);">${escapeHtml(d.resolution)}</span>

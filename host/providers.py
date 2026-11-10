@@ -66,6 +66,41 @@ CLSID_MMDeviceEnumerator = _make_guid('{BCDE0395-E52F-467C-8E3D-C4579291692E}')
 IID_IMMDeviceEnumerator = _make_guid('{A95664D2-9614-4F35-A746-DE8DB63617E6}')
 IID_IAudioEndpointVolume = _make_guid('{5CDF2C82-841E-4546-9722-0CF74078229A}')
 
+class _CCD_LUID(ctypes.Structure):
+    _fields_ = [('LowPart', wintypes.DWORD), ('HighPart', wintypes.LONG)]
+
+class _CCD_RATIONAL(ctypes.Structure):
+    _fields_ = [('Numerator', wintypes.UINT), ('Denominator', wintypes.UINT)]
+
+class _CCD_PATH_SOURCE_INFO(ctypes.Structure):
+    _fields_ = [
+        ('adapterId', _CCD_LUID),
+        ('id', wintypes.UINT),
+        ('modeInfoIdx', wintypes.UINT),
+        ('statusFlags', wintypes.UINT),
+    ]
+
+class _CCD_PATH_TARGET_INFO(ctypes.Structure):
+    _fields_ = [
+        ('adapterId', _CCD_LUID),
+        ('id', wintypes.UINT),
+        ('modeInfoIdx', wintypes.UINT),
+        ('outputTechnology', wintypes.UINT),
+        ('rotation', wintypes.UINT),
+        ('scaling', wintypes.UINT),
+        ('refreshRate', _CCD_RATIONAL),
+        ('scanLineOrdering', wintypes.UINT),
+        ('targetAvailable', wintypes.BOOL),
+        ('statusFlags', wintypes.UINT),
+    ]
+
+class DISPLAYCONFIG_PATH_INFO(ctypes.Structure):
+    _fields_ = [
+        ('sourceInfo', _CCD_PATH_SOURCE_INFO),
+        ('targetInfo', _CCD_PATH_TARGET_INFO),
+        ('flags', wintypes.UINT),
+    ]
+
 class IMMDeviceEnumeratorVtbl(ctypes.Structure):
     _fields_ = [
         ('QueryInterface', ctypes.c_void_p),
@@ -2192,49 +2227,161 @@ class SystemProviders:
 
     def sample_display(self) -> Dict[str, Any]:
         now = time.time()
-        if self._display_cache and (now - self._last_display_scan < 8.0):
+        if self._display_cache and (now - self._last_display_scan < 5.0):
             return self._display_cache
 
+        monitor_name = 'M27Q'
         brightness = 85
+        refresh_rate = 144
+        supported_rates = [60, 120, 144]
+
+        # 1. Read Twinkle Tray display state (dedicated for external monitors like M27Q)
         try:
-            ps = 'Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction SilentlyContinue | Select-Object -ExpandProperty CurrentBrightness'
-            res = subprocess.run(
-                ['powershell', '-NoProfile', '-NonInteractive', '-Command', ps],
-                capture_output=True,
-                text=True,
-                timeout=2.0,
-                creationflags=0x08000000,
-            )
-            if res.returncode == 0 and res.stdout.strip().isdigit():
-                brightness = int(res.stdout.strip())
+            tt_json_path = os.path.expandvars(r'%APPDATA%\twinkle-tray\known-displays.json')
+            if os.path.exists(tt_json_path):
+                with open(tt_json_path, 'r', encoding='utf-8') as f:
+                    tt_data = json.load(f)
+                for _k, disp in tt_data.items():
+                    name = str(disp.get('name', ''))
+                    if 'm27q' in name.lower() or 'gbt270d' in str(disp.get('id', '')).lower():
+                        monitor_name = name or 'M27Q'
+                        if 'brightness' in disp and isinstance(disp['brightness'], (int, float)):
+                            brightness = int(disp['brightness'])
+                        break
         except Exception:
             pass
 
-        sw = user32.GetSystemMetrics(0) or 1920
-        sh = user32.GetSystemMetrics(1) or 1080
+        # Fallback to WMI brightness if Twinkle Tray had no reading
+        if brightness == 85:
+            try:
+                ps = 'Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction SilentlyContinue | Select-Object -ExpandProperty CurrentBrightness'
+                res = subprocess.run(
+                    ['powershell', '-NoProfile', '-NonInteractive', '-Command', ps],
+                    capture_output=True,
+                    text=True,
+                    timeout=1.5,
+                    creationflags=0x08000000,
+                )
+                if res.returncode == 0 and res.stdout.strip().isdigit():
+                    brightness = int(res.stdout.strip())
+            except Exception:
+                pass
+
+        # 2. Query active refresh rate via Windows CCD QueryDisplayConfig
+        try:
+            h_def = user32.OpenDesktopW('default', 0, False, 0x01FF)
+            if h_def:
+                user32.SetThreadDesktop(h_def)
+            num_path = wintypes.UINT()
+            num_mode = wintypes.UINT()
+            if user32.GetDisplayConfigBufferSizes(2, ctypes.byref(num_path), ctypes.byref(num_mode)) == 0 and num_path.value > 0:
+                p_buf = (DISPLAYCONFIG_PATH_INFO * num_path.value)()
+                m_buf = bytearray(num_mode.value * 64)
+                if user32.QueryDisplayConfig(2, ctypes.byref(num_path), p_buf, ctypes.byref(num_mode), (ctypes.c_char * len(m_buf)).from_buffer(m_buf), None) == 0:
+                    r = p_buf[0].targetInfo.refreshRate
+                    if r.Denominator > 0:
+                        hz_val = round(r.Numerator / r.Denominator)
+                        if hz_val > 0:
+                            refresh_rate = hz_val
+        except Exception:
+            pass
+
+        sw = user32.GetSystemMetrics(0) or 2560
+        sh = user32.GetSystemMetrics(1) or 1440
 
         self._display_cache = {
+            'monitorName': monitor_name,
             'brightness': brightness,
             'nightLight': False,
             'resolution': f'{sw} × {sh}',
-            'refreshRate': 144,
+            'refreshRate': refresh_rate,
+            'supportedRefreshRates': supported_rates,
             'scaling': 100,
         }
         self._last_display_scan = now
         return self._display_cache
 
     def set_brightness(self, val: int) -> Dict[str, Any]:
-        val = max(10, min(100, int(val)))
+        val = max(0, min(100, int(val)))
         if self._display_cache:
             self._display_cache['brightness'] = val
+
+        # 1. Twinkle Tray CLI for external monitor (M27Q)
+        tt_path = os.path.expandvars(r'%LOCALAPPDATA%\Programs\twinkle-tray\Twinkle Tray.exe')
+        if os.path.exists(tt_path):
+            try:
+                env = os.environ.copy()
+                env.pop('ELECTRON_RUN_AS_NODE', None)
+                # Apply specifically to M27Q by MonitorID or partial name
+                subprocess.Popen(
+                    [tt_path, '--MonitorID=5&27916936&0&UID4355', f'--Set={val}'],
+                    env=env,
+                    creationflags=0x08000000,
+                )
+                subprocess.Popen(
+                    [tt_path, '--MonitorID=M27Q', f'--Set={val}'],
+                    env=env,
+                    creationflags=0x08000000,
+                )
+            except Exception:
+                pass
+
+        # 2. WMI fallback for internal laptop screen
         try:
-            ps = f'(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods).WmiSetBrightness(1, {val})'
+            ps = f'(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods -ErrorAction SilentlyContinue).WmiSetBrightness(1, {val})'
             subprocess.Popen(
                 ['powershell', '-NoProfile', '-NonInteractive', '-Command', ps],
                 creationflags=0x08000000,
             )
         except Exception:
             pass
+        return self.sample_display()
+
+    def set_refresh_rate(self, rate: int) -> Dict[str, Any]:
+        rate = int(rate)
+        if rate not in (60, 120, 144):
+            rate = 144
+
+        try:
+            h_def = user32.OpenDesktopW('default', 0, False, 0x01FF)
+            if h_def:
+                user32.SetThreadDesktop(h_def)
+
+            num_path = wintypes.UINT()
+            num_mode = wintypes.UINT()
+            if user32.GetDisplayConfigBufferSizes(2, ctypes.byref(num_path), ctypes.byref(num_mode)) == 0 and num_path.value > 0:
+                p_buf = (DISPLAYCONFIG_PATH_INFO * num_path.value)()
+                m_buf = bytearray(num_mode.value * 64)
+                if user32.QueryDisplayConfig(2, ctypes.byref(num_path), p_buf, ctypes.byref(num_mode), (ctypes.c_char * len(m_buf)).from_buffer(m_buf), None) == 0:
+                    freq_map = {
+                        60: [(59951, 1000), (60000, 1000), (60, 1)],
+                        120: [(119998, 1000), (120000, 1000), (120, 1)],
+                        144: [(143856, 1000), (144000, 1000), (144, 1)],
+                    }
+                    candidates = freq_map.get(rate, [(rate * 1000, 1000), (rate, 1)])
+                    applied = False
+                    for num, den in candidates:
+                        p_buf[0].targetInfo.refreshRate.Numerator = num
+                        p_buf[0].targetInfo.refreshRate.Denominator = den
+                        struct.pack_into('<II', m_buf, 16 + 16, num, den)
+                        # SDC_APPLY (0x80) | SDC_USE_SUPPLIED_DISPLAY_CONFIG (0x20) | SDC_ALLOW_CHANGES (0x400) | SDC_SAVE_TO_DATABASE (0x200)
+                        flags = 0x80 | 0x20 | 0x400 | 0x200
+                        ret_set = user32.SetDisplayConfig(
+                            num_path.value,
+                            p_buf,
+                            num_mode.value,
+                            (ctypes.c_char * len(m_buf)).from_buffer(m_buf),
+                            flags
+                        )
+                        if ret_set == 0:
+                            applied = True
+                            break
+        except Exception:
+            pass
+
+        if self._display_cache:
+            self._display_cache['refreshRate'] = rate
+            self._display_cache['statusMessage'] = f'Refresh rate changed to {rate} Hz'
         return self.sample_display()
 
     def toggle_night_light(self) -> Dict[str, Any]:
