@@ -695,6 +695,9 @@ class FlankHostApi:
         city = self.prefs.get('weatherCity')
         if city:
             self._providers._weather_city = city
+        gh_token = self.prefs.get('githubToken')
+        if gh_token:
+            self._providers._github_token = gh_token
         self._card_hide_timer: threading.Timer | None = None
         self._card_open: bool = False
         self._card_pinned: bool = False
@@ -1973,6 +1976,29 @@ class FlankHostApi:
         self._broadcast_update(payload)
         return payload
 
+    def terminate_runner_command(self) -> Dict[str, Any]:
+        data = self._providers.terminate_runner_command()
+        payload = {'runner': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def connect_github(self, token: str) -> Dict[str, Any]:
+        cleaned = (token or '').strip()
+        self.prefs['githubToken'] = cleaned
+        self._write_prefs_to_disk()
+        data = self._providers.set_github_token(cleaned)
+        payload = {'github': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def disconnect_github(self) -> Dict[str, Any]:
+        self.prefs['githubToken'] = ''
+        self._write_prefs_to_disk()
+        data = self._providers.set_github_token('')
+        payload = {'github': data}
+        self._broadcast_update(payload)
+        return payload
+
     def _broadcast_update(self, payload: Dict[str, Any]) -> None:
         js_arg = json.dumps(payload)
         for w in list(windows.values()):
@@ -2207,6 +2233,10 @@ def start_telemetry_loop(api: FlankHostApi) -> None:
             if tick % 10 == 0:
                 payload['storage'] = api._providers.sample_storage()
                 payload['tasks'] = api._providers.sample_tasks()
+            if tick % 15 == 0:
+                payload['github'] = api._providers.sample_github()
+            if api._providers._runner_running or tick % 3 == 0:
+                payload['runner'] = api._providers.sample_runner()
             if tick % 90 == 0:
                 payload['weather'] = api._providers.fetch_weather()
 

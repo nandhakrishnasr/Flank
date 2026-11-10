@@ -1838,6 +1838,26 @@ function setupEventDelegation(): void {
       return;
     }
 
+    if (action === 'clear-calc') {
+      const calcInput = document.getElementById('flank-calc-input') as HTMLInputElement | null;
+      if (calcInput) {
+        calcInput.value = '';
+        calcInput.focus();
+      }
+      const resEl = document.getElementById('flank-calc-result');
+      if (resEl) resEl.textContent = '0';
+      if (!state.calculator) state.calculator = { lastExpr: '', lastResult: '0', history: [] };
+      state.calculator.lastExpr = '';
+      state.calculator.lastResult = '0';
+      return;
+    }
+
+    if (action === 'clear-calc-history') {
+      if (state.calculator) state.calculator.history = [];
+      renderApp();
+      return;
+    }
+
     if (action === 'copy-calc-result') {
       const res = state.calculator?.lastResult;
       if (res && navigator.clipboard?.writeText) {
@@ -1961,6 +1981,54 @@ function setupEventDelegation(): void {
         if (updated?.runner) state.runner = updated.runner;
         renderApp();
       }
+      return;
+    }
+
+    if (action === 'terminate-cmd') {
+      if (state.runner) {
+        state.runner.running = false;
+        state.runner.lastOutput = (state.runner.lastOutput + '\n[Terminating process...]').trim();
+      }
+      renderApp();
+      const updated = await window.pywebview?.api?.terminate_runner_command?.();
+      if (updated?.runner) state.runner = updated.runner;
+      renderApp();
+      return;
+    }
+
+    if (action === 'clear-runner-output') {
+      if (state.runner) {
+        state.runner.lastOutput = '';
+      }
+      renderApp();
+      return;
+    }
+
+    if (action === 'connect-github') {
+      const tokenInput = document.getElementById('flank-github-token-input') as HTMLInputElement | null;
+      const token = tokenInput?.value.trim() || '';
+      if (token) {
+        if (tokenInput) tokenInput.value = '';
+        const updated = await window.pywebview?.api?.connect_github?.(token);
+        if (updated?.github) state.github = updated.github;
+        renderApp();
+      }
+      return;
+    }
+
+    if (action === 'disconnect-github') {
+      const updated = await window.pywebview?.api?.disconnect_github?.();
+      if (updated?.github) state.github = updated.github;
+      renderApp();
+      return;
+    }
+
+    if (action === 'open-settings-widgets') {
+      windowUiState.settingsTab = 'widgets';
+      state.activeFullWindow = 'settings';
+      state.activeWidget = null;
+      window.pywebview?.api?.open_window?.('settings');
+      renderApp();
       return;
     }
 

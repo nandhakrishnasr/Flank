@@ -843,12 +843,12 @@ function renderTasksCardInner(state: FlankState): string {
   const rowsHtml = items.length === 0
     ? `<div style="padding: 16px 0; text-align: center; font-size: 12px; color: var(--flank-color-text-muted);">No tasks yet. Type below to add one!</div>`
     : items.map((t) => `
-        <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
-          <button type="button" class="flank-win-btn" data-action="toggle-task" data-task-id="${escapeHtml(t.id)}" title="${t.done ? 'Mark pending' : 'Mark done'}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid ${t.done ? 'var(--flank-color-accent)' : 'var(--flank-color-divider-soft)'}; background: ${t.done ? 'var(--flank-color-accent)' : 'transparent'}; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;">
-            ${t.done ? iconSvg('check', 12) : ''}
+        <div style="display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--flank-color-divider-soft); width: 100%; box-sizing: border-box;">
+          <button type="button" data-action="toggle-task" data-task-id="${escapeHtml(t.id)}" title="${t.done ? 'Mark pending' : 'Mark done'}" style="width: 16px; height: 16px; min-width: 16px; max-width: 16px; flex: 0 0 16px; border-radius: 4px; border: 1.5px solid ${t.done ? 'var(--flank-color-accent)' : 'var(--flank-color-divider-soft)'}; background: ${t.done ? 'var(--flank-color-accent)' : 'transparent'}; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; outline: none; transition: all 0.15s ease;">
+            ${t.done ? iconSvg('check', 10) : ''}
           </button>
-          <span style="flex: 1; font-size: 12px; color: ${t.done ? 'var(--flank-color-text-muted)' : 'var(--flank-color-text)'}; text-decoration: ${t.done ? 'line-through' : 'none'}; word-break: break-word;">${escapeHtml(t.text)}</span>
-          <button type="button" class="flank-win-btn" data-action="delete-task" data-task-id="${escapeHtml(t.id)}" title="Delete task" style="width: 20px; height: 20px; color: var(--flank-color-text-muted); opacity: 0.7; cursor: pointer;">
+          <span style="flex: 1 1 auto; min-width: 0; font-size: 12px; line-height: 1.35; color: ${t.done ? 'var(--flank-color-text-muted)' : 'var(--flank-color-text)'}; text-decoration: ${t.done ? 'line-through' : 'none'}; word-break: break-word;">${escapeHtml(t.text)}</span>
+          <button type="button" data-action="delete-task" data-task-id="${escapeHtml(t.id)}" title="Delete task" style="width: 20px; height: 20px; min-width: 20px; flex: 0 0 20px; border: none; background: transparent; color: var(--flank-color-text-muted); opacity: 0.6; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 4px;">
             ${iconSvg('x', 12)}
           </button>
         </div>
@@ -877,7 +877,7 @@ function renderTasksCardInner(state: FlankState): string {
 function renderCalculatorCardInner(state: FlankState): string {
   const calc = state.calculator || { lastExpr: '', lastResult: '0', history: [] };
   const historyRows = (calc.history || []).slice(0, 3).map((h) => `
-    <div class="flank-row" style="padding: 3px 0; font-size: 11px; font-family: var(--flank-type-mono); cursor: pointer;" data-action="recall-calc" data-expr="${escapeHtml(h.expr)}">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 11px; font-family: var(--flank-type-mono); cursor: pointer;" data-action="recall-calc" data-expr="${escapeHtml(h.expr)}">
       <span style="color: var(--flank-color-text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(h.expr)}</span>
       <span style="color: var(--flank-color-accent); font-weight: 600;">= ${escapeHtml(h.result)}</span>
     </div>
@@ -890,12 +890,18 @@ function renderCalculatorCardInner(state: FlankState): string {
     </div>
     <input type="text" id="flank-calc-input" class="flank-card-input" value="${escapeHtml(calc.lastExpr || '')}" placeholder="Type e.g. 120 * 1.18, 16 GB to MB, sqrt(144)..." style="width: 100%; height: 32px; font-family: var(--flank-type-mono); font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text); margin-bottom: 8px;" />
     <div style="display:flex; justify-content:space-between; align-items:center; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;">
-      <div style="font-size: 18px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-calc-result">${escapeHtml(calc.lastResult || '0')}</div>
-      <button type="button" class="flank-chip" data-action="copy-calc-result" title="Copy result to clipboard" style="font-size: 11px;">Copy</button>
+      <div style="font-size: 18px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;" id="flank-calc-result">${escapeHtml(calc.lastResult || '0')}</div>
+      <div style="display:flex; gap: 6px; align-items:center;">
+        <button type="button" class="flank-chip" data-action="clear-calc" title="Clear calculator" style="font-size: 11px; padding: 2px 8px;">Clear</button>
+        <button type="button" class="flank-chip" data-action="copy-calc-result" title="Copy result to clipboard" style="font-size: 11px; padding: 2px 8px;">Copy</button>
+      </div>
     </div>
     ${historyRows ? `
       <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 6px; margin-top: 4px;">
-        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--flank-color-text-muted); margin-bottom: 4px;">Recent</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--flank-color-text-muted);">Recent</span>
+          <button type="button" class="flank-chip" data-action="clear-calc-history" style="font-size: 9px; padding: 1px 6px;">Clear history</button>
+        </div>
         ${historyRows}
       </div>
     ` : ''}
@@ -1080,18 +1086,26 @@ function renderRunnerCardInner(state: FlankState): string {
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">Quick Command Runner</span>
-      <span class="flank-live-pill">>_ CLI</span>
+      <span class="flank-live-pill" style="${run.running ? 'color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);' : ''}">${run.running ? '● Running...' : '>_ CLI'}</span>
     </div>
     <div style="display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 8px;">
       ${cmdChips}
     </div>
     <div style="display:flex; gap: 6px; margin-bottom: 8px;">
       <input type="text" id="flank-runner-input" class="flank-card-input" placeholder="Enter shell command (e.g. ping 8.8.8.8)..." style="flex: 1; height: 30px; font-family: var(--flank-type-mono); font-size: 11px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text);" />
-      <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="run-custom-cmd">Run</button>
+      ${run.running ? `
+        <button type="button" class="flank-btn" style="height: 30px; padding: 0 10px; font-size: 11px; background: rgba(239, 68, 68, 0.25); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.45); font-weight: 600;" data-action="terminate-cmd" title="Terminate running process">Terminate</button>
+      ` : `
+        <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="run-custom-cmd">Run</button>
+      `}
     </div>
     ${run.lastOutput ? `
-      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--flank-color-divider-soft); border-radius: 6px; padding: 8px; font-family: var(--flank-type-mono); font-size: 10px; color: var(--flank-color-text); max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
-        <div style="color: var(--flank-color-accent); margin-bottom: 4px;">$ ${escapeHtml(run.lastCmd)}</div>${escapeHtml(run.lastOutput)}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 10px; color: var(--flank-color-text-muted); font-family: var(--flank-type-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;">$ ${escapeHtml(run.lastCmd)}</span>
+        <button type="button" class="flank-chip" style="font-size: 9px; padding: 1px 6px;" data-action="clear-runner-output">Clear</button>
+      </div>
+      <div style="background: rgba(0,0,0,0.45); border: 1px solid var(--flank-color-divider-soft); border-radius: 6px; padding: 8px; font-family: var(--flank-type-mono); font-size: 10px; color: var(--flank-color-text); max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+        ${escapeHtml(run.lastOutput)}
       </div>
     ` : ''}
   `;
@@ -1131,11 +1145,31 @@ function renderGpuCardInner(state: FlankState): string {
 }
 
 function renderGithubCardInner(state: FlankState): string {
-  const gh = state.github || { connected: true, pendingCount: 0, items: [] };
+  const gh = state.github || { connected: false, pendingCount: 0, items: [] };
   const items = gh.items || [];
 
+  if (!gh.connected) {
+    return `
+      <div class="flank-card__header">
+        <span class="flank-card__title">GitHub Activity</span>
+        <span class="flank-live-pill" style="opacity: 0.65;">Offline</span>
+      </div>
+      <div style="padding: 16px 8px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--flank-color-tile-bg); display: flex; align-items: center; justify-content: center; color: var(--flank-color-text-muted);">
+          ${iconSvg('github', 20)}
+        </div>
+        <div style="color: var(--flank-color-text-muted); font-size: 12px; line-height: 1.45; max-width: 250px;">
+          Connect your GitHub account in <strong>Settings → Widgets</strong> to view live pull requests and review requests.
+        </div>
+        <button type="button" class="flank-btn is-primary" style="height: 28px; font-size: 11px; padding: 0 14px; margin-top: 2px;" data-action="open-settings-widgets">
+          Connect GitHub
+        </button>
+      </div>
+    `;
+  }
+
   const rows = items.map((it) => `
-    <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--flank-color-divider-soft); gap: 8px;">
       <div style="display:flex; flex-direction:column; gap: 2px; min-width:0; flex:1;">
         <div style="font-size: 12px; font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: var(--flank-color-text);" title="${escapeHtml(it.title)}">${escapeHtml(it.title)}</div>
         <div style="font-size: 10px; color: var(--flank-color-text-muted);">${escapeHtml(it.repo)} · ${escapeHtml(it.status)}</div>
@@ -1147,7 +1181,7 @@ function renderGithubCardInner(state: FlankState): string {
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">GitHub Activity</span>
-      <span class="flank-live-pill">${gh.pendingCount} PRs</span>
+      <span class="flank-live-pill">${gh.username ? `@${escapeHtml(gh.username)} · ` : ''}${gh.pendingCount} PRs</span>
     </div>
     <div style="max-height: 180px; overflow-y: auto;">
       ${rows || '<div style="padding:16px 0; text-align:center; font-size:12px; color:var(--flank-color-text-muted);">All caught up! No pending PRs.</div>'}

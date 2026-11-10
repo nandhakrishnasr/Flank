@@ -299,6 +299,11 @@ class SystemProviders:
         self._gpu_cache: Dict[str, Any] = {}
         self._runner_last_output = ''
         self._runner_last_cmd = ''
+        self._runner_running = False
+        self._current_runner_proc = None
+        self._github_token = ''
+        self._github_cache: Dict[str, Any] = {}
+        self._last_github_fetch = 0.0
 
         self._focus_running = False
         self._focus_mode = 'focus'
@@ -2295,7 +2300,7 @@ class SystemProviders:
 
     def sample_runner(self) -> Dict[str, Any]:
         return {
-            'running': False,
+            'running': bool(self._runner_running),
             'lastCmd': self._runner_last_cmd or 'ipconfig /flushdns',
             'lastOutput': self._runner_last_output or 'Ready to execute commands.',
             'commands': [
@@ -2311,23 +2316,54 @@ class SystemProviders:
         if not cmd:
             return self.sample_runner()
 
-        self._runner_last_cmd = cmd
-        try:
-            res = subprocess.run(
-                cmd,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=12.0,
-                creationflags=0x08000000,
-            )
-            out = (res.stdout or '') + ('\n' + res.stderr if res.stderr else '')
-            self._runner_last_output = out.strip() or f'Command completed with exit code {res.returncode}.'
-        except subprocess.TimeoutExpired:
-            self._runner_last_output = 'Command timed out after 12 seconds.'
-        except Exception as e:
-            self._runner_last_output = f'Error executing command: {e}'
+        # If already running a process, terminate it first
+        if self._current_runner_proc and self._current_runner_proc.poll() is None:
+            self.terminate_runner_command()
 
+        self._runner_last_cmd = cmd
+        self._runner_running = True
+        self._runner_last_output = f'Running: {cmd}...\n'
+
+        def _worker():
+            try:
+                proc = subprocess.Popen(
+                    cmd,
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    creationflags=0x08000000,
+                )
+                self._current_runner_proc = proc
+                out, _ = proc.communicate(timeout=30.0)
+                if not (self._runner_last_output and '[Command terminated' in self._runner_last_output):
+                    self._runner_last_output = (out or '').strip() or f'Command completed with exit code {proc.returncode}.'
+            except subprocess.TimeoutExpired:
+                try:
+                    subprocess.run(['taskkill', '/F', '/T', '/PID', str(proc.pid)], check=False, creationflags=0x08000000)
+                    proc.kill()
+                except Exception:
+                    pass
+                self._runner_last_output = 'Command timed out after 30 seconds.'
+            except Exception as e:
+                self._runner_last_output = f'Error executing command: {e}'
+            finally:
+                self._runner_running = False
+                self._current_runner_proc = None
+
+        threading.Thread(target=_worker, daemon=True).start()
+        return self.sample_runner()
+
+    def terminate_runner_command(self) -> Dict[str, Any]:
+        if self._current_runner_proc and self._current_runner_proc.poll() is None:
+            try:
+                subprocess.run(['taskkill', '/F', '/T', '/PID', str(self._current_runner_proc.pid)], check=False, creationflags=0x08000000)
+                self._current_runner_proc.kill()
+            except Exception:
+                pass
+            self._runner_last_output = (self._runner_last_output + '\n[Command terminated by user]').strip()
+        self._runner_running = False
+        self._current_runner_proc = None
         return self.sample_runner()
 
     # ========================================================================
@@ -2382,30 +2418,99 @@ class SystemProviders:
     # 17. GITHUB ACTIVITY
     # ========================================================================
 
+    def set_github_token(self, token: str) -> Dict[str, Any]:
+        self._github_token = (token or '').strip()
+        self._last_github_fetch = 0.0
+        self._github_cache = {}
+        return self.sample_github()
+
     def sample_github(self) -> Dict[str, Any]:
-        return {
-            'username': 'nandhakrishnasr',
-            'connected': True,
-            'pendingCount': 2,
-            'items': [
-                {
-                    'id': 'pr-14',
-                    'title': 'feat: add album art & YouTube thumbnail',
-                    'repo': 'Flank',
-                    'type': 'pr',
-                    'url': 'https://github.com/nandhakrishnasr/Flank/pull/14',
-                    'status': 'Review requested',
-                },
-                {
-                    'id': 'pr-12',
-                    'title': 'fix: edge dock positioning multi-monitor',
-                    'repo': 'Flank',
-                    'type': 'pr',
-                    'url': 'https://github.com/nandhakrishnasr/Flank/pull/12',
-                    'status': 'Approved',
-                },
-            ],
+        token = (self._github_token or '').strip()
+        if not token:
+            return {
+                'username': '',
+                'connected': False,
+                'pendingCount': 0,
+                'items': [],
+            }
+
+        now = time.time()
+        if self._github_cache and (now - self._last_github_fetch < 30.0):
+            return self._github_cache
+
+        import urllib.request
+        import urllib.parse
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Accept': 'application/vnd.github+json',
+            'User-Agent': 'Flank-Desktop/1.0',
         }
+
+        try:
+            req_user = urllib.request.Request('https://api.github.com/user', headers=headers)
+            with urllib.request.urlopen(req_user, timeout=5.0) as resp:
+                user_data = json.loads(resp.read().decode('utf-8'))
+                username = user_data.get('login', 'User')
+
+            items = []
+            # 1. Check unread notifications
+            try:
+                req_notif = urllib.request.Request('https://api.github.com/notifications?per_page=10', headers=headers)
+                with urllib.request.urlopen(req_notif, timeout=5.0) as resp:
+                    notifs = json.loads(resp.read().decode('utf-8'))
+                    for n in notifs[:6]:
+                        subject = n.get('subject', {})
+                        repo = n.get('repository', {}).get('name', 'Repo')
+                        ntype = subject.get('type', 'pr').lower()
+                        items.append({
+                            'id': str(n.get('id', '')),
+                            'title': subject.get('title', 'Notification'),
+                            'repo': repo,
+                            'type': 'pr' if 'pull' in ntype else 'mention' if 'mention' in n.get('reason', '') else 'issue',
+                            'url': subject.get('html_url') or f"https://github.com/{n.get('repository', {}).get('full_name', '')}",
+                            'status': n.get('reason', 'Notification').replace('_', ' ').capitalize(),
+                        })
+            except Exception:
+                pass
+
+            # 2. If notifications are empty, query open PRs authored by user
+            if not items:
+                try:
+                    q = urllib.parse.quote(f'is:pr is:open author:{username}')
+                    req_prs = urllib.request.Request(f'https://api.github.com/search/issues?q={q}&per_page=5', headers=headers)
+                    with urllib.request.urlopen(req_prs, timeout=5.0) as resp:
+                        search_res = json.loads(resp.read().decode('utf-8'))
+                        for issue in search_res.get('items', [])[:5]:
+                            repo_name = issue.get('repository_url', '').split('/')[-1] or 'Repo'
+                            items.append({
+                                'id': str(issue.get('id', '')),
+                                'title': issue.get('title', 'Pull Request'),
+                                'repo': repo_name,
+                                'type': 'pr',
+                                'url': issue.get('html_url', ''),
+                                'status': 'Open PR',
+                            })
+                except Exception:
+                    pass
+
+            self._github_cache = {
+                'username': username,
+                'connected': True,
+                'pendingCount': len(items),
+                'items': items,
+            }
+            self._last_github_fetch = now
+            return self._github_cache
+        except Exception as e:
+            if self._github_cache:
+                return self._github_cache
+            return {
+                'username': '',
+                'connected': False,
+                'pendingCount': 0,
+                'items': [],
+                'error': str(e),
+            }
 
 
 

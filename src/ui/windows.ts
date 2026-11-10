@@ -915,53 +915,165 @@ export function renderSettingsWindowHtml(
       .join('');
 
     contentHtml = `
-      <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
         ${SectionHeader({
           title: 'Widget Preferences',
-          description: 'Configure weather location, multiple world clocks, and clipboard storage.',
+          description: 'Custom configurations organized and grouped per widget.',
         })}
-        ${Row({
-          label: 'Weather city',
-          description: 'Location for weather and hourly forecast.',
-          controlHtml: `
-            <div style="display:flex; gap: 8px;">
-              ${Input({ id: 'flank-weather-city-input', value: state.weather.city, style: 'width: 140px;' })}
-              ${Button({ label: 'Update', variant: 'primary', actionAttr: 'data-action="save-weather-city"' })}
+
+        <!-- GITHUB WIDGET GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                  ${iconSvg('github', 16)} GitHub Activity
+                </div>
+                <span class="flank-chip" style="font-size: 11px; ${state.github?.connected ? 'color: #10B981; border-color: rgba(16, 185, 129, 0.4); font-weight: 600;' : ''}">
+                  ${state.github?.connected ? `Connected (@${escapeHtml(state.github.username || 'user')})` : 'Not connected'}
+                </span>
+              </div>
+              <div style="font-size: 12px; color: var(--flank-color-text-muted); line-height: 1.45;">
+                Connect a GitHub Personal Access Token (classic or fine-grained with <code>repo</code> and <code>notifications</code> scopes) to view live PRs, review requests, and alerts on your dock.
+              </div>
+              <div style="display:flex; gap: 8px; align-items:center;">
+                ${Input({ id: 'flank-github-token-input', type: 'password', placeholder: 'ghp_xxxxxxxxxxxxxxxxxxxx', style: 'flex: 1;' })}
+                ${Button({ label: state.github?.connected ? 'Update Token' : 'Connect', variant: 'primary', actionAttr: 'data-action="connect-github"' })}
+                ${state.github?.connected ? Button({ label: 'Disconnect', variant: 'secondary', actionAttr: 'data-action="disconnect-github"' }) : ''}
+              </div>
             </div>
           `,
         })}
-        ${Row({
-          label: 'Add World Clock city',
-          description: 'Search any city to track local time.',
-          controlHtml: `
-            <div style="display:flex; gap: 8px;">
-              ${Input({ id: 'flank-clock-city-input', placeholder: 'e.g. Tokyo, London, Dubai...', style: 'width: 160px;' })}
-              ${Button({ label: 'Add city', variant: 'primary', actionAttr: 'data-action="add-world-clock"' })}
+
+        <!-- WEATHER WIDGET GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg('sun', 16)} Weather &amp; Forecast
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Default city location</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Provides live conditions and temperature forecast.</div>
+                </div>
+                <div style="display:flex; gap: 8px;">
+                  ${Input({ id: 'flank-weather-city-input', value: state.weather.city, style: 'width: 140px;' })}
+                  ${Button({ label: 'Update', variant: 'primary', actionAttr: 'data-action="save-weather-city"' })}
+                </div>
+              </div>
             </div>
           `,
         })}
-        ${Row({
-          label: 'Saved World Clocks',
-          controlHtml: `<div class="flank-chip-row" style="flex-wrap: wrap; max-width: 320px; justify-content: flex-end; gap: 6px;">${clockChips || '<span class="flank-card-muted">None</span>'}</div>`,
-        })}
-        ${Row({
-          label: 'Bluetooth & peripherals',
-          description: 'Scans for connected Bluetooth keyboards, mice, audio devices and controllers.',
-          controlHtml: `
-            <button type="button" class="flank-ui-btn is-secondary" data-item-kind="link" data-item-id="win-bluetooth-settings" data-target="ms-settings:bluetooth">
-              <span>Open Windows Bluetooth settings</span>
-            </button>
+
+        <!-- WORLD CLOCK WIDGET GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg('clock', 16)} World Clock &amp; Timezones
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Add tracked city</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Search any international city to track local time.</div>
+                </div>
+                <div style="display:flex; gap: 8px;">
+                  ${Input({ id: 'flank-clock-city-input', placeholder: 'e.g. Tokyo, London, Dubai...', style: 'width: 160px;' })}
+                  ${Button({ label: 'Add city', variant: 'primary', actionAttr: 'data-action="add-world-clock"' })}
+                </div>
+              </div>
+              <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 8px;">
+                <div style="font-size: 11px; color: var(--flank-color-text-muted); margin-bottom: 6px;">Tracked cities:</div>
+                <div class="flank-chip-row" style="flex-wrap: wrap; gap: 6px;">
+                  ${clockChips || '<span class="flank-card-muted" style="font-size: 11px;">None</span>'}
+                </div>
+              </div>
+            </div>
           `,
         })}
-        ${Row({
-          label: 'Clipboard history',
-          description: 'Removes all unpinned entries from local database.',
-          controlHtml: Button({ label: 'Clear unpinned items', variant: 'secondary', actionAttr: 'data-action="clear-clipboard"' }),
+
+        <!-- HABITS & HYDRATION GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg('droplet', 16)} Habits &amp; Hydration
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Daily water target</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Target number of water glasses or cups per day.</div>
+                </div>
+                <div style="font-size: 13px; font-weight: 600; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${state.habits?.waterGoal || 8} cups</div>
+              </div>
+            </div>
+          `,
         })}
-        ${Row({
-          label: 'Launch Flank on Windows sign-in',
-          description: 'Automatically starts Flank in background.',
-          controlHtml: Switch({ checked: Boolean(state.autostart), actionAttr: 'data-action="toggle-autostart"' }),
+
+        <!-- FOCUS TIMER & SOUNDSCAPES GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg('waves', 16)} Focus Timer &amp; Soundscapes
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Offline soundscape presets</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Synthesizes Rain, Waves, Campfire, Cafe, Wind, Brown Noise offline.</div>
+                </div>
+                <button type="button" class="flank-chip" data-action="toggle-ambient" style="font-size: 11px;">
+                  ${state.ambient?.playing ? 'Mute soundscape' : 'Test soundscape'}
+                </button>
+              </div>
+            </div>
+          `,
+        })}
+
+        <!-- STORAGE & DRIVES GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg('hard-drive', 16)} Storage &amp; Drives
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Windows Disk Cleanup</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Quickly clean temporary files, cache, and recycle bin.</div>
+                </div>
+                ${Button({ label: 'Launch Cleanup', variant: 'secondary', actionAttr: 'data-action="launch-disk-cleanup"' })}
+              </div>
+            </div>
+          `,
+        })}
+
+        <!-- CLIPBOARD & BLUETOOTH GROUP -->
+        ${Card({
+          children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg('clipboard', 16)} Clipboard &amp; Peripherals
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Clipboard database</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Removes all unpinned entries from local memory.</div>
+                </div>
+                ${Button({ label: 'Clear unpinned', variant: 'secondary', actionAttr: 'data-action="clear-clipboard"' })}
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 10px;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Bluetooth settings</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Pair wireless controllers, headsets, and mice in Windows.</div>
+                </div>
+                <button type="button" class="flank-ui-btn is-secondary" data-item-kind="link" data-item-id="win-bluetooth-settings" data-target="ms-settings:bluetooth">
+                  <span>Windows Settings</span>
+                </button>
+              </div>
+            </div>
+          `,
         })}
       </div>
     `;

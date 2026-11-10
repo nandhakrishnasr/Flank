@@ -6,8 +6,8 @@
 
 let audioCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
-let currentSourceNode: AudioNode | null = null;
-let currentLfo: OscillatorNode | null = null;
+let activeNodes: AudioNode[] = [];
+let activeTimers: number[] = [];
 let isPlaying = false;
 let currentPreset = 'rain';
 let currentVolume = 65;
@@ -25,8 +25,8 @@ function getAudioContext(): AudioContext | null {
   return audioCtx;
 }
 
-function createNoiseBuffer(ctx: AudioContext, type: 'white' | 'pink' | 'brown'): AudioBuffer {
-  const bufferSize = ctx.sampleRate * 4; // 4 seconds loop
+function createNoiseBuffer(ctx: AudioContext, type: 'white' | 'pink' | 'brown', durationSeconds: number = 4): AudioBuffer {
+  const bufferSize = ctx.sampleRate * durationSeconds;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
 
@@ -48,7 +48,7 @@ function createNoiseBuffer(ctx: AudioContext, type: 'white' | 'pink' | 'brown'):
       b6 = white * 0.115926;
     }
   } else {
-    // brownian noise
+    // Brownian noise: deep integrated random walk
     let lastOut = 0.0;
     for (let i = 0; i < bufferSize; i++) {
       const white = Math.random() * 2 - 1;
@@ -61,20 +61,16 @@ function createNoiseBuffer(ctx: AudioContext, type: 'white' | 'pink' | 'brown'):
 }
 
 export function stopAmbientSound(): void {
-  if (currentSourceNode) {
+  activeTimers.forEach((t) => clearInterval(t));
+  activeTimers = [];
+
+  for (const node of activeNodes) {
     try {
-      (currentSourceNode as any).stop?.();
-      currentSourceNode.disconnect();
+      (node as any).stop?.();
+      node.disconnect();
     } catch {}
-    currentSourceNode = null;
   }
-  if (currentLfo) {
-    try {
-      currentLfo.stop();
-      currentLfo.disconnect();
-    } catch {}
-    currentLfo = null;
-  }
+  activeNodes = [];
   isPlaying = false;
 }
 
@@ -92,69 +88,257 @@ export function startAmbientSound(preset: string = 'rain', volume: number = 65):
   }
   masterGain.gain.setValueAtTime((volume / 100) * 0.35, ctx.currentTime);
 
-  const noiseType = preset === 'brown' || preset === 'waves' ? 'brown' : preset === 'rain' ? 'pink' : 'white';
-  const noiseBuf = createNoiseBuffer(ctx, noiseType);
-  const source = ctx.createBufferSource();
-  source.buffer = noiseBuf;
-  source.loop = true;
-
   if (preset === 'rain') {
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1000, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    // 1. Rain downpour bed (pink noise lowpass)
+    const pinkBuf = createNoiseBuffer(ctx, 'pink', 4);
+    const rainSrc = ctx.createBufferSource();
+    rainSrc.buffer = pinkBuf;
+    rainSrc.loop = true;
+
+    const rainFilter = ctx.createBiquadFilter();
+    rainFilter.type = 'lowpass';
+    rainFilter.frequency.setValueAtTime(1100, ctx.currentTime);
+
+    const rainGain = ctx.createGain();
+    rainGain.gain.setValueAtTime(0.85, ctx.currentTime);
+
+    rainSrc.connect(rainFilter);
+    rainFilter.connect(rainGain);
+    rainGain.connect(masterGain);
+    rainSrc.start();
+    activeNodes.push(rainSrc, rainFilter, rainGain);
+
+    // 2. High-frequency randomized droplet patter
+    const dropletBuf = createNoiseBuffer(ctx, 'white', 2);
+    const dropSrc = ctx.createBufferSource();
+    dropSrc.buffer = dropletBuf;
+    dropSrc.loop = true;
+
+    const dropFilter = ctx.createBiquadFilter();
+    dropFilter.type = 'bandpass';
+    dropFilter.frequency.setValueAtTime(3200, ctx.currentTime);
+    dropFilter.Q.setValueAtTime(3.0, ctx.currentTime);
+
+    const dropGain = ctx.createGain();
+    dropGain.gain.setValueAtTime(0.18, ctx.currentTime);
+
+    dropSrc.connect(dropFilter);
+    dropFilter.connect(dropGain);
+    dropGain.connect(masterGain);
+    dropSrc.start();
+    activeNodes.push(dropSrc, dropFilter, dropGain);
   } else if (preset === 'waves') {
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(450, ctx.currentTime);
-    filter.Q.setValueAtTime(1.2, ctx.currentTime);
+    // Ocean surf: brown noise swept by slow rhythmic LFO with synchronized filter and swell gain
+    const brownBuf = createNoiseBuffer(ctx, 'brown', 6);
+    const waveSrc = ctx.createBufferSource();
+    waveSrc.buffer = brownBuf;
+    waveSrc.loop = true;
 
-    // LFO to create rhythmic rolling wave swells
-    const lfo = ctx.createOscillator();
-    lfo.frequency.setValueAtTime(0.12, ctx.currentTime); // ~8 sec wave period
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.setValueAtTime(250, ctx.currentTime);
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
-    lfo.start();
-    currentLfo = lfo;
+    const waveFilter = ctx.createBiquadFilter();
+    waveFilter.type = 'bandpass';
+    waveFilter.frequency.setValueAtTime(380, ctx.currentTime);
+    waveFilter.Q.setValueAtTime(1.6, ctx.currentTime);
 
-    source.connect(filter);
-    filter.connect(masterGain);
+    const waveSwellGain = ctx.createGain();
+    waveSwellGain.gain.setValueAtTime(0.5, ctx.currentTime);
+
+    // LFO for filter sweep (frequency sweep simulating wave approaching, breaking, and receding)
+    const filterLfo = ctx.createOscillator();
+    filterLfo.frequency.setValueAtTime(0.11, ctx.currentTime); // ~9 second wave cycle
+    const filterLfoGain = ctx.createGain();
+    filterLfoGain.gain.setValueAtTime(260, ctx.currentTime);
+    filterLfo.connect(filterLfoGain);
+    filterLfoGain.connect(waveFilter.frequency);
+    filterLfo.start();
+
+    // LFO for volume swell (waves crash louder, recede softer)
+    const ampLfo = ctx.createOscillator();
+    ampLfo.frequency.setValueAtTime(0.11, ctx.currentTime);
+    const ampLfoGain = ctx.createGain();
+    ampLfoGain.gain.setValueAtTime(0.35, ctx.currentTime);
+    ampLfo.connect(ampLfoGain);
+    ampLfoGain.connect(waveSwellGain.gain);
+    ampLfo.start();
+
+    waveSrc.connect(waveFilter);
+    waveFilter.connect(waveSwellGain);
+    waveSwellGain.connect(masterGain);
+    waveSrc.start();
+    activeNodes.push(waveSrc, waveFilter, waveSwellGain, filterLfo, filterLfoGain, ampLfo, ampLfoGain);
   } else if (preset === 'campfire') {
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(1200, ctx.currentTime);
-    filter.Q.setValueAtTime(2.0, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    // 1. Warm flame roar base (lowpass brown noise)
+    const flameBuf = createNoiseBuffer(ctx, 'brown', 4);
+    const flameSrc = ctx.createBufferSource();
+    flameSrc.buffer = flameBuf;
+    flameSrc.loop = true;
+
+    const flameFilter = ctx.createBiquadFilter();
+    flameFilter.type = 'lowpass';
+    flameFilter.frequency.setValueAtTime(240, ctx.currentTime);
+
+    const flameGain = ctx.createGain();
+    flameGain.gain.setValueAtTime(0.7, ctx.currentTime);
+
+    flameSrc.connect(flameFilter);
+    flameFilter.connect(flameGain);
+    flameGain.connect(masterGain);
+    flameSrc.start();
+    activeNodes.push(flameSrc, flameFilter, flameGain);
+
+    // 2. Procedural wood crackle & pop impulses
+    const crackleInterval = window.setInterval(() => {
+      if (!audioCtx || !isPlaying) return;
+      if (Math.random() < 0.45) {
+        try {
+          const osc = audioCtx.createOscillator();
+          const popGain = audioCtx.createGain();
+          const popFilter = audioCtx.createBiquadFilter();
+
+          // Randomized snap / pop frequency between 1.8kHz and 4.2kHz
+          const freq = 1800 + Math.random() * 2400;
+          popFilter.type = 'bandpass';
+          popFilter.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          popFilter.Q.setValueAtTime(4.0, audioCtx.currentTime);
+
+          osc.type = Math.random() > 0.5 ? 'triangle' : 'square';
+          osc.frequency.setValueAtTime(freq * 0.5, audioCtx.currentTime);
+
+          const dur = 0.015 + Math.random() * 0.04;
+          const peakGain = 0.08 + Math.random() * 0.16;
+
+          popGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          popGain.gain.linearRampToValueAtTime(peakGain, audioCtx.currentTime + 0.002);
+          popGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+
+          osc.connect(popFilter);
+          popFilter.connect(popGain);
+          if (masterGain) popGain.connect(masterGain);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + dur);
+        } catch {}
+      }
+    }, 90);
+    activeTimers.push(crackleInterval);
   } else if (preset === 'wind') {
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(500, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    // Howling winter gusts: pink noise swept by dual LFOs through resonant bandpass
+    const pinkBuf = createNoiseBuffer(ctx, 'pink', 5);
+    const windSrc = ctx.createBufferSource();
+    windSrc.buffer = pinkBuf;
+    windSrc.loop = true;
+
+    const windFilter = ctx.createBiquadFilter();
+    windFilter.type = 'bandpass';
+    windFilter.frequency.setValueAtTime(420, ctx.currentTime);
+    windFilter.Q.setValueAtTime(3.8, ctx.currentTime); // High resonance for audible whistling gust
+
+    const windGain = ctx.createGain();
+    windGain.gain.setValueAtTime(0.85, ctx.currentTime);
+
+    // Primary gust LFO
+    const gustLfo = ctx.createOscillator();
+    gustLfo.frequency.setValueAtTime(0.08, ctx.currentTime); // ~12s gust cycle
+    const gustLfoGain = ctx.createGain();
+    gustLfoGain.gain.setValueAtTime(320, ctx.currentTime);
+    gustLfo.connect(gustLfoGain);
+    gustLfoGain.connect(windFilter.frequency);
+    gustLfo.start();
+
+    // Secondary turbulence LFO for erratic wind flutter
+    const flutterLfo = ctx.createOscillator();
+    flutterLfo.frequency.setValueAtTime(0.24, ctx.currentTime);
+    const flutterLfoGain = ctx.createGain();
+    flutterLfoGain.gain.setValueAtTime(140, ctx.currentTime);
+    flutterLfo.connect(flutterLfoGain);
+    flutterLfoGain.connect(windFilter.frequency);
+    flutterLfo.start();
+
+    windSrc.connect(windFilter);
+    windFilter.connect(windGain);
+    windGain.connect(masterGain);
+    windSrc.start();
+    activeNodes.push(windSrc, windFilter, windGain, gustLfo, gustLfoGain, flutterLfo, flutterLfoGain);
   } else if (preset === 'coffee') {
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(650, ctx.currentTime);
-    filter.Q.setValueAtTime(0.8, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    // Cozy cafe murmur: layered conversational rumble with soft wandering room tone
+    const roomBuf = createNoiseBuffer(ctx, 'pink', 4);
+    const roomSrc = ctx.createBufferSource();
+    roomSrc.buffer = roomBuf;
+    roomSrc.loop = true;
+
+    const filter1 = ctx.createBiquadFilter();
+    filter1.type = 'bandpass';
+    filter1.frequency.setValueAtTime(340, ctx.currentTime);
+    filter1.Q.setValueAtTime(1.2, ctx.currentTime);
+
+    const filter2 = ctx.createBiquadFilter();
+    filter2.type = 'lowpass';
+    filter2.frequency.setValueAtTime(750, ctx.currentTime);
+
+    const roomGain = ctx.createGain();
+    roomGain.gain.setValueAtTime(0.65, ctx.currentTime);
+
+    // Gentle conversational murmur modulation
+    const chatterLfo = ctx.createOscillator();
+    chatterLfo.frequency.setValueAtTime(0.28, ctx.currentTime);
+    const chatterGain = ctx.createGain();
+    chatterGain.gain.setValueAtTime(0.12, ctx.currentTime);
+    chatterLfo.connect(chatterGain);
+    chatterGain.connect(roomGain.gain);
+    chatterLfo.start();
+
+    roomSrc.connect(filter1);
+    filter1.connect(filter2);
+    filter2.connect(roomGain);
+    roomGain.connect(masterGain);
+    roomSrc.start();
+    activeNodes.push(roomSrc, filter1, filter2, roomGain, chatterLfo, chatterGain);
+
+    // Occasional subtle distant ceramic clink
+    const clinkInterval = window.setInterval(() => {
+      if (!audioCtx || !isPlaying) return;
+      if (Math.random() < 0.22) {
+        try {
+          const osc = audioCtx.createOscillator();
+          const clinkGain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(2200 + Math.random() * 600, audioCtx.currentTime);
+
+          clinkGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          clinkGain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.003);
+          clinkGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+
+          osc.connect(clinkGain);
+          if (masterGain) clinkGain.connect(masterGain);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.09);
+        } catch {}
+      }
+    }, 400);
+    activeTimers.push(clinkInterval);
   } else {
-    // raw brown noise
-    source.connect(masterGain);
+    // Pure deep brownian focus noise
+    const brownBuf = createNoiseBuffer(ctx, 'brown', 6);
+    const brownSrc = ctx.createBufferSource();
+    brownSrc.buffer = brownBuf;
+    brownSrc.loop = true;
+
+    const brownFilter = ctx.createBiquadFilter();
+    brownFilter.type = 'lowpass';
+    brownFilter.frequency.setValueAtTime(450, ctx.currentTime);
+
+    brownSrc.connect(brownFilter);
+    brownFilter.connect(masterGain);
+    brownSrc.start();
+    activeNodes.push(brownSrc, brownFilter);
   }
 
-  source.start();
-  currentSourceNode = source;
   isPlaying = true;
   return true;
 }
 
-export function setAmbientVolume(volume: number): void {
-  currentVolume = Math.max(0, Math.min(100, volume));
+export function setAmbientVolume(vol: number): void {
+  currentVolume = Math.max(0, Math.min(100, vol));
   if (masterGain && audioCtx) {
     masterGain.gain.setValueAtTime((currentVolume / 100) * 0.35, audioCtx.currentTime);
   }
@@ -162,4 +346,12 @@ export function setAmbientVolume(volume: number): void {
 
 export function isAmbientPlaying(): boolean {
   return isPlaying;
+}
+
+export function getAmbientPreset(): string {
+  return currentPreset;
+}
+
+export function getAmbientVolume(): number {
+  return currentVolume;
 }

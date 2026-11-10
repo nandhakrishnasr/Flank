@@ -3688,12 +3688,12 @@ function renderTasksCardInner(state2) {
   const items = tasks.items || [];
   const pending = tasks.pendingCount ?? items.filter((t) => !t.done).length;
   const rowsHtml = items.length === 0 ? `<div style="padding: 16px 0; text-align: center; font-size: 12px; color: var(--flank-color-text-muted);">No tasks yet. Type below to add one!</div>` : items.map((t) => `
-        <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
-          <button type="button" class="flank-win-btn" data-action="toggle-task" data-task-id="${escapeHtml2(t.id)}" title="${t.done ? "Mark pending" : "Mark done"}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid ${t.done ? "var(--flank-color-accent)" : "var(--flank-color-divider-soft)"}; background: ${t.done ? "var(--flank-color-accent)" : "transparent"}; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;">
-            ${t.done ? iconSvg("check", 12) : ""}
+        <div style="display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--flank-color-divider-soft); width: 100%; box-sizing: border-box;">
+          <button type="button" data-action="toggle-task" data-task-id="${escapeHtml2(t.id)}" title="${t.done ? "Mark pending" : "Mark done"}" style="width: 16px; height: 16px; min-width: 16px; max-width: 16px; flex: 0 0 16px; border-radius: 4px; border: 1.5px solid ${t.done ? "var(--flank-color-accent)" : "var(--flank-color-divider-soft)"}; background: ${t.done ? "var(--flank-color-accent)" : "transparent"}; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; outline: none; transition: all 0.15s ease;">
+            ${t.done ? iconSvg("check", 10) : ""}
           </button>
-          <span style="flex: 1; font-size: 12px; color: ${t.done ? "var(--flank-color-text-muted)" : "var(--flank-color-text)"}; text-decoration: ${t.done ? "line-through" : "none"}; word-break: break-word;">${escapeHtml2(t.text)}</span>
-          <button type="button" class="flank-win-btn" data-action="delete-task" data-task-id="${escapeHtml2(t.id)}" title="Delete task" style="width: 20px; height: 20px; color: var(--flank-color-text-muted); opacity: 0.7; cursor: pointer;">
+          <span style="flex: 1 1 auto; min-width: 0; font-size: 12px; line-height: 1.35; color: ${t.done ? "var(--flank-color-text-muted)" : "var(--flank-color-text)"}; text-decoration: ${t.done ? "line-through" : "none"}; word-break: break-word;">${escapeHtml2(t.text)}</span>
+          <button type="button" data-action="delete-task" data-task-id="${escapeHtml2(t.id)}" title="Delete task" style="width: 20px; height: 20px; min-width: 20px; flex: 0 0 20px; border: none; background: transparent; color: var(--flank-color-text-muted); opacity: 0.6; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 4px;">
             ${iconSvg("x", 12)}
           </button>
         </div>
@@ -3720,7 +3720,7 @@ function renderTasksCardInner(state2) {
 function renderCalculatorCardInner(state2) {
   const calc = state2.calculator || { lastExpr: "", lastResult: "0", history: [] };
   const historyRows = (calc.history || []).slice(0, 3).map((h) => `
-    <div class="flank-row" style="padding: 3px 0; font-size: 11px; font-family: var(--flank-type-mono); cursor: pointer;" data-action="recall-calc" data-expr="${escapeHtml2(h.expr)}">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 11px; font-family: var(--flank-type-mono); cursor: pointer;" data-action="recall-calc" data-expr="${escapeHtml2(h.expr)}">
       <span style="color: var(--flank-color-text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml2(h.expr)}</span>
       <span style="color: var(--flank-color-accent); font-weight: 600;">= ${escapeHtml2(h.result)}</span>
     </div>
@@ -3732,12 +3732,18 @@ function renderCalculatorCardInner(state2) {
     </div>
     <input type="text" id="flank-calc-input" class="flank-card-input" value="${escapeHtml2(calc.lastExpr || "")}" placeholder="Type e.g. 120 * 1.18, 16 GB to MB, sqrt(144)..." style="width: 100%; height: 32px; font-family: var(--flank-type-mono); font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text); margin-bottom: 8px;" />
     <div style="display:flex; justify-content:space-between; align-items:center; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;">
-      <div style="font-size: 18px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-calc-result">${escapeHtml2(calc.lastResult || "0")}</div>
-      <button type="button" class="flank-chip" data-action="copy-calc-result" title="Copy result to clipboard" style="font-size: 11px;">Copy</button>
+      <div style="font-size: 18px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;" id="flank-calc-result">${escapeHtml2(calc.lastResult || "0")}</div>
+      <div style="display:flex; gap: 6px; align-items:center;">
+        <button type="button" class="flank-chip" data-action="clear-calc" title="Clear calculator" style="font-size: 11px; padding: 2px 8px;">Clear</button>
+        <button type="button" class="flank-chip" data-action="copy-calc-result" title="Copy result to clipboard" style="font-size: 11px; padding: 2px 8px;">Copy</button>
+      </div>
     </div>
     ${historyRows ? `
       <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 6px; margin-top: 4px;">
-        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--flank-color-text-muted); margin-bottom: 4px;">Recent</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--flank-color-text-muted);">Recent</span>
+          <button type="button" class="flank-chip" data-action="clear-calc-history" style="font-size: 9px; padding: 1px 6px;">Clear history</button>
+        </div>
         ${historyRows}
       </div>
     ` : ""}
@@ -3907,18 +3913,26 @@ function renderRunnerCardInner(state2) {
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">Quick Command Runner</span>
-      <span class="flank-live-pill">>_ CLI</span>
+      <span class="flank-live-pill" style="${run.running ? "color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);" : ""}">${run.running ? "\u25CF Running..." : ">_ CLI"}</span>
     </div>
     <div style="display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 8px;">
       ${cmdChips}
     </div>
     <div style="display:flex; gap: 6px; margin-bottom: 8px;">
       <input type="text" id="flank-runner-input" class="flank-card-input" placeholder="Enter shell command (e.g. ping 8.8.8.8)..." style="flex: 1; height: 30px; font-family: var(--flank-type-mono); font-size: 11px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text);" />
-      <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="run-custom-cmd">Run</button>
+      ${run.running ? `
+        <button type="button" class="flank-btn" style="height: 30px; padding: 0 10px; font-size: 11px; background: rgba(239, 68, 68, 0.25); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.45); font-weight: 600;" data-action="terminate-cmd" title="Terminate running process">Terminate</button>
+      ` : `
+        <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="run-custom-cmd">Run</button>
+      `}
     </div>
     ${run.lastOutput ? `
-      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--flank-color-divider-soft); border-radius: 6px; padding: 8px; font-family: var(--flank-type-mono); font-size: 10px; color: var(--flank-color-text); max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
-        <div style="color: var(--flank-color-accent); margin-bottom: 4px;">$ ${escapeHtml2(run.lastCmd)}</div>${escapeHtml2(run.lastOutput)}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 10px; color: var(--flank-color-text-muted); font-family: var(--flank-type-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;">$ ${escapeHtml2(run.lastCmd)}</span>
+        <button type="button" class="flank-chip" style="font-size: 9px; padding: 1px 6px;" data-action="clear-runner-output">Clear</button>
+      </div>
+      <div style="background: rgba(0,0,0,0.45); border: 1px solid var(--flank-color-divider-soft); border-radius: 6px; padding: 8px; font-family: var(--flank-type-mono); font-size: 10px; color: var(--flank-color-text); max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+        ${escapeHtml2(run.lastOutput)}
       </div>
     ` : ""}
   `;
@@ -3955,10 +3969,29 @@ function renderGpuCardInner(state2) {
   `;
 }
 function renderGithubCardInner(state2) {
-  const gh = state2.github || { connected: true, pendingCount: 0, items: [] };
+  const gh = state2.github || { connected: false, pendingCount: 0, items: [] };
   const items = gh.items || [];
+  if (!gh.connected) {
+    return `
+      <div class="flank-card__header">
+        <span class="flank-card__title">GitHub Activity</span>
+        <span class="flank-live-pill" style="opacity: 0.65;">Offline</span>
+      </div>
+      <div style="padding: 16px 8px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--flank-color-tile-bg); display: flex; align-items: center; justify-content: center; color: var(--flank-color-text-muted);">
+          ${iconSvg("github", 20)}
+        </div>
+        <div style="color: var(--flank-color-text-muted); font-size: 12px; line-height: 1.45; max-width: 250px;">
+          Connect your GitHub account in <strong>Settings \u2192 Widgets</strong> to view live pull requests and review requests.
+        </div>
+        <button type="button" class="flank-btn is-primary" style="height: 28px; font-size: 11px; padding: 0 14px; margin-top: 2px;" data-action="open-settings-widgets">
+          Connect GitHub
+        </button>
+      </div>
+    `;
+  }
   const rows = items.map((it) => `
-    <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--flank-color-divider-soft); gap: 8px;">
       <div style="display:flex; flex-direction:column; gap: 2px; min-width:0; flex:1;">
         <div style="font-size: 12px; font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: var(--flank-color-text);" title="${escapeHtml2(it.title)}">${escapeHtml2(it.title)}</div>
         <div style="font-size: 10px; color: var(--flank-color-text-muted);">${escapeHtml2(it.repo)} \xB7 ${escapeHtml2(it.status)}</div>
@@ -3969,7 +4002,7 @@ function renderGithubCardInner(state2) {
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">GitHub Activity</span>
-      <span class="flank-live-pill">${gh.pendingCount} PRs</span>
+      <span class="flank-live-pill">${gh.username ? `@${escapeHtml2(gh.username)} \xB7 ` : ""}${gh.pendingCount} PRs</span>
     </div>
     <div style="max-height: 180px; overflow-y: auto;">
       ${rows || '<div style="padding:16px 0; text-align:center; font-size:12px; color:var(--flank-color-text-muted);">All caught up! No pending PRs.</div>'}
@@ -4297,8 +4330,8 @@ function formatNum(num) {
 // src/ui/ambient.ts
 var audioCtx = null;
 var masterGain = null;
-var currentSourceNode = null;
-var currentLfo = null;
+var activeNodes = [];
+var activeTimers = [];
 var isPlaying = false;
 var currentPreset = "rain";
 var currentVolume = 65;
@@ -4315,8 +4348,8 @@ function getAudioContext() {
   }
   return audioCtx;
 }
-function createNoiseBuffer(ctx, type) {
-  const bufferSize = ctx.sampleRate * 4;
+function createNoiseBuffer(ctx, type, durationSeconds = 4) {
+  const bufferSize = ctx.sampleRate * durationSeconds;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   if (type === "white") {
@@ -4347,22 +4380,16 @@ function createNoiseBuffer(ctx, type) {
   return buffer;
 }
 function stopAmbientSound() {
-  if (currentSourceNode) {
+  activeTimers.forEach((t) => clearInterval(t));
+  activeTimers = [];
+  for (const node of activeNodes) {
     try {
-      currentSourceNode.stop?.();
-      currentSourceNode.disconnect();
+      node.stop?.();
+      node.disconnect();
     } catch {
     }
-    currentSourceNode = null;
   }
-  if (currentLfo) {
-    try {
-      currentLfo.stop();
-      currentLfo.disconnect();
-    } catch {
-    }
-    currentLfo = null;
-  }
+  activeNodes = [];
   isPlaying = false;
 }
 function startAmbientSound(preset = "rain", volume = 65) {
@@ -4376,62 +4403,204 @@ function startAmbientSound(preset = "rain", volume = 65) {
     masterGain.connect(ctx.destination);
   }
   masterGain.gain.setValueAtTime(volume / 100 * 0.35, ctx.currentTime);
-  const noiseType = preset === "brown" || preset === "waves" ? "brown" : preset === "rain" ? "pink" : "white";
-  const noiseBuf = createNoiseBuffer(ctx, noiseType);
-  const source = ctx.createBufferSource();
-  source.buffer = noiseBuf;
-  source.loop = true;
   if (preset === "rain") {
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(1e3, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    const pinkBuf = createNoiseBuffer(ctx, "pink", 4);
+    const rainSrc = ctx.createBufferSource();
+    rainSrc.buffer = pinkBuf;
+    rainSrc.loop = true;
+    const rainFilter = ctx.createBiquadFilter();
+    rainFilter.type = "lowpass";
+    rainFilter.frequency.setValueAtTime(1100, ctx.currentTime);
+    const rainGain = ctx.createGain();
+    rainGain.gain.setValueAtTime(0.85, ctx.currentTime);
+    rainSrc.connect(rainFilter);
+    rainFilter.connect(rainGain);
+    rainGain.connect(masterGain);
+    rainSrc.start();
+    activeNodes.push(rainSrc, rainFilter, rainGain);
+    const dropletBuf = createNoiseBuffer(ctx, "white", 2);
+    const dropSrc = ctx.createBufferSource();
+    dropSrc.buffer = dropletBuf;
+    dropSrc.loop = true;
+    const dropFilter = ctx.createBiquadFilter();
+    dropFilter.type = "bandpass";
+    dropFilter.frequency.setValueAtTime(3200, ctx.currentTime);
+    dropFilter.Q.setValueAtTime(3, ctx.currentTime);
+    const dropGain = ctx.createGain();
+    dropGain.gain.setValueAtTime(0.18, ctx.currentTime);
+    dropSrc.connect(dropFilter);
+    dropFilter.connect(dropGain);
+    dropGain.connect(masterGain);
+    dropSrc.start();
+    activeNodes.push(dropSrc, dropFilter, dropGain);
   } else if (preset === "waves") {
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(450, ctx.currentTime);
-    filter.Q.setValueAtTime(1.2, ctx.currentTime);
-    const lfo = ctx.createOscillator();
-    lfo.frequency.setValueAtTime(0.12, ctx.currentTime);
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.setValueAtTime(250, ctx.currentTime);
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
-    lfo.start();
-    currentLfo = lfo;
-    source.connect(filter);
-    filter.connect(masterGain);
+    const brownBuf = createNoiseBuffer(ctx, "brown", 6);
+    const waveSrc = ctx.createBufferSource();
+    waveSrc.buffer = brownBuf;
+    waveSrc.loop = true;
+    const waveFilter = ctx.createBiquadFilter();
+    waveFilter.type = "bandpass";
+    waveFilter.frequency.setValueAtTime(380, ctx.currentTime);
+    waveFilter.Q.setValueAtTime(1.6, ctx.currentTime);
+    const waveSwellGain = ctx.createGain();
+    waveSwellGain.gain.setValueAtTime(0.5, ctx.currentTime);
+    const filterLfo = ctx.createOscillator();
+    filterLfo.frequency.setValueAtTime(0.11, ctx.currentTime);
+    const filterLfoGain = ctx.createGain();
+    filterLfoGain.gain.setValueAtTime(260, ctx.currentTime);
+    filterLfo.connect(filterLfoGain);
+    filterLfoGain.connect(waveFilter.frequency);
+    filterLfo.start();
+    const ampLfo = ctx.createOscillator();
+    ampLfo.frequency.setValueAtTime(0.11, ctx.currentTime);
+    const ampLfoGain = ctx.createGain();
+    ampLfoGain.gain.setValueAtTime(0.35, ctx.currentTime);
+    ampLfo.connect(ampLfoGain);
+    ampLfoGain.connect(waveSwellGain.gain);
+    ampLfo.start();
+    waveSrc.connect(waveFilter);
+    waveFilter.connect(waveSwellGain);
+    waveSwellGain.connect(masterGain);
+    waveSrc.start();
+    activeNodes.push(waveSrc, waveFilter, waveSwellGain, filterLfo, filterLfoGain, ampLfo, ampLfoGain);
   } else if (preset === "campfire") {
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1200, ctx.currentTime);
-    filter.Q.setValueAtTime(2, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    const flameBuf = createNoiseBuffer(ctx, "brown", 4);
+    const flameSrc = ctx.createBufferSource();
+    flameSrc.buffer = flameBuf;
+    flameSrc.loop = true;
+    const flameFilter = ctx.createBiquadFilter();
+    flameFilter.type = "lowpass";
+    flameFilter.frequency.setValueAtTime(240, ctx.currentTime);
+    const flameGain = ctx.createGain();
+    flameGain.gain.setValueAtTime(0.7, ctx.currentTime);
+    flameSrc.connect(flameFilter);
+    flameFilter.connect(flameGain);
+    flameGain.connect(masterGain);
+    flameSrc.start();
+    activeNodes.push(flameSrc, flameFilter, flameGain);
+    const crackleInterval = window.setInterval(() => {
+      if (!audioCtx || !isPlaying) return;
+      if (Math.random() < 0.45) {
+        try {
+          const osc = audioCtx.createOscillator();
+          const popGain = audioCtx.createGain();
+          const popFilter = audioCtx.createBiquadFilter();
+          const freq = 1800 + Math.random() * 2400;
+          popFilter.type = "bandpass";
+          popFilter.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          popFilter.Q.setValueAtTime(4, audioCtx.currentTime);
+          osc.type = Math.random() > 0.5 ? "triangle" : "square";
+          osc.frequency.setValueAtTime(freq * 0.5, audioCtx.currentTime);
+          const dur = 0.015 + Math.random() * 0.04;
+          const peakGain = 0.08 + Math.random() * 0.16;
+          popGain.gain.setValueAtTime(1e-3, audioCtx.currentTime);
+          popGain.gain.linearRampToValueAtTime(peakGain, audioCtx.currentTime + 2e-3);
+          popGain.gain.exponentialRampToValueAtTime(1e-4, audioCtx.currentTime + dur);
+          osc.connect(popFilter);
+          popFilter.connect(popGain);
+          if (masterGain) popGain.connect(masterGain);
+          osc.start();
+          osc.stop(audioCtx.currentTime + dur);
+        } catch {
+        }
+      }
+    }, 90);
+    activeTimers.push(crackleInterval);
   } else if (preset === "wind") {
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(500, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    const pinkBuf = createNoiseBuffer(ctx, "pink", 5);
+    const windSrc = ctx.createBufferSource();
+    windSrc.buffer = pinkBuf;
+    windSrc.loop = true;
+    const windFilter = ctx.createBiquadFilter();
+    windFilter.type = "bandpass";
+    windFilter.frequency.setValueAtTime(420, ctx.currentTime);
+    windFilter.Q.setValueAtTime(3.8, ctx.currentTime);
+    const windGain = ctx.createGain();
+    windGain.gain.setValueAtTime(0.85, ctx.currentTime);
+    const gustLfo = ctx.createOscillator();
+    gustLfo.frequency.setValueAtTime(0.08, ctx.currentTime);
+    const gustLfoGain = ctx.createGain();
+    gustLfoGain.gain.setValueAtTime(320, ctx.currentTime);
+    gustLfo.connect(gustLfoGain);
+    gustLfoGain.connect(windFilter.frequency);
+    gustLfo.start();
+    const flutterLfo = ctx.createOscillator();
+    flutterLfo.frequency.setValueAtTime(0.24, ctx.currentTime);
+    const flutterLfoGain = ctx.createGain();
+    flutterLfoGain.gain.setValueAtTime(140, ctx.currentTime);
+    flutterLfo.connect(flutterLfoGain);
+    flutterLfoGain.connect(windFilter.frequency);
+    flutterLfo.start();
+    windSrc.connect(windFilter);
+    windFilter.connect(windGain);
+    windGain.connect(masterGain);
+    windSrc.start();
+    activeNodes.push(windSrc, windFilter, windGain, gustLfo, gustLfoGain, flutterLfo, flutterLfoGain);
   } else if (preset === "coffee") {
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(650, ctx.currentTime);
-    filter.Q.setValueAtTime(0.8, ctx.currentTime);
-    source.connect(filter);
-    filter.connect(masterGain);
+    const roomBuf = createNoiseBuffer(ctx, "pink", 4);
+    const roomSrc = ctx.createBufferSource();
+    roomSrc.buffer = roomBuf;
+    roomSrc.loop = true;
+    const filter1 = ctx.createBiquadFilter();
+    filter1.type = "bandpass";
+    filter1.frequency.setValueAtTime(340, ctx.currentTime);
+    filter1.Q.setValueAtTime(1.2, ctx.currentTime);
+    const filter2 = ctx.createBiquadFilter();
+    filter2.type = "lowpass";
+    filter2.frequency.setValueAtTime(750, ctx.currentTime);
+    const roomGain = ctx.createGain();
+    roomGain.gain.setValueAtTime(0.65, ctx.currentTime);
+    const chatterLfo = ctx.createOscillator();
+    chatterLfo.frequency.setValueAtTime(0.28, ctx.currentTime);
+    const chatterGain = ctx.createGain();
+    chatterGain.gain.setValueAtTime(0.12, ctx.currentTime);
+    chatterLfo.connect(chatterGain);
+    chatterGain.connect(roomGain.gain);
+    chatterLfo.start();
+    roomSrc.connect(filter1);
+    filter1.connect(filter2);
+    filter2.connect(roomGain);
+    roomGain.connect(masterGain);
+    roomSrc.start();
+    activeNodes.push(roomSrc, filter1, filter2, roomGain, chatterLfo, chatterGain);
+    const clinkInterval = window.setInterval(() => {
+      if (!audioCtx || !isPlaying) return;
+      if (Math.random() < 0.22) {
+        try {
+          const osc = audioCtx.createOscillator();
+          const clinkGain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(2200 + Math.random() * 600, audioCtx.currentTime);
+          clinkGain.gain.setValueAtTime(1e-3, audioCtx.currentTime);
+          clinkGain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 3e-3);
+          clinkGain.gain.exponentialRampToValueAtTime(1e-4, audioCtx.currentTime + 0.08);
+          osc.connect(clinkGain);
+          if (masterGain) clinkGain.connect(masterGain);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.09);
+        } catch {
+        }
+      }
+    }, 400);
+    activeTimers.push(clinkInterval);
   } else {
-    source.connect(masterGain);
+    const brownBuf = createNoiseBuffer(ctx, "brown", 6);
+    const brownSrc = ctx.createBufferSource();
+    brownSrc.buffer = brownBuf;
+    brownSrc.loop = true;
+    const brownFilter = ctx.createBiquadFilter();
+    brownFilter.type = "lowpass";
+    brownFilter.frequency.setValueAtTime(450, ctx.currentTime);
+    brownSrc.connect(brownFilter);
+    brownFilter.connect(masterGain);
+    brownSrc.start();
+    activeNodes.push(brownSrc, brownFilter);
   }
-  source.start();
-  currentSourceNode = source;
   isPlaying = true;
   return true;
 }
-function setAmbientVolume(volume) {
-  currentVolume = Math.max(0, Math.min(100, volume));
+function setAmbientVolume(vol) {
+  currentVolume = Math.max(0, Math.min(100, vol));
   if (masterGain && audioCtx) {
     masterGain.gain.setValueAtTime(currentVolume / 100 * 0.35, audioCtx.currentTime);
   }
@@ -5850,53 +6019,165 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       (c) => `<button type="button" class="flank-chip" data-clock-remove="${escapeHtml5(c.id)}" title="Click to remove ${escapeHtml5(c.city)}">${escapeHtml5(c.city)} (${escapeHtml5(c.timeText)}) \xD7</button>`
     ).join("");
     contentHtml = `
-      <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
         ${SectionHeader({
       title: "Widget Preferences",
-      description: "Configure weather location, multiple world clocks, and clipboard storage."
+      description: "Custom configurations organized and grouped per widget."
     })}
-        ${Row({
-      label: "Weather city",
-      description: "Location for weather and hourly forecast.",
-      controlHtml: `
-            <div style="display:flex; gap: 8px;">
-              ${Input({ id: "flank-weather-city-input", value: state2.weather.city, style: "width: 140px;" })}
-              ${Button({ label: "Update", variant: "primary", actionAttr: 'data-action="save-weather-city"' })}
+
+        <!-- GITHUB WIDGET GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                  ${iconSvg("github", 16)} GitHub Activity
+                </div>
+                <span class="flank-chip" style="font-size: 11px; ${state2.github?.connected ? "color: #10B981; border-color: rgba(16, 185, 129, 0.4); font-weight: 600;" : ""}">
+                  ${state2.github?.connected ? `Connected (@${escapeHtml5(state2.github.username || "user")})` : "Not connected"}
+                </span>
+              </div>
+              <div style="font-size: 12px; color: var(--flank-color-text-muted); line-height: 1.45;">
+                Connect a GitHub Personal Access Token (classic or fine-grained with <code>repo</code> and <code>notifications</code> scopes) to view live PRs, review requests, and alerts on your dock.
+              </div>
+              <div style="display:flex; gap: 8px; align-items:center;">
+                ${Input({ id: "flank-github-token-input", type: "password", placeholder: "ghp_xxxxxxxxxxxxxxxxxxxx", style: "flex: 1;" })}
+                ${Button({ label: state2.github?.connected ? "Update Token" : "Connect", variant: "primary", actionAttr: 'data-action="connect-github"' })}
+                ${state2.github?.connected ? Button({ label: "Disconnect", variant: "secondary", actionAttr: 'data-action="disconnect-github"' }) : ""}
+              </div>
             </div>
           `
     })}
-        ${Row({
-      label: "Add World Clock city",
-      description: "Search any city to track local time.",
-      controlHtml: `
-            <div style="display:flex; gap: 8px;">
-              ${Input({ id: "flank-clock-city-input", placeholder: "e.g. Tokyo, London, Dubai...", style: "width: 160px;" })}
-              ${Button({ label: "Add city", variant: "primary", actionAttr: 'data-action="add-world-clock"' })}
+
+        <!-- WEATHER WIDGET GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg("sun", 16)} Weather &amp; Forecast
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Default city location</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Provides live conditions and temperature forecast.</div>
+                </div>
+                <div style="display:flex; gap: 8px;">
+                  ${Input({ id: "flank-weather-city-input", value: state2.weather.city, style: "width: 140px;" })}
+                  ${Button({ label: "Update", variant: "primary", actionAttr: 'data-action="save-weather-city"' })}
+                </div>
+              </div>
             </div>
           `
     })}
-        ${Row({
-      label: "Saved World Clocks",
-      controlHtml: `<div class="flank-chip-row" style="flex-wrap: wrap; max-width: 320px; justify-content: flex-end; gap: 6px;">${clockChips || '<span class="flank-card-muted">None</span>'}</div>`
-    })}
-        ${Row({
-      label: "Bluetooth & peripherals",
-      description: "Scans for connected Bluetooth keyboards, mice, audio devices and controllers.",
-      controlHtml: `
-            <button type="button" class="flank-ui-btn is-secondary" data-item-kind="link" data-item-id="win-bluetooth-settings" data-target="ms-settings:bluetooth">
-              <span>Open Windows Bluetooth settings</span>
-            </button>
+
+        <!-- WORLD CLOCK WIDGET GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg("clock", 16)} World Clock &amp; Timezones
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Add tracked city</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Search any international city to track local time.</div>
+                </div>
+                <div style="display:flex; gap: 8px;">
+                  ${Input({ id: "flank-clock-city-input", placeholder: "e.g. Tokyo, London, Dubai...", style: "width: 160px;" })}
+                  ${Button({ label: "Add city", variant: "primary", actionAttr: 'data-action="add-world-clock"' })}
+                </div>
+              </div>
+              <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 8px;">
+                <div style="font-size: 11px; color: var(--flank-color-text-muted); margin-bottom: 6px;">Tracked cities:</div>
+                <div class="flank-chip-row" style="flex-wrap: wrap; gap: 6px;">
+                  ${clockChips || '<span class="flank-card-muted" style="font-size: 11px;">None</span>'}
+                </div>
+              </div>
+            </div>
           `
     })}
-        ${Row({
-      label: "Clipboard history",
-      description: "Removes all unpinned entries from local database.",
-      controlHtml: Button({ label: "Clear unpinned items", variant: "secondary", actionAttr: 'data-action="clear-clipboard"' })
+
+        <!-- HABITS & HYDRATION GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg("droplet", 16)} Habits &amp; Hydration
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Daily water target</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Target number of water glasses or cups per day.</div>
+                </div>
+                <div style="font-size: 13px; font-weight: 600; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${state2.habits?.waterGoal || 8} cups</div>
+              </div>
+            </div>
+          `
     })}
-        ${Row({
-      label: "Launch Flank on Windows sign-in",
-      description: "Automatically starts Flank in background.",
-      controlHtml: Switch({ checked: Boolean(state2.autostart), actionAttr: 'data-action="toggle-autostart"' })
+
+        <!-- FOCUS TIMER & SOUNDSCAPES GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg("waves", 16)} Focus Timer &amp; Soundscapes
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Offline soundscape presets</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Synthesizes Rain, Waves, Campfire, Cafe, Wind, Brown Noise offline.</div>
+                </div>
+                <button type="button" class="flank-chip" data-action="toggle-ambient" style="font-size: 11px;">
+                  ${state2.ambient?.playing ? "Mute soundscape" : "Test soundscape"}
+                </button>
+              </div>
+            </div>
+          `
+    })}
+
+        <!-- STORAGE & DRIVES GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg("hard-drive", 16)} Storage &amp; Drives
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Windows Disk Cleanup</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Quickly clean temporary files, cache, and recycle bin.</div>
+                </div>
+                ${Button({ label: "Launch Cleanup", variant: "secondary", actionAttr: 'data-action="launch-disk-cleanup"' })}
+              </div>
+            </div>
+          `
+    })}
+
+        <!-- CLIPBOARD & BLUETOOTH GROUP -->
+        ${Card({
+      children: `
+            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
+              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
+                ${iconSvg("clipboard", 16)} Clipboard &amp; Peripherals
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Clipboard database</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Removes all unpinned entries from local memory.</div>
+                </div>
+                ${Button({ label: "Clear unpinned", variant: "secondary", actionAttr: 'data-action="clear-clipboard"' })}
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 10px;">
+                <div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Bluetooth settings</div>
+                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Pair wireless controllers, headsets, and mice in Windows.</div>
+                </div>
+                <button type="button" class="flank-ui-btn is-secondary" data-item-kind="link" data-item-id="win-bluetooth-settings" data-target="ms-settings:bluetooth">
+                  <span>Windows Settings</span>
+                </button>
+              </div>
+            </div>
+          `
     })}
       </div>
     `;
@@ -8358,6 +8639,24 @@ function setupEventDelegation() {
       renderApp();
       return;
     }
+    if (action === "clear-calc") {
+      const calcInput = document.getElementById("flank-calc-input");
+      if (calcInput) {
+        calcInput.value = "";
+        calcInput.focus();
+      }
+      const resEl = document.getElementById("flank-calc-result");
+      if (resEl) resEl.textContent = "0";
+      if (!state.calculator) state.calculator = { lastExpr: "", lastResult: "0", history: [] };
+      state.calculator.lastExpr = "";
+      state.calculator.lastResult = "0";
+      return;
+    }
+    if (action === "clear-calc-history") {
+      if (state.calculator) state.calculator.history = [];
+      renderApp();
+      return;
+    }
     if (action === "copy-calc-result") {
       const res = state.calculator?.lastResult;
       if (res && navigator.clipboard?.writeText) {
@@ -8470,6 +8769,49 @@ function setupEventDelegation() {
         if (updated?.runner) state.runner = updated.runner;
         renderApp();
       }
+      return;
+    }
+    if (action === "terminate-cmd") {
+      if (state.runner) {
+        state.runner.running = false;
+        state.runner.lastOutput = (state.runner.lastOutput + "\n[Terminating process...]").trim();
+      }
+      renderApp();
+      const updated = await window.pywebview?.api?.terminate_runner_command?.();
+      if (updated?.runner) state.runner = updated.runner;
+      renderApp();
+      return;
+    }
+    if (action === "clear-runner-output") {
+      if (state.runner) {
+        state.runner.lastOutput = "";
+      }
+      renderApp();
+      return;
+    }
+    if (action === "connect-github") {
+      const tokenInput = document.getElementById("flank-github-token-input");
+      const token = tokenInput?.value.trim() || "";
+      if (token) {
+        if (tokenInput) tokenInput.value = "";
+        const updated = await window.pywebview?.api?.connect_github?.(token);
+        if (updated?.github) state.github = updated.github;
+        renderApp();
+      }
+      return;
+    }
+    if (action === "disconnect-github") {
+      const updated = await window.pywebview?.api?.disconnect_github?.();
+      if (updated?.github) state.github = updated.github;
+      renderApp();
+      return;
+    }
+    if (action === "open-settings-widgets") {
+      windowUiState.settingsTab = "widgets";
+      state.activeFullWindow = "settings";
+      state.activeWidget = null;
+      window.pywebview?.api?.open_window?.("settings");
+      renderApp();
       return;
     }
     const copyId = btn.getAttribute("data-copy-id") || btn.getAttribute("data-cb-copy");
