@@ -1,9 +1,11 @@
 import { ThemeEngine } from './theme/engine.ts';
 import { createSampleState } from './providers/sample.ts';
-import { type DockItem, type FlankState, type WidgetKind } from './providers/types.ts';
+import { type DockItem, type FlankState, type WidgetKind, type TaskItem } from './providers/types.ts';
 import { renderDockHtml } from './ui/dock.ts';
 import { renderHoverCardHtml } from './ui/cards.ts';
 import { attachDockMagnification } from './ui/magnification.ts';
+import { evaluateExpression } from './ui/calc.ts';
+import { startAmbientSound, stopAmbientSound, setAmbientVolume, isAmbientPlaying } from './ui/ambient.ts';
 import {
   initDockState,
   setDockState,
@@ -1782,6 +1784,186 @@ function setupEventDelegation(): void {
       return;
     }
 
+    // 4c. Tasks, Calculator, Habits, Storage, Display, Privacy, Ambient, Runner
+    if (action === 'add-task') {
+      const taskInput = document.getElementById('flank-task-input') as HTMLInputElement | null;
+      const text = taskInput?.value.trim() || '';
+      if (text) {
+        if (taskInput) taskInput.value = '';
+        if (!state.tasks) state.tasks = { items: [], pendingCount: 0 };
+        const newTask: TaskItem = { id: `task-${Date.now()}`, text, done: false, createdAt: 'Just now' };
+        state.tasks.items.unshift(newTask);
+        state.tasks.pendingCount = state.tasks.items.filter((t) => !t.done).length;
+        const updated = await window.pywebview?.api?.tasks_action?.('add', text);
+        if (updated?.tasks) state.tasks = updated.tasks;
+        renderApp();
+      }
+      return;
+    }
+
+    const toggleTaskId = btn.getAttribute('data-task-id');
+    if (action === 'toggle-task' && toggleTaskId) {
+      if (state.tasks?.items) {
+        const item = state.tasks.items.find((t) => t.id === toggleTaskId);
+        if (item) {
+          item.done = !item.done;
+          state.tasks.pendingCount = state.tasks.items.filter((t) => !t.done).length;
+        }
+      }
+      const updated = await window.pywebview?.api?.tasks_action?.('toggle', toggleTaskId);
+      if (updated?.tasks) state.tasks = updated.tasks;
+      renderApp();
+      return;
+    }
+
+    if (action === 'delete-task' && toggleTaskId) {
+      if (state.tasks?.items) {
+        state.tasks.items = state.tasks.items.filter((t) => t.id !== toggleTaskId);
+        state.tasks.pendingCount = state.tasks.items.filter((t) => !t.done).length;
+      }
+      const updated = await window.pywebview?.api?.tasks_action?.('delete', toggleTaskId);
+      if (updated?.tasks) state.tasks = updated.tasks;
+      renderApp();
+      return;
+    }
+
+    if (action === 'clear-completed-tasks') {
+      if (state.tasks?.items) {
+        state.tasks.items = state.tasks.items.filter((t) => !t.done);
+        state.tasks.pendingCount = state.tasks.items.length;
+      }
+      const updated = await window.pywebview?.api?.tasks_action?.('clear_completed');
+      if (updated?.tasks) state.tasks = updated.tasks;
+      renderApp();
+      return;
+    }
+
+    if (action === 'copy-calc-result') {
+      const res = state.calculator?.lastResult;
+      if (res && navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(res).catch(() => {});
+      }
+      return;
+    }
+
+    const recallExpr = btn.getAttribute('data-expr');
+    if (action === 'recall-calc' && recallExpr) {
+      const calcInput = document.getElementById('flank-calc-input') as HTMLInputElement | null;
+      if (calcInput) calcInput.value = recallExpr;
+      const res = evaluateExpression(recallExpr);
+      if (!state.calculator) state.calculator = { lastExpr: '', lastResult: '', history: [] };
+      state.calculator.lastExpr = recallExpr;
+      state.calculator.lastResult = res;
+      renderApp();
+      return;
+    }
+
+    if (action === 'habit-water-add') {
+      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
+      state.habits.waterGlasses += 1;
+      const updated = await window.pywebview?.api?.habits_action?.('add_water', 1);
+      if (updated?.habits) state.habits = updated.habits;
+      renderApp();
+      return;
+    }
+
+    if (action === 'habit-water-sub') {
+      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
+      state.habits.waterGlasses = Math.max(0, state.habits.waterGlasses - 1);
+      const updated = await window.pywebview?.api?.habits_action?.('sub_water', 1);
+      if (updated?.habits) state.habits = updated.habits;
+      renderApp();
+      return;
+    }
+
+    if (action === 'habit-log-stretch') {
+      if (state.habits) state.habits.lastStretchMin = 0;
+      const updated = await window.pywebview?.api?.habits_action?.('log_stretch');
+      if (updated?.habits) state.habits = updated.habits;
+      renderApp();
+      return;
+    }
+
+    const openDrive = btn.getAttribute('data-drive');
+    if (action === 'open-drive' && openDrive) {
+      window.pywebview?.api?.open_drive?.(openDrive);
+      return;
+    }
+
+    if (action === 'launch-disk-cleanup') {
+      window.pywebview?.api?.launch_disk_cleanup?.();
+      return;
+    }
+
+    if (action === 'toggle-night-light') {
+      if (state.display) state.display.nightLight = !state.display.nightLight;
+      const updated = await window.pywebview?.api?.toggle_night_light?.();
+      if (updated?.display) state.display = updated.display;
+      renderApp();
+      return;
+    }
+
+    if (action === 'toggle-mic-mute') {
+      if (state.privacy) state.privacy.micMuted = !state.privacy.micMuted;
+      const updated = await window.pywebview?.api?.toggle_mic_mute?.();
+      if (updated?.privacy) state.privacy = updated.privacy;
+      renderApp();
+      return;
+    }
+
+    if (action === 'toggle-ambient') {
+      if (!state.ambient) state.ambient = { playing: false, sound: 'rain', volume: 65 };
+      if (isAmbientPlaying()) {
+        stopAmbientSound();
+        state.ambient.playing = false;
+      } else {
+        startAmbientSound(state.ambient.sound, state.ambient.volume);
+        state.ambient.playing = true;
+      }
+      renderApp();
+      return;
+    }
+
+    const ambSound = btn.getAttribute('data-sound');
+    if (action === 'select-ambient-sound' && ambSound) {
+      if (!state.ambient) state.ambient = { playing: false, sound: 'rain', volume: 65 };
+      state.ambient.sound = ambSound as any;
+      if (isAmbientPlaying()) {
+        startAmbientSound(ambSound, state.ambient.volume);
+      }
+      renderApp();
+      return;
+    }
+
+    const runCmd = btn.getAttribute('data-cmd');
+    if (action === 'run-preset-cmd' && runCmd) {
+      if (state.runner) {
+        state.runner.running = true;
+        state.runner.lastCmd = runCmd;
+      }
+      renderApp();
+      const updated = await window.pywebview?.api?.execute_runner_command?.(runCmd);
+      if (updated?.runner) state.runner = updated.runner;
+      renderApp();
+      return;
+    }
+
+    if (action === 'run-custom-cmd') {
+      const runnerInput = document.getElementById('flank-runner-input') as HTMLInputElement | null;
+      const cmd = runnerInput?.value.trim() || '';
+      if (cmd) {
+        if (state.runner) {
+          state.runner.running = true;
+          state.runner.lastCmd = cmd;
+        }
+        renderApp();
+        const updated = await window.pywebview?.api?.execute_runner_command?.(cmd);
+        if (updated?.runner) state.runner = updated.runner;
+        renderApp();
+      }
+      return;
+    }
+
     // 5. Clipboard quick copy or window actions
     const copyId = btn.getAttribute('data-copy-id') || btn.getAttribute('data-cb-copy');
     if (copyId) {
@@ -2030,6 +2212,28 @@ function setupEventDelegation(): void {
       renderApp(true);
     } else if (target.id === 'flank-weather-city-input') {
       state.weather.city = target.value;
+    } else if (target.id === 'flank-calc-input') {
+      const expr = target.value;
+      const res = evaluateExpression(expr);
+      const resBox = document.getElementById('flank-calc-result');
+      if (resBox) resBox.textContent = res;
+      if (!state.calculator) state.calculator = { lastExpr: '', lastResult: '', history: [] };
+      state.calculator.lastExpr = expr;
+      state.calculator.lastResult = res;
+    } else if (target.id === 'flank-brightness-slider') {
+      const val = Number((target as HTMLInputElement).value) || 85;
+      const dispText = document.getElementById('flank-disp-val');
+      if (dispText) dispText.textContent = `${val}%`;
+      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: '1920 × 1080', refreshRate: 144, scaling: 100 };
+      state.display.brightness = val;
+      window.pywebview?.api?.set_brightness?.(val);
+    } else if (target.id === 'flank-ambient-volume') {
+      const vol = Number((target as HTMLInputElement).value) || 65;
+      const volText = document.getElementById('flank-amb-vol-text');
+      if (volText) volText.textContent = `${vol}%`;
+      setAmbientVolume(vol);
+      if (!state.ambient) state.ambient = { playing: false, sound: 'rain', volume: vol };
+      state.ambient.volume = vol;
     } else if (target.id === 'flank-scratchpad-textarea') {
       const active =
         state.scratchpad.notes.find((n) => n.id === state.scratchpad.activeNoteId) || state.scratchpad.notes[0];
@@ -2171,6 +2375,22 @@ function setupEventDelegation(): void {
       ev.preventDefault();
       toggleDockCollapse();
       return;
+    }
+
+    if (ev.key === 'Enter') {
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (activeEl?.id === 'flank-task-input') {
+        ev.preventDefault();
+        const addBtn = document.querySelector<HTMLElement>('[data-action="add-task"]');
+        addBtn?.click();
+        return;
+      }
+      if (activeEl?.id === 'flank-runner-input') {
+        ev.preventDefault();
+        const runBtn = document.querySelector<HTMLElement>('[data-action="run-custom-cmd"]');
+        runBtn?.click();
+        return;
+      }
     }
     if (uiState.recordingItemId) {
       ev.preventDefault();
@@ -2467,6 +2687,36 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
   if (patch.bluetooth) {
     state.bluetooth = { ...state.bluetooth, ...patch.bluetooth };
   }
+  if (patch.tasks) {
+    state.tasks = { ...state.tasks, ...patch.tasks };
+  }
+  if (patch.calculator) {
+    state.calculator = { ...state.calculator, ...patch.calculator };
+  }
+  if (patch.habits) {
+    state.habits = { ...state.habits, ...patch.habits };
+  }
+  if (patch.storage) {
+    state.storage = { ...state.storage, ...patch.storage };
+  }
+  if (patch.display) {
+    state.display = { ...state.display, ...patch.display };
+  }
+  if (patch.privacy) {
+    state.privacy = { ...state.privacy, ...patch.privacy };
+  }
+  if (patch.ambient) {
+    state.ambient = { ...state.ambient, ...patch.ambient };
+  }
+  if (patch.runner) {
+    state.runner = { ...state.runner, ...patch.runner };
+  }
+  if (patch.gpu) {
+    state.gpu = { ...state.gpu, ...patch.gpu };
+  }
+  if (patch.github) {
+    state.github = { ...state.github, ...patch.github };
+  }
   if (patch.topProcesses) {
     state.topProcesses = patch.topProcesses;
   }
@@ -2497,7 +2747,17 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
       (w === 'audio' && !!patch.audio) ||
       (w === 'network' && !!patch.network) ||
       (w === 'clipboard' && !!patch.clipboard) ||
-      (w === 'bluetooth' && !!patch.bluetooth);
+      (w === 'bluetooth' && !!patch.bluetooth) ||
+      (w === 'tasks' && !!patch.tasks) ||
+      (w === 'calculator' && !!patch.calculator) ||
+      (w === 'habits' && !!patch.habits) ||
+      (w === 'storage' && !!patch.storage) ||
+      (w === 'display' && !!patch.display) ||
+      (w === 'privacy' && !!patch.privacy) ||
+      (w === 'ambient' && !!patch.ambient) ||
+      (w === 'runner' && !!patch.runner) ||
+      (w === 'gpu' && !!patch.gpu) ||
+      (w === 'github' && !!patch.github);
     if (!hasWidgetUpdate) {
       return;
     }

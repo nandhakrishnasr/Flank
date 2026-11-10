@@ -12,6 +12,16 @@ export type WidgetKind =
   | 'audio'
   | 'network'
   | 'bluetooth'
+  | 'tasks'
+  | 'calculator'
+  | 'habits'
+  | 'storage'
+  | 'display'
+  | 'privacy'
+  | 'ambient'
+  | 'runner'
+  | 'gpu'
+  | 'github'
   | 'widgets';
 
 export interface DockItem {
@@ -121,6 +131,7 @@ export interface PlayerPayload {
   title: string;
   artist: string;
   album?: string;
+  artworkUrl?: string;
   sourceApp?: string;
   positionSec: number;
   durationSec: number;
@@ -236,6 +247,112 @@ export interface ProcessItem {
   threads: number;
 }
 
+export interface TaskItem {
+  id: string;
+  text: string;
+  done: boolean;
+  createdAt: string;
+}
+
+export interface TasksPayload {
+  items: TaskItem[];
+  pendingCount: number;
+}
+
+export interface CalculatorHistoryItem {
+  expr: string;
+  result: string;
+}
+
+export interface CalculatorPayload {
+  lastExpr: string;
+  lastResult: string;
+  history: CalculatorHistoryItem[];
+}
+
+export interface HabitsPayload {
+  waterGlasses: number;
+  waterGoal: number;
+  lastStretchMin: number;
+  streakDays: number;
+}
+
+export interface StorageDrive {
+  letter: string;
+  label: string;
+  type: string;
+  usedGb: number;
+  totalGb: number;
+  freeGb: number;
+  percent: number;
+}
+
+export interface StoragePayload {
+  primaryPercent: number;
+  primaryDrive: string;
+  drives: StorageDrive[];
+}
+
+export interface DisplayPayload {
+  brightness: number;
+  nightLight: boolean;
+  resolution: string;
+  refreshRate: number;
+  scaling: number;
+}
+
+export interface PrivacyPayload {
+  micActive: boolean;
+  cameraActive: boolean;
+  micMuted: boolean;
+  activeApps: string[];
+}
+
+export interface AmbientPayload {
+  playing: boolean;
+  sound: 'rain' | 'waves' | 'campfire' | 'coffee' | 'wind' | 'brown';
+  volume: number;
+}
+
+export interface RunnerCommand {
+  id: string;
+  name: string;
+  cmd: string;
+  desc: string;
+}
+
+export interface RunnerPayload {
+  commands: RunnerCommand[];
+  lastOutput: string;
+  lastCmd: string;
+  running: boolean;
+}
+
+export interface GpuPayload {
+  name: string;
+  utilizationPercent: number;
+  tempC: number;
+  vramUsedGb: number;
+  vramTotalGb: number;
+  driverVersion?: string;
+}
+
+export interface GithubItem {
+  id: string;
+  title: string;
+  repo: string;
+  type: 'pr' | 'issue' | 'mention';
+  url: string;
+  status: string;
+}
+
+export interface GithubPayload {
+  username?: string;
+  connected: boolean;
+  pendingCount: number;
+  items: GithubItem[];
+}
+
 export interface FlankState {
   dataSource: 'sample' | 'live';
   themeId: string;
@@ -276,5 +393,15 @@ export interface FlankState {
   activity?: any;
   bluetooth?: BluetoothPayload;
   topProcesses?: ProcessItem[];
+  tasks?: TasksPayload;
+  calculator?: CalculatorPayload;
+  habits?: HabitsPayload;
+  storage?: StoragePayload;
+  display?: DisplayPayload;
+  privacy?: PrivacyPayload;
+  ambient?: AmbientPayload;
+  runner?: RunnerPayload;
+  gpu?: GpuPayload;
+  github?: GithubPayload;
 }
 

@@ -187,6 +187,66 @@ function renderWidgetTileInner(
           extraClass: '',
           html: `<span class="flank-row-left"><span class="flank-row-code">bt</span><span>devices</span></span><span class="flank-row-right is-accent">${state.bluetooth?.connectedCount ?? 0}</span>`,
         };
+      case 'tasks':
+        return {
+          ariaLabel: `Tasks, ${state.tasks?.pendingCount ?? 0} remaining`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">todo</span><span>tasks</span></span><span class="flank-row-right">${state.tasks?.pendingCount ?? 0}</span>`,
+        };
+      case 'calculator':
+        return {
+          ariaLabel: `Smart calculator`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">calc</span><span>math</span></span><span class="flank-row-right">${truncateValue(state.calculator?.lastResult || '=')}</span>`,
+        };
+      case 'habits':
+        return {
+          ariaLabel: `Habits, ${state.habits?.waterGlasses ?? 0} of ${state.habits?.waterGoal ?? 8} glasses`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">hbt</span><span>water</span></span><span class="flank-row-right">${state.habits?.waterGlasses ?? 0}/${state.habits?.waterGoal ?? 8}</span>`,
+        };
+      case 'storage':
+        return {
+          ariaLabel: `Storage ${state.storage?.primaryPercent ?? 68}%`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">dsk</span><span>drives</span></span><span class="flank-row-right">${state.storage?.primaryPercent ?? 68}%</span>`,
+        };
+      case 'display':
+        return {
+          ariaLabel: `Display brightness ${state.display?.brightness ?? 85}%`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">dsp</span><span>bright</span></span><span class="flank-row-right">${state.display?.brightness ?? 85}%</span>`,
+        };
+      case 'privacy':
+        return {
+          ariaLabel: `Privacy guard, ${state.privacy?.micActive ? 'mic active' : 'protected'}`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">prv</span><span>guard</span></span><span class="flank-row-right">${state.privacy?.micActive ? 'REC' : 'OK'}</span>`,
+        };
+      case 'ambient':
+        return {
+          ariaLabel: `Focus ambiance, ${state.ambient?.playing ? 'playing' : 'off'}`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">amb</span><span>sound</span></span><span class="flank-row-right">${state.ambient?.playing ? 'Play' : 'Off'}</span>`,
+        };
+      case 'runner':
+        return {
+          ariaLabel: `Command runner`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">run</span><span>cli</span></span><span class="flank-row-right">>_</span>`,
+        };
+      case 'gpu':
+        return {
+          ariaLabel: `GPU ${state.gpu?.tempC ?? 54}°C`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">gpu</span><span>thermal</span></span><span class="flank-row-right">${state.gpu?.tempC ?? 54}°C</span>`,
+        };
+      case 'github':
+        return {
+          ariaLabel: `GitHub, ${state.github?.pendingCount ?? 0} pull requests`,
+          extraClass: '',
+          html: `<span class="flank-row-left"><span class="flank-row-code">git</span><span>prs</span></span><span class="flank-row-right">${state.github?.pendingCount ?? 0}</span>`,
+        };
     }
   }
 
@@ -221,7 +281,9 @@ function renderWidgetTileInner(
         return {
           ariaLabel: `Mini player, ${state.player.playing ? 'playing' : 'paused'}`,
           extraClass: state.player.playing ? 'flank-tile-accent-icon is-playing' : '',
-          html: `${iconSvg('equalizer')}${railIndicator}`,
+          html: state.player.artworkUrl
+            ? `<img src="${escapeHtml(state.player.artworkUrl)}" style="width: 18px; height: 18px; border-radius: 3px; object-fit: cover;" alt="Art" />${railIndicator}`
+            : `${iconSvg('equalizer')}${railIndicator}`,
         };
       case 'focus':
         return {
@@ -271,6 +333,66 @@ function renderWidgetTileInner(
           extraClass: '',
           html: `${iconSvg('bluetooth')}${railIndicator}`,
         };
+      case 'tasks':
+        return {
+          ariaLabel: `Tasks, ${state.tasks?.pendingCount ?? 0} remaining`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">${state.tasks?.pendingCount ?? 0}</span>${railIndicator}`,
+        };
+      case 'calculator':
+        return {
+          ariaLabel: `Smart calculator`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">=</span>${railIndicator}`,
+        };
+      case 'habits':
+        return {
+          ariaLabel: `Habits, ${state.habits?.waterGlasses ?? 0} glasses`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">${state.habits?.waterGlasses ?? 0}w</span>${railIndicator}`,
+        };
+      case 'storage':
+        return {
+          ariaLabel: `Storage ${state.storage?.primaryPercent ?? 68}%`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">${state.storage?.primaryPercent ?? 68}%</span>${railIndicator}`,
+        };
+      case 'display':
+        return {
+          ariaLabel: `Display ${state.display?.brightness ?? 85}%`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">${state.display?.brightness ?? 85}%</span>${railIndicator}`,
+        };
+      case 'privacy':
+        return {
+          ariaLabel: `Privacy guard`,
+          extraClass: state.privacy?.micActive ? 'flank-tile-accent-icon' : '',
+          html: `${iconSvg('shield')}${railIndicator}`,
+        };
+      case 'ambient':
+        return {
+          ariaLabel: `Focus ambiance`,
+          extraClass: state.ambient?.playing ? 'flank-tile-accent-icon' : '',
+          html: `${iconSvg('waves')}${railIndicator}`,
+        };
+      case 'runner':
+        return {
+          ariaLabel: `Command runner`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">>_</span>${railIndicator}`,
+        };
+      case 'gpu':
+        return {
+          ariaLabel: `GPU ${state.gpu?.tempC ?? 54}°C`,
+          extraClass: '',
+          html: `<span class="flank-tile-value">${state.gpu?.tempC ?? 54}°</span>${railIndicator}`,
+        };
+      case 'github':
+        return {
+          ariaLabel: `GitHub, ${state.github?.pendingCount ?? 0} pull requests`,
+          extraClass: '',
+          html: `${iconSvg('github')}${railIndicator}`,
+        };
     }
   }
 
@@ -305,7 +427,9 @@ function renderWidgetTileInner(
         return {
           ariaLabel: `Now playing, ${state.player.title}`,
           extraClass: 'is-widget-pill',
-          html: `<span class="flank-tile-accent-icon" style="display:flex">${iconSvg('equalizer')}</span>${escapeHtml(state.player.title)}`,
+          html: state.player.artworkUrl
+            ? `<img src="${escapeHtml(state.player.artworkUrl)}" style="width: 16px; height: 16px; border-radius: 3px; object-fit: cover; margin-right: 4px;" alt="Art" />${escapeHtml(state.player.title)}`
+            : `<span class="flank-tile-accent-icon" style="display:flex">${iconSvg('equalizer')}</span>${escapeHtml(state.player.title)}`,
         };
       case 'focus':
         return {
@@ -355,6 +479,66 @@ function renderWidgetTileInner(
           extraClass: 'is-widget-pill',
           html: `${iconSvg('bluetooth')}BT (${state.bluetooth?.connectedCount ?? 0})`,
         };
+      case 'tasks':
+        return {
+          ariaLabel: `Tasks, ${state.tasks?.pendingCount ?? 0} remaining`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('check-square')}${state.tasks?.pendingCount ?? 0} tasks`,
+        };
+      case 'calculator':
+        return {
+          ariaLabel: `Smart calculator`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('calculator')}${escapeHtml(state.calculator?.lastResult || 'Calc')}`,
+        };
+      case 'habits':
+        return {
+          ariaLabel: `Habits, ${state.habits?.waterGlasses ?? 0} cups`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('droplet')}${state.habits?.waterGlasses ?? 0}/8 cups`,
+        };
+      case 'storage':
+        return {
+          ariaLabel: `Storage ${state.storage?.primaryPercent ?? 68}%`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('hard-drive')}${state.storage?.primaryDrive ?? 'C:'} ${state.storage?.primaryPercent ?? 68}%`,
+        };
+      case 'display':
+        return {
+          ariaLabel: `Display ${state.display?.brightness ?? 85}%`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('sun')}${state.display?.brightness ?? 85}%`,
+        };
+      case 'privacy':
+        return {
+          ariaLabel: `Privacy guard`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('shield')}${state.privacy?.micActive ? 'Mic Active' : 'Protected'}`,
+        };
+      case 'ambient':
+        return {
+          ariaLabel: `Focus ambiance`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('waves')}${state.ambient?.playing ? 'Ambiance' : 'Muted'}`,
+        };
+      case 'runner':
+        return {
+          ariaLabel: `Command runner`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('terminal')}Runner`,
+        };
+      case 'gpu':
+        return {
+          ariaLabel: `GPU ${state.gpu?.tempC ?? 54}°C`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('activity')}${state.gpu?.tempC ?? 54}°C`,
+        };
+      case 'github':
+        return {
+          ariaLabel: `GitHub ${state.github?.pendingCount ?? 0} PRs`,
+          extraClass: 'is-widget-pill',
+          html: `${iconSvg('github')}${state.github?.pendingCount ?? 0} PRs`,
+        };
     }
   }
 
@@ -394,7 +578,9 @@ function renderWidgetTileInner(
       return {
         ariaLabel: `Mini player, ${state.player.playing ? 'playing' : 'paused'}`,
         extraClass: state.player.playing ? 'flank-tile-accent-icon is-playing' : '',
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('equalizer', 20)}</span><span class="flank-widget-value flank-num">${state.player.playing ? 'Play' : 'Pau'}</span></span>`,
+        html: state.player.artworkUrl
+          ? `<span class="flank-widget-glance"><img src="${escapeHtml(state.player.artworkUrl)}" style="width: 20px; height: 20px; border-radius: 4px; object-fit: cover;" alt="Art" /><span class="flank-widget-value flank-num">${state.player.playing ? 'Play' : 'Pau'}</span></span>`
+          : `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('equalizer', 20)}</span><span class="flank-widget-value flank-num">${state.player.playing ? 'Play' : 'Pau'}</span></span>`,
       };
     }
     case 'focus': {
@@ -455,13 +641,99 @@ function renderWidgetTileInner(
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('wifi', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(ping)}</span></span>`,
       };
     }
-    case 'bluetooth':
-    default: {
+    case 'bluetooth': {
       const cnt = state.bluetooth?.connectedCount ?? 0;
       return {
         ariaLabel: `Bluetooth, ${cnt} connected devices`,
         extraClass: '',
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('bluetooth', 20)}</span><span class="flank-widget-value flank-num">${cnt}d</span></span>${renderBadge(cnt)}`,
+      };
+    }
+    case 'tasks': {
+      const pending = state.tasks?.pendingCount ?? 0;
+      return {
+        ariaLabel: `Tasks, ${pending} remaining`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('check-square', 20)}</span><span class="flank-widget-value flank-num">${pending}t</span></span>${renderBadge(pending)}`,
+      };
+    }
+    case 'calculator': {
+      const res = state.calculator?.lastResult || '=';
+      return {
+        ariaLabel: `Smart calculator, ${res}`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('calculator', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(res)}</span></span>`,
+      };
+    }
+    case 'habits': {
+      const w = state.habits?.waterGlasses ?? 0;
+      const g = state.habits?.waterGoal ?? 8;
+      return {
+        ariaLabel: `Habits, ${w} of ${g} glasses`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('droplet', 20)}</span><span class="flank-widget-value flank-num">${w}/${g}</span></span>`,
+      };
+    }
+    case 'storage': {
+      const p = `${state.storage?.primaryPercent ?? 68}%`;
+      return {
+        ariaLabel: `Storage ${p}`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('hard-drive', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(p)}</span></span>`,
+      };
+    }
+    case 'display': {
+      const b = `${state.display?.brightness ?? 85}%`;
+      return {
+        ariaLabel: `Display brightness ${b}`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('sun', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(b)}</span></span>`,
+      };
+    }
+    case 'privacy': {
+      const isRec = Boolean(state.privacy?.micActive || state.privacy?.cameraActive);
+      return {
+        ariaLabel: `Privacy guard, ${isRec ? 'recording active' : 'protected'}`,
+        extraClass: isRec ? 'flank-tile-accent-icon' : '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon" style="${isRec ? 'color: #EF4444;' : ''}">${iconSvg('shield', 20)}</span><span class="flank-widget-value flank-num">${isRec ? 'REC' : 'Safe'}</span></span>`,
+      };
+    }
+    case 'ambient': {
+      const playing = Boolean(state.ambient?.playing);
+      return {
+        ariaLabel: `Focus ambiance, ${playing ? 'playing' : 'off'}`,
+        extraClass: playing ? 'flank-tile-accent-icon' : '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('waves', 20)}</span><span class="flank-widget-value flank-num">${playing ? 'Play' : 'Off'}</span></span>`,
+      };
+    }
+    case 'runner': {
+      return {
+        ariaLabel: `Command runner`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('terminal', 20)}</span><span class="flank-widget-value flank-num">>_</span></span>`,
+      };
+    }
+    case 'gpu': {
+      const tc = `${state.gpu?.tempC ?? 54}°`;
+      return {
+        ariaLabel: `GPU ${tc}`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('activity', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(tc)}</span></span>`,
+      };
+    }
+    case 'github': {
+      const cnt = state.github?.pendingCount ?? 0;
+      return {
+        ariaLabel: `GitHub, ${cnt} pull requests`,
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('github', 20)}</span><span class="flank-widget-value flank-num">${cnt}pr</span></span>${renderBadge(cnt)}`,
+      };
+    }
+    default: {
+      return {
+        ariaLabel: 'Widget',
+        extraClass: '',
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('equalizer', 20)}</span><span class="flank-widget-value flank-num">--</span></span>`,
       };
     }
   }

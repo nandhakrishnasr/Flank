@@ -1513,7 +1513,7 @@ function createSampleState() {
         icon: "equalizer",
         widgetKind: "player",
         shortcut: "Alt+P",
-        enabled: false
+        enabled: true
       },
       {
         id: "widget-scratchpad",
@@ -1547,6 +1547,116 @@ function createSampleState() {
         widgetKind: "network",
         shortcut: "Alt+I",
         enabled: false
+      },
+      {
+        id: "widget-tasks",
+        group: "widgets",
+        kind: "widget",
+        label: "Quick to-do",
+        shortCode: "todo",
+        icon: "check-square",
+        widgetKind: "tasks",
+        shortcut: "Alt+T",
+        enabled: true
+      },
+      {
+        id: "widget-calculator",
+        group: "widgets",
+        kind: "widget",
+        label: "Smart calculator",
+        shortCode: "calc",
+        icon: "calculator",
+        widgetKind: "calculator",
+        shortcut: "Alt+Q",
+        enabled: true
+      },
+      {
+        id: "widget-habits",
+        group: "widgets",
+        kind: "widget",
+        label: "Habits & hydration",
+        shortCode: "hbt",
+        icon: "droplet",
+        widgetKind: "habits",
+        shortcut: "Alt+H",
+        enabled: true
+      },
+      {
+        id: "widget-storage",
+        group: "widgets",
+        kind: "widget",
+        label: "Storage & drives",
+        shortCode: "dsk",
+        icon: "hard-drive",
+        widgetKind: "storage",
+        shortcut: "Alt+D",
+        enabled: true
+      },
+      {
+        id: "widget-display",
+        group: "widgets",
+        kind: "widget",
+        label: "Display & brightness",
+        shortCode: "dsp",
+        icon: "sun",
+        widgetKind: "display",
+        shortcut: "Alt+L",
+        enabled: true
+      },
+      {
+        id: "widget-privacy",
+        group: "widgets",
+        kind: "widget",
+        label: "Privacy guard",
+        shortCode: "prv",
+        icon: "shield",
+        widgetKind: "privacy",
+        shortcut: "Alt+Y",
+        enabled: true
+      },
+      {
+        id: "widget-ambient",
+        group: "widgets",
+        kind: "widget",
+        label: "Focus ambiance",
+        shortCode: "amb",
+        icon: "waves",
+        widgetKind: "ambient",
+        shortcut: "Alt+A",
+        enabled: true
+      },
+      {
+        id: "widget-runner",
+        group: "widgets",
+        kind: "widget",
+        label: "Command runner",
+        shortCode: "run",
+        icon: "terminal",
+        widgetKind: "runner",
+        shortcut: "Alt+R",
+        enabled: true
+      },
+      {
+        id: "widget-gpu",
+        group: "widgets",
+        kind: "widget",
+        label: "GPU diagnostics",
+        shortCode: "gpu",
+        icon: "activity",
+        widgetKind: "gpu",
+        shortcut: "Alt+G",
+        enabled: true
+      },
+      {
+        id: "widget-github",
+        group: "widgets",
+        kind: "widget",
+        label: "GitHub activity",
+        shortCode: "git",
+        icon: "github",
+        widgetKind: "github",
+        shortcut: "Alt+J",
+        enabled: true
       }
     ],
     clipboard: {
@@ -1755,7 +1865,85 @@ function createSampleState() {
       { pid: 25852, name: "Antigravity IDE.exe", memMb: 405.3, threads: 68 },
       { pid: 31316, name: "explorer.exe", memMb: 331.6, threads: 84 },
       { pid: 17792, name: "Raycast.exe", memMb: 285.8, threads: 32 }
-    ]
+    ],
+    tasks: {
+      pendingCount: 3,
+      items: [
+        { id: "task-1", text: "Review pull request for telemetry pipeline", done: false, createdAt: "10:30 AM" },
+        { id: "task-2", text: "Prepare release notes for Flank v1.1", done: false, createdAt: "11:15 AM" },
+        { id: "task-3", text: "Sync meeting with design team", done: true, createdAt: "09:00 AM" },
+        { id: "task-4", text: "Benchmark liquid glass blur performance", done: false, createdAt: "01:45 PM" }
+      ]
+    },
+    calculator: {
+      lastExpr: "120 * 1.18",
+      lastResult: "141.6",
+      history: [
+        { expr: "120 * 1.18", result: "141.6" },
+        { expr: "16 GB to MB", result: "16,384 MB" },
+        { expr: "sqrt(256) * 4", result: "64" }
+      ]
+    },
+    habits: {
+      waterGlasses: 5,
+      waterGoal: 8,
+      lastStretchMin: 25,
+      streakDays: 4
+    },
+    storage: {
+      primaryPercent: 68,
+      primaryDrive: "C:",
+      drives: [
+        { letter: "C:", label: "Windows", type: "SSD NVMe", usedGb: 340, totalGb: 500, freeGb: 160, percent: 68 },
+        { letter: "D:", label: "Projects & Games", type: "SSD NVMe", usedGb: 720, totalGb: 1e3, freeGb: 280, percent: 72 }
+      ]
+    },
+    display: {
+      brightness: 85,
+      nightLight: false,
+      resolution: "1920 \xD7 1080",
+      refreshRate: 144,
+      scaling: 100
+    },
+    privacy: {
+      micActive: false,
+      cameraActive: false,
+      micMuted: false,
+      activeApps: []
+    },
+    ambient: {
+      playing: false,
+      sound: "rain",
+      volume: 65
+    },
+    runner: {
+      running: false,
+      lastCmd: "ipconfig /flushdns",
+      lastOutput: "Successfully flushed the DNS Resolver Cache.",
+      commands: [
+        { id: "flushdns", name: "Flush DNS", cmd: "ipconfig /flushdns", desc: "Clear local DNS cache" },
+        { id: "killnode", name: "Kill Node.js", cmd: "taskkill /F /IM node.exe", desc: "Stop running dev servers" },
+        { id: "pinggoogle", name: "Ping 8.8.8.8", cmd: "ping -n 4 8.8.8.8", desc: "Check network gateway latency" },
+        { id: "gitfetch", name: "Git Fetch All", cmd: "git fetch --all --prune", desc: "Fetch latest remote branches" }
+      ]
+    },
+    gpu: {
+      name: "NVIDIA GeForce RTX",
+      utilizationPercent: 42,
+      tempC: 54,
+      vramUsedGb: 3.8,
+      vramTotalGb: 8,
+      driverVersion: "566.14"
+    },
+    github: {
+      username: "nandhakrishnasr",
+      connected: true,
+      pendingCount: 2,
+      items: [
+        { id: "pr-14", title: "feat: add album art & YouTube thumbnail", repo: "Flank", type: "pr", url: "https://github.com/nandhakrishnasr/Flank/pull/14", status: "Review requested" },
+        { id: "pr-12", title: "fix: edge dock positioning multi-monitor", repo: "Flank", type: "pr", url: "https://github.com/nandhakrishnasr/Flank/pull/12", status: "Approved" }
+      ]
+    }
   };
 }
 
@@ -1890,6 +2078,31 @@ function iconSvg(name, sizePx) {
       return `<svg ${sizeStyle} ${strokeAttr}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
     case "bluetooth":
       return `<svg ${sizeStyle} ${strokeAttr}><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>`;
+    case "check-square":
+    case "tasks":
+    case "todo":
+      return `<svg ${sizeStyle} ${strokeAttr}><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+    case "calculator":
+      return `<svg ${sizeStyle} ${strokeAttr}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>`;
+    case "droplet":
+    case "water":
+    case "habits":
+      return `<svg ${sizeStyle} ${strokeAttr}><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>`;
+    case "hard-drive":
+    case "storage":
+    case "disk":
+      return `<svg ${sizeStyle} ${strokeAttr}><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>`;
+    case "shield":
+    case "privacy":
+      return `<svg ${sizeStyle} ${strokeAttr}><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>`;
+    case "waves":
+    case "ambient":
+      return `<svg ${sizeStyle} ${strokeAttr}><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>`;
+    case "github":
+      return `<svg ${sizeStyle} ${strokeAttr}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`;
+    case "monitor":
+    case "display":
+      return `<svg ${sizeStyle} ${strokeAttr}><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>`;
     case "activity":
     case "agent":
     case "bot":
@@ -2098,6 +2311,66 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
           extraClass: "",
           html: `<span class="flank-row-left"><span class="flank-row-code">bt</span><span>devices</span></span><span class="flank-row-right is-accent">${state2.bluetooth?.connectedCount ?? 0}</span>`
         };
+      case "tasks":
+        return {
+          ariaLabel: `Tasks, ${state2.tasks?.pendingCount ?? 0} remaining`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">todo</span><span>tasks</span></span><span class="flank-row-right">${state2.tasks?.pendingCount ?? 0}</span>`
+        };
+      case "calculator":
+        return {
+          ariaLabel: `Smart calculator`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">calc</span><span>math</span></span><span class="flank-row-right">${truncateValue(state2.calculator?.lastResult || "=")}</span>`
+        };
+      case "habits":
+        return {
+          ariaLabel: `Habits, ${state2.habits?.waterGlasses ?? 0} of ${state2.habits?.waterGoal ?? 8} glasses`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">hbt</span><span>water</span></span><span class="flank-row-right">${state2.habits?.waterGlasses ?? 0}/${state2.habits?.waterGoal ?? 8}</span>`
+        };
+      case "storage":
+        return {
+          ariaLabel: `Storage ${state2.storage?.primaryPercent ?? 68}%`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">dsk</span><span>drives</span></span><span class="flank-row-right">${state2.storage?.primaryPercent ?? 68}%</span>`
+        };
+      case "display":
+        return {
+          ariaLabel: `Display brightness ${state2.display?.brightness ?? 85}%`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">dsp</span><span>bright</span></span><span class="flank-row-right">${state2.display?.brightness ?? 85}%</span>`
+        };
+      case "privacy":
+        return {
+          ariaLabel: `Privacy guard, ${state2.privacy?.micActive ? "mic active" : "protected"}`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">prv</span><span>guard</span></span><span class="flank-row-right">${state2.privacy?.micActive ? "REC" : "OK"}</span>`
+        };
+      case "ambient":
+        return {
+          ariaLabel: `Focus ambiance, ${state2.ambient?.playing ? "playing" : "off"}`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">amb</span><span>sound</span></span><span class="flank-row-right">${state2.ambient?.playing ? "Play" : "Off"}</span>`
+        };
+      case "runner":
+        return {
+          ariaLabel: `Command runner`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">run</span><span>cli</span></span><span class="flank-row-right">>_</span>`
+        };
+      case "gpu":
+        return {
+          ariaLabel: `GPU ${state2.gpu?.tempC ?? 54}\xB0C`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">gpu</span><span>thermal</span></span><span class="flank-row-right">${state2.gpu?.tempC ?? 54}\xB0C</span>`
+        };
+      case "github":
+        return {
+          ariaLabel: `GitHub, ${state2.github?.pendingCount ?? 0} pull requests`,
+          extraClass: "",
+          html: `<span class="flank-row-left"><span class="flank-row-code">git</span><span>prs</span></span><span class="flank-row-right">${state2.github?.pendingCount ?? 0}</span>`
+        };
     }
   }
   if (style === "value") {
@@ -2130,7 +2403,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         return {
           ariaLabel: `Mini player, ${state2.player.playing ? "playing" : "paused"}`,
           extraClass: state2.player.playing ? "flank-tile-accent-icon is-playing" : "",
-          html: `${iconSvg("equalizer")}${railIndicator}`
+          html: state2.player.artworkUrl ? `<img src="${escapeHtml(state2.player.artworkUrl)}" style="width: 18px; height: 18px; border-radius: 3px; object-fit: cover;" alt="Art" />${railIndicator}` : `${iconSvg("equalizer")}${railIndicator}`
         };
       case "focus":
         return {
@@ -2180,6 +2453,66 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
           extraClass: "",
           html: `${iconSvg("bluetooth")}${railIndicator}`
         };
+      case "tasks":
+        return {
+          ariaLabel: `Tasks, ${state2.tasks?.pendingCount ?? 0} remaining`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">${state2.tasks?.pendingCount ?? 0}</span>${railIndicator}`
+        };
+      case "calculator":
+        return {
+          ariaLabel: `Smart calculator`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">=</span>${railIndicator}`
+        };
+      case "habits":
+        return {
+          ariaLabel: `Habits, ${state2.habits?.waterGlasses ?? 0} glasses`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">${state2.habits?.waterGlasses ?? 0}w</span>${railIndicator}`
+        };
+      case "storage":
+        return {
+          ariaLabel: `Storage ${state2.storage?.primaryPercent ?? 68}%`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">${state2.storage?.primaryPercent ?? 68}%</span>${railIndicator}`
+        };
+      case "display":
+        return {
+          ariaLabel: `Display ${state2.display?.brightness ?? 85}%`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">${state2.display?.brightness ?? 85}%</span>${railIndicator}`
+        };
+      case "privacy":
+        return {
+          ariaLabel: `Privacy guard`,
+          extraClass: state2.privacy?.micActive ? "flank-tile-accent-icon" : "",
+          html: `${iconSvg("shield")}${railIndicator}`
+        };
+      case "ambient":
+        return {
+          ariaLabel: `Focus ambiance`,
+          extraClass: state2.ambient?.playing ? "flank-tile-accent-icon" : "",
+          html: `${iconSvg("waves")}${railIndicator}`
+        };
+      case "runner":
+        return {
+          ariaLabel: `Command runner`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">>_</span>${railIndicator}`
+        };
+      case "gpu":
+        return {
+          ariaLabel: `GPU ${state2.gpu?.tempC ?? 54}\xB0C`,
+          extraClass: "",
+          html: `<span class="flank-tile-value">${state2.gpu?.tempC ?? 54}\xB0</span>${railIndicator}`
+        };
+      case "github":
+        return {
+          ariaLabel: `GitHub, ${state2.github?.pendingCount ?? 0} pull requests`,
+          extraClass: "",
+          html: `${iconSvg("github")}${railIndicator}`
+        };
     }
   }
   if (style === "pill") {
@@ -2212,7 +2545,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         return {
           ariaLabel: `Now playing, ${state2.player.title}`,
           extraClass: "is-widget-pill",
-          html: `<span class="flank-tile-accent-icon" style="display:flex">${iconSvg("equalizer")}</span>${escapeHtml(state2.player.title)}`
+          html: state2.player.artworkUrl ? `<img src="${escapeHtml(state2.player.artworkUrl)}" style="width: 16px; height: 16px; border-radius: 3px; object-fit: cover; margin-right: 4px;" alt="Art" />${escapeHtml(state2.player.title)}` : `<span class="flank-tile-accent-icon" style="display:flex">${iconSvg("equalizer")}</span>${escapeHtml(state2.player.title)}`
         };
       case "focus":
         return {
@@ -2262,6 +2595,66 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
           extraClass: "is-widget-pill",
           html: `${iconSvg("bluetooth")}BT (${state2.bluetooth?.connectedCount ?? 0})`
         };
+      case "tasks":
+        return {
+          ariaLabel: `Tasks, ${state2.tasks?.pendingCount ?? 0} remaining`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("check-square")}${state2.tasks?.pendingCount ?? 0} tasks`
+        };
+      case "calculator":
+        return {
+          ariaLabel: `Smart calculator`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("calculator")}${escapeHtml(state2.calculator?.lastResult || "Calc")}`
+        };
+      case "habits":
+        return {
+          ariaLabel: `Habits, ${state2.habits?.waterGlasses ?? 0} cups`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("droplet")}${state2.habits?.waterGlasses ?? 0}/8 cups`
+        };
+      case "storage":
+        return {
+          ariaLabel: `Storage ${state2.storage?.primaryPercent ?? 68}%`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("hard-drive")}${state2.storage?.primaryDrive ?? "C:"} ${state2.storage?.primaryPercent ?? 68}%`
+        };
+      case "display":
+        return {
+          ariaLabel: `Display ${state2.display?.brightness ?? 85}%`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("sun")}${state2.display?.brightness ?? 85}%`
+        };
+      case "privacy":
+        return {
+          ariaLabel: `Privacy guard`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("shield")}${state2.privacy?.micActive ? "Mic Active" : "Protected"}`
+        };
+      case "ambient":
+        return {
+          ariaLabel: `Focus ambiance`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("waves")}${state2.ambient?.playing ? "Ambiance" : "Muted"}`
+        };
+      case "runner":
+        return {
+          ariaLabel: `Command runner`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("terminal")}Runner`
+        };
+      case "gpu":
+        return {
+          ariaLabel: `GPU ${state2.gpu?.tempC ?? 54}\xB0C`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("activity")}${state2.gpu?.tempC ?? 54}\xB0C`
+        };
+      case "github":
+        return {
+          ariaLabel: `GitHub ${state2.github?.pendingCount ?? 0} PRs`,
+          extraClass: "is-widget-pill",
+          html: `${iconSvg("github")}${state2.github?.pendingCount ?? 0} PRs`
+        };
     }
   }
   switch (kind) {
@@ -2299,7 +2692,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
       return {
         ariaLabel: `Mini player, ${state2.player.playing ? "playing" : "paused"}`,
         extraClass: state2.player.playing ? "flank-tile-accent-icon is-playing" : "",
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("equalizer", 20)}</span><span class="flank-widget-value flank-num">${state2.player.playing ? "Play" : "Pau"}</span></span>`
+        html: state2.player.artworkUrl ? `<span class="flank-widget-glance"><img src="${escapeHtml(state2.player.artworkUrl)}" style="width: 20px; height: 20px; border-radius: 4px; object-fit: cover;" alt="Art" /><span class="flank-widget-value flank-num">${state2.player.playing ? "Play" : "Pau"}</span></span>` : `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("equalizer", 20)}</span><span class="flank-widget-value flank-num">${state2.player.playing ? "Play" : "Pau"}</span></span>`
       };
     }
     case "focus": {
@@ -2360,13 +2753,99 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("wifi", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(ping)}</span></span>`
       };
     }
-    case "bluetooth":
-    default: {
+    case "bluetooth": {
       const cnt = state2.bluetooth?.connectedCount ?? 0;
       return {
         ariaLabel: `Bluetooth, ${cnt} connected devices`,
         extraClass: "",
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("bluetooth", 20)}</span><span class="flank-widget-value flank-num">${cnt}d</span></span>${renderBadge(cnt)}`
+      };
+    }
+    case "tasks": {
+      const pending = state2.tasks?.pendingCount ?? 0;
+      return {
+        ariaLabel: `Tasks, ${pending} remaining`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("check-square", 20)}</span><span class="flank-widget-value flank-num">${pending}t</span></span>${renderBadge(pending)}`
+      };
+    }
+    case "calculator": {
+      const res = state2.calculator?.lastResult || "=";
+      return {
+        ariaLabel: `Smart calculator, ${res}`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("calculator", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(res)}</span></span>`
+      };
+    }
+    case "habits": {
+      const w = state2.habits?.waterGlasses ?? 0;
+      const g = state2.habits?.waterGoal ?? 8;
+      return {
+        ariaLabel: `Habits, ${w} of ${g} glasses`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("droplet", 20)}</span><span class="flank-widget-value flank-num">${w}/${g}</span></span>`
+      };
+    }
+    case "storage": {
+      const p = `${state2.storage?.primaryPercent ?? 68}%`;
+      return {
+        ariaLabel: `Storage ${p}`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("hard-drive", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(p)}</span></span>`
+      };
+    }
+    case "display": {
+      const b = `${state2.display?.brightness ?? 85}%`;
+      return {
+        ariaLabel: `Display brightness ${b}`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("sun", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(b)}</span></span>`
+      };
+    }
+    case "privacy": {
+      const isRec = Boolean(state2.privacy?.micActive || state2.privacy?.cameraActive);
+      return {
+        ariaLabel: `Privacy guard, ${isRec ? "recording active" : "protected"}`,
+        extraClass: isRec ? "flank-tile-accent-icon" : "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon" style="${isRec ? "color: #EF4444;" : ""}">${iconSvg("shield", 20)}</span><span class="flank-widget-value flank-num">${isRec ? "REC" : "Safe"}</span></span>`
+      };
+    }
+    case "ambient": {
+      const playing = Boolean(state2.ambient?.playing);
+      return {
+        ariaLabel: `Focus ambiance, ${playing ? "playing" : "off"}`,
+        extraClass: playing ? "flank-tile-accent-icon" : "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("waves", 20)}</span><span class="flank-widget-value flank-num">${playing ? "Play" : "Off"}</span></span>`
+      };
+    }
+    case "runner": {
+      return {
+        ariaLabel: `Command runner`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("terminal", 20)}</span><span class="flank-widget-value flank-num">>_</span></span>`
+      };
+    }
+    case "gpu": {
+      const tc = `${state2.gpu?.tempC ?? 54}\xB0`;
+      return {
+        ariaLabel: `GPU ${tc}`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("activity", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(tc)}</span></span>`
+      };
+    }
+    case "github": {
+      const cnt = state2.github?.pendingCount ?? 0;
+      return {
+        ariaLabel: `GitHub, ${cnt} pull requests`,
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("github", 20)}</span><span class="flank-widget-value flank-num">${cnt}pr</span></span>${renderBadge(cnt)}`
+      };
+    }
+    default: {
+      return {
+        ariaLabel: "Widget",
+        extraClass: "",
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("equalizer", 20)}</span><span class="flank-widget-value flank-num">--</span></span>`
       };
     }
   }
@@ -2724,7 +3203,11 @@ function renderPlayerCardInner(state2) {
       </span>
     </div>
     <div style="display:flex; gap: 12px; align-items: center; width: 100%;">
-      <span class="flank-player-art${p.playing ? " is-playing" : ""}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft); transition: box-shadow 0.3s ease, border-color 0.3s ease;" aria-hidden="true">${iconSvg("equalizer", 22)}</span>
+      ${p.artworkUrl ? `
+        <img src="${escapeHtml2(p.artworkUrl)}" class="flank-player-art${p.playing ? " is-playing" : ""}" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 8px; object-fit: cover; border: 1px solid var(--flank-color-divider-soft); box-shadow: 0 4px 14px rgba(0,0,0,0.20);" alt="Artwork" />
+      ` : `
+        <span class="flank-player-art${p.playing ? " is-playing" : ""}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft); transition: box-shadow 0.3s ease, border-color 0.3s ease;" aria-hidden="true">${iconSvg("equalizer", 22)}</span>
+      `}
       <div style="display:flex; flex-direction:column; gap: 2px; min-width: 0; flex: 1;">
         <div style="font-size: 13px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--flank-color-text);" title="${escapeHtml2(p.title)}">${escapeHtml2(p.title)}</div>
         <div style="font-size: 12px; color: var(--flank-color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml2(p.artist)}</div>
@@ -3200,6 +3683,303 @@ function renderBluetoothCardInner(state2) {
     </button>
   `;
 }
+function renderTasksCardInner(state2) {
+  const tasks = state2.tasks || { items: [], pendingCount: 0 };
+  const items = tasks.items || [];
+  const pending = tasks.pendingCount ?? items.filter((t) => !t.done).length;
+  const rowsHtml = items.length === 0 ? `<div style="padding: 16px 0; text-align: center; font-size: 12px; color: var(--flank-color-text-muted);">No tasks yet. Type below to add one!</div>` : items.map((t) => `
+        <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
+          <button type="button" class="flank-win-btn" data-action="toggle-task" data-task-id="${escapeHtml2(t.id)}" title="${t.done ? "Mark pending" : "Mark done"}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid ${t.done ? "var(--flank-color-accent)" : "var(--flank-color-divider-soft)"}; background: ${t.done ? "var(--flank-color-accent)" : "transparent"}; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;">
+            ${t.done ? iconSvg("check", 12) : ""}
+          </button>
+          <span style="flex: 1; font-size: 12px; color: ${t.done ? "var(--flank-color-text-muted)" : "var(--flank-color-text)"}; text-decoration: ${t.done ? "line-through" : "none"}; word-break: break-word;">${escapeHtml2(t.text)}</span>
+          <button type="button" class="flank-win-btn" data-action="delete-task" data-task-id="${escapeHtml2(t.id)}" title="Delete task" style="width: 20px; height: 20px; color: var(--flank-color-text-muted); opacity: 0.7; cursor: pointer;">
+            ${iconSvg("x", 12)}
+          </button>
+        </div>
+      `).join("");
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Tasks &amp; To-Do</span>
+      <span class="flank-live-pill">${pending} pending</span>
+    </div>
+    <div style="display:flex; gap: 6px; margin-bottom: 8px;">
+      <input type="text" id="flank-task-input" class="flank-card-input" placeholder="+ Add a task (press Enter)..." style="flex: 1; height: 30px; font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text);" />
+      <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="add-task">Add</button>
+    </div>
+    <div style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column;">
+      ${rowsHtml}
+    </div>
+    ${items.some((t) => t.done) ? `
+      <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+        <button type="button" class="flank-chip" style="font-size: 10px; padding: 2px 8px;" data-action="clear-completed-tasks">Clear completed</button>
+      </div>
+    ` : ""}
+  `;
+}
+function renderCalculatorCardInner(state2) {
+  const calc = state2.calculator || { lastExpr: "", lastResult: "0", history: [] };
+  const historyRows = (calc.history || []).slice(0, 3).map((h) => `
+    <div class="flank-row" style="padding: 3px 0; font-size: 11px; font-family: var(--flank-type-mono); cursor: pointer;" data-action="recall-calc" data-expr="${escapeHtml2(h.expr)}">
+      <span style="color: var(--flank-color-text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml2(h.expr)}</span>
+      <span style="color: var(--flank-color-accent); font-weight: 600;">= ${escapeHtml2(h.result)}</span>
+    </div>
+  `).join("");
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Smart Calculator</span>
+      <span class="flank-live-pill">Live Math</span>
+    </div>
+    <input type="text" id="flank-calc-input" class="flank-card-input" value="${escapeHtml2(calc.lastExpr || "")}" placeholder="Type e.g. 120 * 1.18, 16 GB to MB, sqrt(144)..." style="width: 100%; height: 32px; font-family: var(--flank-type-mono); font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text); margin-bottom: 8px;" />
+    <div style="display:flex; justify-content:space-between; align-items:center; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;">
+      <div style="font-size: 18px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-calc-result">${escapeHtml2(calc.lastResult || "0")}</div>
+      <button type="button" class="flank-chip" data-action="copy-calc-result" title="Copy result to clipboard" style="font-size: 11px;">Copy</button>
+    </div>
+    ${historyRows ? `
+      <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 6px; margin-top: 4px;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--flank-color-text-muted); margin-bottom: 4px;">Recent</div>
+        ${historyRows}
+      </div>
+    ` : ""}
+  `;
+}
+function renderHabitsCardInner(state2) {
+  const h = state2.habits || { waterGlasses: 5, waterGoal: 8, lastStretchMin: 20, streakDays: 3 };
+  const pct = Math.min(100, Math.round(h.waterGlasses / (h.waterGoal || 8) * 100));
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Habits &amp; Hydration</span>
+      <span class="flank-live-pill">\u{1F525} ${h.streakDays} day streak</span>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg("droplet", 14)} Daily Water Intake
+        </span>
+        <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${h.waterGlasses} / ${h.waterGoal} cups</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 6px; margin-bottom: 8px;">
+        <div class="flank-meter__fill" style="width: ${pct}%; background: #38BDF8;"></div>
+      </div>
+      <div style="display:flex; gap: 8px; justify-content: center;">
+        <button type="button" class="flank-btn is-secondary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-sub">- 1 Cup</button>
+        <button type="button" class="flank-btn is-primary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-add">+ 1 Cup</button>
+      </div>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; flex-direction:column; gap: 2px;">
+        <span style="font-size: 12px; font-weight: 600;">Posture &amp; Stretch</span>
+        <span style="font-size: 11px; color: var(--flank-color-text-muted);">Last break: ${h.lastStretchMin}m ago</span>
+      </div>
+      <button type="button" class="flank-chip" data-action="habit-log-stretch" style="font-size: 11px;">Log Stretch</button>
+    </div>
+  `;
+}
+function renderStorageCardInner(state2) {
+  const s = state2.storage || { primaryPercent: 68, primaryDrive: "C:", drives: [] };
+  const drives = s.drives || [];
+  const driveRows = drives.map((d) => `
+    <div class="flank-subcard" style="padding: 8px 10px; margin-bottom: 6px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg("hard-drive", 14)} <strong>${escapeHtml2(d.letter)}</strong> ${escapeHtml2(d.label)}
+        </span>
+        <span style="font-size: 11px; color: var(--flank-color-text-muted); font-family: var(--flank-type-mono);">${d.freeGb} GB free (${d.percent}%)</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 5px; margin-bottom: 6px;">
+        <div class="flank-meter__fill" style="width: ${d.percent}%; background: ${d.percent > 90 ? "#EF4444" : d.percent > 80 ? "#F59E0B" : "var(--flank-color-accent)"};"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size: 10px; color: var(--flank-color-text-muted);">${d.usedGb} / ${d.totalGb} GB</span>
+        <button type="button" class="flank-chip" style="height: 20px; padding: 0 8px; font-size: 10px;" data-action="open-drive" data-drive="${escapeHtml2(d.letter)}">Open Explorer</button>
+      </div>
+    </div>
+  `).join("");
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Storage &amp; Drives</span>
+      <span class="flank-live-pill">${drives.length} drives</span>
+    </div>
+    ${driveRows}
+    <button type="button" class="flank-btn is-secondary" style="width: 100%; justify-content: center; height: 28px; font-size: 11px; margin-top: 4px;" data-action="launch-disk-cleanup">
+      <span>Open Windows Disk Cleanup</span>
+    </button>
+  `;
+}
+function renderDisplayCardInner(state2) {
+  const d = state2.display || { brightness: 85, nightLight: false, resolution: "1920 \xD7 1080", refreshRate: 144, scaling: 100 };
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Display &amp; Brightness</span>
+      <span class="flank-live-pill">${d.refreshRate}Hz</span>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">${iconSvg("sun", 14)} Screen Brightness</span>
+        <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-disp-val">${d.brightness}%</span>
+      </div>
+      <input type="range" id="flank-brightness-slider" min="10" max="100" value="${d.brightness}" style="width:100%; cursor: pointer;" />
+    </div>
+    <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft);">
+      <span style="font-size: 12px; color: var(--flank-color-text-muted);">Active Resolution</span>
+      <span style="font-size: 12px; font-weight: 600; font-family: var(--flank-type-mono);">${escapeHtml2(d.resolution)}</span>
+    </div>
+    <div class="flank-row" style="padding: 6px 0;">
+      <span style="font-size: 12px; color: var(--flank-color-text-muted);">Night Light</span>
+      <button type="button" class="flank-chip${d.nightLight ? " is-active" : ""}" data-action="toggle-night-light" style="font-size: 11px;">${d.nightLight ? "Active" : "Off"}</button>
+    </div>
+  `;
+}
+function renderPrivacyCardInner(state2) {
+  const prv = state2.privacy || { micActive: false, cameraActive: false, micMuted: false, activeApps: [] };
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Privacy Guard</span>
+      <span class="flank-live-pill" style="${prv.micActive ? "color: #EF4444;" : ""}">
+        <span class="flank-live-dot" style="${prv.micActive ? "background: #EF4444;" : ""}"></span>
+        ${prv.micActive ? "Mic Active" : "Protected"}
+      </span>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap: 8px;">
+          ${iconSvg(prv.micMuted ? "mic-off" : "mic", 18)}
+          <div>
+            <div style="font-size: 12px; font-weight: 600;">System Microphone</div>
+            <div style="font-size: 11px; color: var(--flank-color-text-muted);">${prv.micMuted ? "Muted globally" : prv.micActive ? "In use by apps" : "Idle"}</div>
+          </div>
+        </div>
+        <button type="button" class="flank-chip${prv.micMuted ? " is-active" : ""}" data-action="toggle-mic-mute" style="font-size: 11px;">
+          ${prv.micMuted ? "Unmute" : "Mute Mic"}
+        </button>
+      </div>
+    </div>
+    <div class="flank-row" style="padding: 6px 0;">
+      <span style="font-size: 12px; color: var(--flank-color-text-muted);">Webcam Status</span>
+      <span style="font-size: 12px; font-weight: 600; color: ${prv.cameraActive ? "#EF4444" : "var(--flank-color-text)"};">${prv.cameraActive ? "Camera In Use" : "Camera Off"}</span>
+    </div>
+  `;
+}
+function renderAmbientCardInner(state2) {
+  const amb = state2.ambient || { playing: false, sound: "rain", volume: 65 };
+  const presets = [
+    { id: "rain", name: "Rain", emoji: "\u{1F327}\uFE0F" },
+    { id: "waves", name: "Waves", emoji: "\u{1F30A}" },
+    { id: "campfire", name: "Campfire", emoji: "\u{1FAB5}" },
+    { id: "coffee", name: "Cafe", emoji: "\u2615" },
+    { id: "wind", name: "Wind", emoji: "\u{1F343}" },
+    { id: "brown", name: "Brown Noise", emoji: "\u{1F4FB}" }
+  ];
+  const chipsHtml = presets.map((p) => `
+    <button type="button" class="flank-chip${amb.sound === p.id ? " is-active" : ""}" data-action="select-ambient-sound" data-sound="${p.id}" style="font-size: 11px; padding: 4px 8px;">
+      ${p.emoji} ${p.name}
+    </button>
+  `).join("");
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Focus Ambiance</span>
+      <span class="flank-live-pill">${amb.playing ? "Playing" : "Muted"}</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 12px;">
+      ${chipsHtml}
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+        <span>Ambiance Volume</span>
+        <span style="font-weight: 700; font-family: var(--flank-type-mono);" id="flank-amb-vol-text">${amb.volume}%</span>
+      </div>
+      <input type="range" id="flank-ambient-volume" min="0" max="100" value="${amb.volume}" style="width:100%; cursor: pointer;" />
+    </div>
+    <button type="button" class="flank-btn is-primary" style="width: 100%; justify-content: center; height: 32px; gap: 8px;" data-action="toggle-ambient">
+      ${iconSvg(amb.playing ? "pause" : "play", 15)}
+      <span>${amb.playing ? "Pause Ambiance" : "Play Soundscape"}</span>
+    </button>
+  `;
+}
+function renderRunnerCardInner(state2) {
+  const run = state2.runner || { running: false, lastCmd: "", lastOutput: "", commands: [] };
+  const commands = run.commands || [];
+  const cmdChips = commands.map((c) => `
+    <button type="button" class="flank-chip" data-action="run-preset-cmd" data-cmd="${escapeHtml2(c.cmd)}" title="${escapeHtml2(c.desc)}" style="font-size: 11px; padding: 4px 8px;">
+      ${escapeHtml2(c.name)}
+    </button>
+  `).join("");
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Quick Command Runner</span>
+      <span class="flank-live-pill">>_ CLI</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 8px;">
+      ${cmdChips}
+    </div>
+    <div style="display:flex; gap: 6px; margin-bottom: 8px;">
+      <input type="text" id="flank-runner-input" class="flank-card-input" placeholder="Enter shell command (e.g. ping 8.8.8.8)..." style="flex: 1; height: 30px; font-family: var(--flank-type-mono); font-size: 11px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text);" />
+      <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="run-custom-cmd">Run</button>
+    </div>
+    ${run.lastOutput ? `
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--flank-color-divider-soft); border-radius: 6px; padding: 8px; font-family: var(--flank-type-mono); font-size: 10px; color: var(--flank-color-text); max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+        <div style="color: var(--flank-color-accent); margin-bottom: 4px;">$ ${escapeHtml2(run.lastCmd)}</div>${escapeHtml2(run.lastOutput)}
+      </div>
+    ` : ""}
+  `;
+}
+function renderGpuCardInner(state2) {
+  const gpu = state2.gpu || { name: "GPU Diagnostics", utilizationPercent: 40, tempC: 54, vramUsedGb: 3.5, vramTotalGb: 8, driverVersion: "DirectX 12" };
+  const vramPct = Math.min(100, Math.round(gpu.vramUsedGb / (gpu.vramTotalGb || 8) * 100));
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">GPU Diagnostics</span>
+      <span class="flank-live-pill">${gpu.tempC}\xB0C</span>
+    </div>
+    <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--flank-color-text);">${escapeHtml2(gpu.name)}</div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom: 4px;">
+        <span>3D Engine Load</span>
+        <span style="font-weight:700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${gpu.utilizationPercent}%</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 5px; margin-bottom: 8px;">
+        <div class="flank-meter__fill" style="width: ${gpu.utilizationPercent}%;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom: 4px;">
+        <span>VRAM (${gpu.vramUsedGb} / ${gpu.vramTotalGb} GB)</span>
+        <span style="font-weight:700; font-family: var(--flank-type-mono);">${vramPct}%</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 5px;">
+        <div class="flank-meter__fill" style="width: ${vramPct}%; background: #A855F7;"></div>
+      </div>
+    </div>
+    <div class="flank-row" style="padding: 4px 0; font-size: 11px;">
+      <span style="color: var(--flank-color-text-muted);">Driver / API</span>
+      <span style="font-family: var(--flank-type-mono);">${escapeHtml2(gpu.driverVersion || "DirectX 12")}</span>
+    </div>
+  `;
+}
+function renderGithubCardInner(state2) {
+  const gh = state2.github || { connected: true, pendingCount: 0, items: [] };
+  const items = gh.items || [];
+  const rows = items.map((it) => `
+    <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
+      <div style="display:flex; flex-direction:column; gap: 2px; min-width:0; flex:1;">
+        <div style="font-size: 12px; font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: var(--flank-color-text);" title="${escapeHtml2(it.title)}">${escapeHtml2(it.title)}</div>
+        <div style="font-size: 10px; color: var(--flank-color-text-muted);">${escapeHtml2(it.repo)} \xB7 ${escapeHtml2(it.status)}</div>
+      </div>
+      <button type="button" class="flank-chip" style="font-size: 10px; padding: 2px 8px; flex-shrink: 0;" data-item-kind="link" data-item-id="${escapeHtml2(it.id)}" data-target="${escapeHtml2(it.url)}">View</button>
+    </div>
+  `).join("");
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">GitHub Activity</span>
+      <span class="flank-live-pill">${gh.pendingCount} PRs</span>
+    </div>
+    <div style="max-height: 180px; overflow-y: auto;">
+      ${rows || '<div style="padding:16px 0; text-align:center; font-size:12px; color:var(--flank-color-text-muted);">All caught up! No pending PRs.</div>'}
+    </div>
+    <button type="button" class="flank-btn is-secondary" style="width: 100%; justify-content: center; height: 28px; font-size: 11px; margin-top: 6px;" data-item-kind="link" data-item-id="gh-notifications" data-target="https://github.com/notifications">
+      <span>Open GitHub Notifications</span>
+      <span style="display:flex; width: 12px; height: 12px; flex-shrink: 0;">${iconSvg("arrow-up-right", 12)}</span>
+    </button>
+  `;
+}
 function renderHoverCardHtml(state2, theme) {
   const active = state2.activeWidget;
   if (!active || state2.activeFullWindow) return "";
@@ -3261,6 +4041,46 @@ function renderHoverCardHtml(state2, theme) {
     case "bluetooth":
       label = "Bluetooth & Peripherals";
       inner = renderBluetoothCardInner(state2);
+      break;
+    case "tasks":
+      label = "Tasks and To-Do";
+      inner = renderTasksCardInner(state2);
+      break;
+    case "calculator":
+      label = "Smart Calculator";
+      inner = renderCalculatorCardInner(state2);
+      break;
+    case "habits":
+      label = "Habits & Hydration";
+      inner = renderHabitsCardInner(state2);
+      break;
+    case "storage":
+      label = "Storage & Drives";
+      inner = renderStorageCardInner(state2);
+      break;
+    case "display":
+      label = "Display & Brightness";
+      inner = renderDisplayCardInner(state2);
+      break;
+    case "privacy":
+      label = "Privacy Guard";
+      inner = renderPrivacyCardInner(state2);
+      break;
+    case "ambient":
+      label = "Focus Ambiance";
+      inner = renderAmbientCardInner(state2);
+      break;
+    case "runner":
+      label = "Command Runner";
+      inner = renderRunnerCardInner(state2);
+      break;
+    case "gpu":
+      label = "GPU Diagnostics";
+      inner = renderGpuCardInner(state2);
+      break;
+    case "github":
+      label = "GitHub Activity";
+      inner = renderGithubCardInner(state2);
       break;
   }
   if (!inner) {
@@ -3407,6 +4227,217 @@ function resetDockMagnification() {
   }
   tileStates = [];
   activeDockEl = null;
+}
+
+// src/ui/calc.ts
+function evaluateExpression(expr) {
+  const trimmed = expr.trim();
+  if (!trimmed) return "0";
+  const convMatch = trimmed.match(/^([\d.]+)\s*([a-zA-Z°]+)\s+(?:to|in)\s+([a-zA-Z°]+)$/i);
+  if (convMatch) {
+    const val = parseFloat(convMatch[1]);
+    const fromUnit = convMatch[2].toLowerCase();
+    const toUnit = convMatch[3].toLowerCase();
+    if (!isNaN(val)) {
+      if (fromUnit === "gb" && toUnit === "mb") return `${formatNum(val * 1024)} MB`;
+      if (fromUnit === "mb" && toUnit === "gb") return `${formatNum(val / 1024)} GB`;
+      if (fromUnit === "tb" && toUnit === "gb") return `${formatNum(val * 1024)} GB`;
+      if (fromUnit === "mb" && toUnit === "kb") return `${formatNum(val * 1024)} KB`;
+      if (fromUnit === "kb" && toUnit === "mb") return `${formatNum(val / 1024)} MB`;
+      if (fromUnit === "c" && toUnit === "f") return `${formatNum(val * 9 / 5 + 32)}\xB0F`;
+      if (fromUnit === "f" && toUnit === "c") return `${formatNum((val - 32) * 5 / 9)}\xB0C`;
+      if (fromUnit === "km" && toUnit === "mi") return `${formatNum(val * 0.621371)} mi`;
+      if (fromUnit === "mi" && toUnit === "km") return `${formatNum(val * 1.60934)} km`;
+      if (fromUnit === "m" && toUnit === "ft") return `${formatNum(val * 3.28084)} ft`;
+      if (fromUnit === "ft" && toUnit === "m") return `${formatNum(val / 3.28084)} m`;
+      if (fromUnit === "cm" && toUnit === "in") return `${formatNum(val / 2.54)} in`;
+      if (fromUnit === "in" && toUnit === "cm") return `${formatNum(val * 2.54)} cm`;
+      if (fromUnit === "kg" && toUnit === "lb") return `${formatNum(val * 2.20462)} lb`;
+      if (fromUnit === "lb" && toUnit === "kg") return `${formatNum(val / 2.20462)} kg`;
+      if (fromUnit === "g" && toUnit === "oz") return `${formatNum(val * 0.035274)} oz`;
+      if (fromUnit === "usd" && toUnit === "eur") return `\u20AC ${formatNum(val * 0.92)}`;
+      if (fromUnit === "eur" && toUnit === "usd") return `$ ${formatNum(val * 1.09)}`;
+      if (fromUnit === "usd" && toUnit === "inr") return `\u20B9 ${formatNum(val * 85.5)}`;
+      if (fromUnit === "inr" && toUnit === "usd") return `$ ${formatNum(val / 85.5)}`;
+      if (fromUnit === "gbp" && toUnit === "usd") return `$ ${formatNum(val * 1.28)}`;
+    }
+  }
+  const pctOfMatch = trimmed.match(/^([\d.]+)\s*%\s+of\s+([\d.]+)$/i);
+  if (pctOfMatch) {
+    const pct = parseFloat(pctOfMatch[1]);
+    const base = parseFloat(pctOfMatch[2]);
+    if (!isNaN(pct) && !isNaN(base)) {
+      return formatNum(pct / 100 * base);
+    }
+  }
+  try {
+    let sanitized = trimmed.replace(/\^/g, "**").replace(/sqrt\(/gi, "Math.sqrt(").replace(/cbrt\(/gi, "Math.cbrt(").replace(/sin\(/gi, "Math.sin(").replace(/cos\(/gi, "Math.cos(").replace(/tan\(/gi, "Math.tan(").replace(/abs\(/gi, "Math.abs(").replace(/log\(/gi, "Math.log10(").replace(/ln\(/gi, "Math.log(").replace(/pi/gi, "Math.PI").replace(/e(?![a-zA-Z])/gi, "Math.E");
+    if (!/^[0-9+\-*/().,%*\sMathPIEsqrtcbsintanblg]+$/.test(sanitized)) {
+      return "Invalid";
+    }
+    const res = new Function(`"use strict"; return (${sanitized});`)();
+    if (typeof res === "number") {
+      if (isNaN(res)) return "NaN";
+      if (!isFinite(res)) return "Infinity";
+      return formatNum(res);
+    }
+    return String(res);
+  } catch {
+    return "...";
+  }
+}
+function formatNum(num) {
+  if (Math.abs(num) >= 1e9 || Math.abs(num) < 1e-4 && num !== 0) {
+    return num.toExponential(4);
+  }
+  const rounded = Math.round(num * 1e4) / 1e4;
+  return rounded.toLocaleString("en-US", { maximumFractionDigits: 4 });
+}
+
+// src/ui/ambient.ts
+var audioCtx = null;
+var masterGain = null;
+var currentSourceNode = null;
+var currentLfo = null;
+var isPlaying = false;
+var currentPreset = "rain";
+var currentVolume = 65;
+function getAudioContext() {
+  if (typeof window === "undefined") return null;
+  const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtxClass) return null;
+  if (!audioCtx) {
+    audioCtx = new AudioCtxClass();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {
+    });
+  }
+  return audioCtx;
+}
+function createNoiseBuffer(ctx, type) {
+  const bufferSize = ctx.sampleRate * 4;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  if (type === "white") {
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+  } else if (type === "pink") {
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.969 * b2 + white * 0.153852;
+      b3 = 0.8665 * b3 + white * 0.3104856;
+      b4 = 0.55 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.016898;
+      data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+      b6 = white * 0.115926;
+    }
+  } else {
+    let lastOut = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      lastOut = (lastOut + 0.02 * white) / 1.02;
+      data[i] = lastOut * 3.5;
+    }
+  }
+  return buffer;
+}
+function stopAmbientSound() {
+  if (currentSourceNode) {
+    try {
+      currentSourceNode.stop?.();
+      currentSourceNode.disconnect();
+    } catch {
+    }
+    currentSourceNode = null;
+  }
+  if (currentLfo) {
+    try {
+      currentLfo.stop();
+      currentLfo.disconnect();
+    } catch {
+    }
+    currentLfo = null;
+  }
+  isPlaying = false;
+}
+function startAmbientSound(preset = "rain", volume = 65) {
+  stopAmbientSound();
+  const ctx = getAudioContext();
+  if (!ctx) return false;
+  currentPreset = preset;
+  currentVolume = volume;
+  if (!masterGain) {
+    masterGain = ctx.createGain();
+    masterGain.connect(ctx.destination);
+  }
+  masterGain.gain.setValueAtTime(volume / 100 * 0.35, ctx.currentTime);
+  const noiseType = preset === "brown" || preset === "waves" ? "brown" : preset === "rain" ? "pink" : "white";
+  const noiseBuf = createNoiseBuffer(ctx, noiseType);
+  const source = ctx.createBufferSource();
+  source.buffer = noiseBuf;
+  source.loop = true;
+  if (preset === "rain") {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(1e3, ctx.currentTime);
+    source.connect(filter);
+    filter.connect(masterGain);
+  } else if (preset === "waves") {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(450, ctx.currentTime);
+    filter.Q.setValueAtTime(1.2, ctx.currentTime);
+    const lfo = ctx.createOscillator();
+    lfo.frequency.setValueAtTime(0.12, ctx.currentTime);
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.setValueAtTime(250, ctx.currentTime);
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+    currentLfo = lfo;
+    source.connect(filter);
+    filter.connect(masterGain);
+  } else if (preset === "campfire") {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(1200, ctx.currentTime);
+    filter.Q.setValueAtTime(2, ctx.currentTime);
+    source.connect(filter);
+    filter.connect(masterGain);
+  } else if (preset === "wind") {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(500, ctx.currentTime);
+    source.connect(filter);
+    filter.connect(masterGain);
+  } else if (preset === "coffee") {
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(650, ctx.currentTime);
+    filter.Q.setValueAtTime(0.8, ctx.currentTime);
+    source.connect(filter);
+    filter.connect(masterGain);
+  } else {
+    source.connect(masterGain);
+  }
+  source.start();
+  currentSourceNode = source;
+  isPlaying = true;
+  return true;
+}
+function setAmbientVolume(volume) {
+  currentVolume = Math.max(0, Math.min(100, volume));
+  if (masterGain && audioCtx) {
+    masterGain.gain.setValueAtTime(currentVolume / 100 * 0.35, audioCtx.currentTime);
+  }
+}
+function isAmbientPlaying() {
+  return isPlaying;
 }
 
 // src/state/machines.ts
@@ -7278,6 +8309,169 @@ function setupEventDelegation() {
       renderApp();
       return;
     }
+    if (action === "add-task") {
+      const taskInput = document.getElementById("flank-task-input");
+      const text = taskInput?.value.trim() || "";
+      if (text) {
+        if (taskInput) taskInput.value = "";
+        if (!state.tasks) state.tasks = { items: [], pendingCount: 0 };
+        const newTask = { id: `task-${Date.now()}`, text, done: false, createdAt: "Just now" };
+        state.tasks.items.unshift(newTask);
+        state.tasks.pendingCount = state.tasks.items.filter((t) => !t.done).length;
+        const updated = await window.pywebview?.api?.tasks_action?.("add", text);
+        if (updated?.tasks) state.tasks = updated.tasks;
+        renderApp();
+      }
+      return;
+    }
+    const toggleTaskId = btn.getAttribute("data-task-id");
+    if (action === "toggle-task" && toggleTaskId) {
+      if (state.tasks?.items) {
+        const item = state.tasks.items.find((t) => t.id === toggleTaskId);
+        if (item) {
+          item.done = !item.done;
+          state.tasks.pendingCount = state.tasks.items.filter((t) => !t.done).length;
+        }
+      }
+      const updated = await window.pywebview?.api?.tasks_action?.("toggle", toggleTaskId);
+      if (updated?.tasks) state.tasks = updated.tasks;
+      renderApp();
+      return;
+    }
+    if (action === "delete-task" && toggleTaskId) {
+      if (state.tasks?.items) {
+        state.tasks.items = state.tasks.items.filter((t) => t.id !== toggleTaskId);
+        state.tasks.pendingCount = state.tasks.items.filter((t) => !t.done).length;
+      }
+      const updated = await window.pywebview?.api?.tasks_action?.("delete", toggleTaskId);
+      if (updated?.tasks) state.tasks = updated.tasks;
+      renderApp();
+      return;
+    }
+    if (action === "clear-completed-tasks") {
+      if (state.tasks?.items) {
+        state.tasks.items = state.tasks.items.filter((t) => !t.done);
+        state.tasks.pendingCount = state.tasks.items.length;
+      }
+      const updated = await window.pywebview?.api?.tasks_action?.("clear_completed");
+      if (updated?.tasks) state.tasks = updated.tasks;
+      renderApp();
+      return;
+    }
+    if (action === "copy-calc-result") {
+      const res = state.calculator?.lastResult;
+      if (res && navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(res).catch(() => {
+        });
+      }
+      return;
+    }
+    const recallExpr = btn.getAttribute("data-expr");
+    if (action === "recall-calc" && recallExpr) {
+      const calcInput = document.getElementById("flank-calc-input");
+      if (calcInput) calcInput.value = recallExpr;
+      const res = evaluateExpression(recallExpr);
+      if (!state.calculator) state.calculator = { lastExpr: "", lastResult: "", history: [] };
+      state.calculator.lastExpr = recallExpr;
+      state.calculator.lastResult = res;
+      renderApp();
+      return;
+    }
+    if (action === "habit-water-add") {
+      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
+      state.habits.waterGlasses += 1;
+      const updated = await window.pywebview?.api?.habits_action?.("add_water", 1);
+      if (updated?.habits) state.habits = updated.habits;
+      renderApp();
+      return;
+    }
+    if (action === "habit-water-sub") {
+      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
+      state.habits.waterGlasses = Math.max(0, state.habits.waterGlasses - 1);
+      const updated = await window.pywebview?.api?.habits_action?.("sub_water", 1);
+      if (updated?.habits) state.habits = updated.habits;
+      renderApp();
+      return;
+    }
+    if (action === "habit-log-stretch") {
+      if (state.habits) state.habits.lastStretchMin = 0;
+      const updated = await window.pywebview?.api?.habits_action?.("log_stretch");
+      if (updated?.habits) state.habits = updated.habits;
+      renderApp();
+      return;
+    }
+    const openDrive = btn.getAttribute("data-drive");
+    if (action === "open-drive" && openDrive) {
+      window.pywebview?.api?.open_drive?.(openDrive);
+      return;
+    }
+    if (action === "launch-disk-cleanup") {
+      window.pywebview?.api?.launch_disk_cleanup?.();
+      return;
+    }
+    if (action === "toggle-night-light") {
+      if (state.display) state.display.nightLight = !state.display.nightLight;
+      const updated = await window.pywebview?.api?.toggle_night_light?.();
+      if (updated?.display) state.display = updated.display;
+      renderApp();
+      return;
+    }
+    if (action === "toggle-mic-mute") {
+      if (state.privacy) state.privacy.micMuted = !state.privacy.micMuted;
+      const updated = await window.pywebview?.api?.toggle_mic_mute?.();
+      if (updated?.privacy) state.privacy = updated.privacy;
+      renderApp();
+      return;
+    }
+    if (action === "toggle-ambient") {
+      if (!state.ambient) state.ambient = { playing: false, sound: "rain", volume: 65 };
+      if (isAmbientPlaying()) {
+        stopAmbientSound();
+        state.ambient.playing = false;
+      } else {
+        startAmbientSound(state.ambient.sound, state.ambient.volume);
+        state.ambient.playing = true;
+      }
+      renderApp();
+      return;
+    }
+    const ambSound = btn.getAttribute("data-sound");
+    if (action === "select-ambient-sound" && ambSound) {
+      if (!state.ambient) state.ambient = { playing: false, sound: "rain", volume: 65 };
+      state.ambient.sound = ambSound;
+      if (isAmbientPlaying()) {
+        startAmbientSound(ambSound, state.ambient.volume);
+      }
+      renderApp();
+      return;
+    }
+    const runCmd = btn.getAttribute("data-cmd");
+    if (action === "run-preset-cmd" && runCmd) {
+      if (state.runner) {
+        state.runner.running = true;
+        state.runner.lastCmd = runCmd;
+      }
+      renderApp();
+      const updated = await window.pywebview?.api?.execute_runner_command?.(runCmd);
+      if (updated?.runner) state.runner = updated.runner;
+      renderApp();
+      return;
+    }
+    if (action === "run-custom-cmd") {
+      const runnerInput = document.getElementById("flank-runner-input");
+      const cmd = runnerInput?.value.trim() || "";
+      if (cmd) {
+        if (state.runner) {
+          state.runner.running = true;
+          state.runner.lastCmd = cmd;
+        }
+        renderApp();
+        const updated = await window.pywebview?.api?.execute_runner_command?.(cmd);
+        if (updated?.runner) state.runner = updated.runner;
+        renderApp();
+      }
+      return;
+    }
     const copyId = btn.getAttribute("data-copy-id") || btn.getAttribute("data-cb-copy");
     if (copyId) {
       const entry = state.clipboard.items.find((i) => i.id === copyId);
@@ -7506,6 +8700,28 @@ function setupEventDelegation() {
       renderApp(true);
     } else if (target.id === "flank-weather-city-input") {
       state.weather.city = target.value;
+    } else if (target.id === "flank-calc-input") {
+      const expr = target.value;
+      const res = evaluateExpression(expr);
+      const resBox = document.getElementById("flank-calc-result");
+      if (resBox) resBox.textContent = res;
+      if (!state.calculator) state.calculator = { lastExpr: "", lastResult: "", history: [] };
+      state.calculator.lastExpr = expr;
+      state.calculator.lastResult = res;
+    } else if (target.id === "flank-brightness-slider") {
+      const val = Number(target.value) || 85;
+      const dispText = document.getElementById("flank-disp-val");
+      if (dispText) dispText.textContent = `${val}%`;
+      if (!state.display) state.display = { brightness: val, nightLight: false, resolution: "1920 \xD7 1080", refreshRate: 144, scaling: 100 };
+      state.display.brightness = val;
+      window.pywebview?.api?.set_brightness?.(val);
+    } else if (target.id === "flank-ambient-volume") {
+      const vol = Number(target.value) || 65;
+      const volText = document.getElementById("flank-amb-vol-text");
+      if (volText) volText.textContent = `${vol}%`;
+      setAmbientVolume(vol);
+      if (!state.ambient) state.ambient = { playing: false, sound: "rain", volume: vol };
+      state.ambient.volume = vol;
     } else if (target.id === "flank-scratchpad-textarea") {
       const active = state.scratchpad.notes.find((n) => n.id === state.scratchpad.activeNoteId) || state.scratchpad.notes[0];
       if (active) {
@@ -7631,6 +8847,21 @@ function setupEventDelegation() {
       ev.preventDefault();
       toggleDockCollapse();
       return;
+    }
+    if (ev.key === "Enter") {
+      const activeEl = document.activeElement;
+      if (activeEl?.id === "flank-task-input") {
+        ev.preventDefault();
+        const addBtn = document.querySelector('[data-action="add-task"]');
+        addBtn?.click();
+        return;
+      }
+      if (activeEl?.id === "flank-runner-input") {
+        ev.preventDefault();
+        const runBtn = document.querySelector('[data-action="run-custom-cmd"]');
+        runBtn?.click();
+        return;
+      }
     }
     if (uiState.recordingItemId) {
       ev.preventDefault();
@@ -7912,6 +9143,36 @@ window.flankReceiveHostUpdate = (patch) => {
   if (patch.bluetooth) {
     state.bluetooth = { ...state.bluetooth, ...patch.bluetooth };
   }
+  if (patch.tasks) {
+    state.tasks = { ...state.tasks, ...patch.tasks };
+  }
+  if (patch.calculator) {
+    state.calculator = { ...state.calculator, ...patch.calculator };
+  }
+  if (patch.habits) {
+    state.habits = { ...state.habits, ...patch.habits };
+  }
+  if (patch.storage) {
+    state.storage = { ...state.storage, ...patch.storage };
+  }
+  if (patch.display) {
+    state.display = { ...state.display, ...patch.display };
+  }
+  if (patch.privacy) {
+    state.privacy = { ...state.privacy, ...patch.privacy };
+  }
+  if (patch.ambient) {
+    state.ambient = { ...state.ambient, ...patch.ambient };
+  }
+  if (patch.runner) {
+    state.runner = { ...state.runner, ...patch.runner };
+  }
+  if (patch.gpu) {
+    state.gpu = { ...state.gpu, ...patch.gpu };
+  }
+  if (patch.github) {
+    state.github = { ...state.github, ...patch.github };
+  }
   if (patch.topProcesses) {
     state.topProcesses = patch.topProcesses;
   }
@@ -7924,7 +9185,7 @@ window.flankReceiveHostUpdate = (patch) => {
   }
   if (currentView === "card" && state.activeWidget && !prefsChanged) {
     const w = state.activeWidget;
-    const hasWidgetUpdate = w === "stats" && !!patch.stats || w === "battery" && !!patch.battery || w === "weather" && !!patch.weather || w === "player" && !!patch.player || w === "focus" && !!patch.focus || w === "clock" && !!patch.clock || w === "scratchpad" && !!patch.scratchpad || w === "colorpicker" && !!patch.colorpicker || w === "calendar" && !!patch.calendar || w === "audio" && !!patch.audio || w === "network" && !!patch.network || w === "clipboard" && !!patch.clipboard || w === "bluetooth" && !!patch.bluetooth;
+    const hasWidgetUpdate = w === "stats" && !!patch.stats || w === "battery" && !!patch.battery || w === "weather" && !!patch.weather || w === "player" && !!patch.player || w === "focus" && !!patch.focus || w === "clock" && !!patch.clock || w === "scratchpad" && !!patch.scratchpad || w === "colorpicker" && !!patch.colorpicker || w === "calendar" && !!patch.calendar || w === "audio" && !!patch.audio || w === "network" && !!patch.network || w === "clipboard" && !!patch.clipboard || w === "bluetooth" && !!patch.bluetooth || w === "tasks" && !!patch.tasks || w === "calculator" && !!patch.calculator || w === "habits" && !!patch.habits || w === "storage" && !!patch.storage || w === "display" && !!patch.display || w === "privacy" && !!patch.privacy || w === "ambient" && !!patch.ambient || w === "runner" && !!patch.runner || w === "gpu" && !!patch.gpu || w === "github" && !!patch.github;
     if (!hasWidgetUpdate) {
       return;
     }

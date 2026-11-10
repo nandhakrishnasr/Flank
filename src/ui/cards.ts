@@ -277,7 +277,11 @@ function renderPlayerCardInner(state: FlankState): string {
       </span>
     </div>
     <div style="display:flex; gap: 12px; align-items: center; width: 100%;">
-      <span class="flank-player-art${p.playing ? ' is-playing' : ''}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft); transition: box-shadow 0.3s ease, border-color 0.3s ease;" aria-hidden="true">${iconSvg('equalizer', 22)}</span>
+      ${p.artworkUrl ? `
+        <img src="${escapeHtml(p.artworkUrl)}" class="flank-player-art${p.playing ? ' is-playing' : ''}" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 8px; object-fit: cover; border: 1px solid var(--flank-color-divider-soft); box-shadow: 0 4px 14px rgba(0,0,0,0.20);" alt="Artwork" />
+      ` : `
+        <span class="flank-player-art${p.playing ? ' is-playing' : ''}" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--flank-color-tile-bg); display:flex; align-items:center; justify-content:center; color: var(--flank-color-accent); border: 1px solid var(--flank-color-divider-soft); transition: box-shadow 0.3s ease, border-color 0.3s ease;" aria-hidden="true">${iconSvg('equalizer', 22)}</span>
+      `}
       <div style="display:flex; flex-direction:column; gap: 2px; min-width: 0; flex: 1;">
         <div style="font-size: 13px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--flank-color-text);" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</div>
         <div style="font-size: 12px; color: var(--flank-color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.artist)}</div>
@@ -831,6 +835,330 @@ function renderBluetoothCardInner(state: FlankState): string {
   `;
 }
 
+function renderTasksCardInner(state: FlankState): string {
+  const tasks = state.tasks || { items: [], pendingCount: 0 };
+  const items = tasks.items || [];
+  const pending = tasks.pendingCount ?? items.filter((t) => !t.done).length;
+
+  const rowsHtml = items.length === 0
+    ? `<div style="padding: 16px 0; text-align: center; font-size: 12px; color: var(--flank-color-text-muted);">No tasks yet. Type below to add one!</div>`
+    : items.map((t) => `
+        <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
+          <button type="button" class="flank-win-btn" data-action="toggle-task" data-task-id="${escapeHtml(t.id)}" title="${t.done ? 'Mark pending' : 'Mark done'}" style="width: 20px; height: 20px; border-radius: 4px; border: 1px solid ${t.done ? 'var(--flank-color-accent)' : 'var(--flank-color-divider-soft)'}; background: ${t.done ? 'var(--flank-color-accent)' : 'transparent'}; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;">
+            ${t.done ? iconSvg('check', 12) : ''}
+          </button>
+          <span style="flex: 1; font-size: 12px; color: ${t.done ? 'var(--flank-color-text-muted)' : 'var(--flank-color-text)'}; text-decoration: ${t.done ? 'line-through' : 'none'}; word-break: break-word;">${escapeHtml(t.text)}</span>
+          <button type="button" class="flank-win-btn" data-action="delete-task" data-task-id="${escapeHtml(t.id)}" title="Delete task" style="width: 20px; height: 20px; color: var(--flank-color-text-muted); opacity: 0.7; cursor: pointer;">
+            ${iconSvg('x', 12)}
+          </button>
+        </div>
+      `).join('');
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Tasks &amp; To-Do</span>
+      <span class="flank-live-pill">${pending} pending</span>
+    </div>
+    <div style="display:flex; gap: 6px; margin-bottom: 8px;">
+      <input type="text" id="flank-task-input" class="flank-card-input" placeholder="+ Add a task (press Enter)..." style="flex: 1; height: 30px; font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text);" />
+      <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="add-task">Add</button>
+    </div>
+    <div style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column;">
+      ${rowsHtml}
+    </div>
+    ${items.some((t) => t.done) ? `
+      <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+        <button type="button" class="flank-chip" style="font-size: 10px; padding: 2px 8px;" data-action="clear-completed-tasks">Clear completed</button>
+      </div>
+    ` : ''}
+  `;
+}
+
+function renderCalculatorCardInner(state: FlankState): string {
+  const calc = state.calculator || { lastExpr: '', lastResult: '0', history: [] };
+  const historyRows = (calc.history || []).slice(0, 3).map((h) => `
+    <div class="flank-row" style="padding: 3px 0; font-size: 11px; font-family: var(--flank-type-mono); cursor: pointer;" data-action="recall-calc" data-expr="${escapeHtml(h.expr)}">
+      <span style="color: var(--flank-color-text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(h.expr)}</span>
+      <span style="color: var(--flank-color-accent); font-weight: 600;">= ${escapeHtml(h.result)}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Smart Calculator</span>
+      <span class="flank-live-pill">Live Math</span>
+    </div>
+    <input type="text" id="flank-calc-input" class="flank-card-input" value="${escapeHtml(calc.lastExpr || '')}" placeholder="Type e.g. 120 * 1.18, 16 GB to MB, sqrt(144)..." style="width: 100%; height: 32px; font-family: var(--flank-type-mono); font-size: 12px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text); margin-bottom: 8px;" />
+    <div style="display:flex; justify-content:space-between; align-items:center; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;">
+      <div style="font-size: 18px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-calc-result">${escapeHtml(calc.lastResult || '0')}</div>
+      <button type="button" class="flank-chip" data-action="copy-calc-result" title="Copy result to clipboard" style="font-size: 11px;">Copy</button>
+    </div>
+    ${historyRows ? `
+      <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding-top: 6px; margin-top: 4px;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--flank-color-text-muted); margin-bottom: 4px;">Recent</div>
+        ${historyRows}
+      </div>
+    ` : ''}
+  `;
+}
+
+function renderHabitsCardInner(state: FlankState): string {
+  const h = state.habits || { waterGlasses: 5, waterGoal: 8, lastStretchMin: 20, streakDays: 3 };
+  const pct = Math.min(100, Math.round((h.waterGlasses / (h.waterGoal || 8)) * 100));
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Habits &amp; Hydration</span>
+      <span class="flank-live-pill">🔥 ${h.streakDays} day streak</span>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg('droplet', 14)} Daily Water Intake
+        </span>
+        <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${h.waterGlasses} / ${h.waterGoal} cups</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 6px; margin-bottom: 8px;">
+        <div class="flank-meter__fill" style="width: ${pct}%; background: #38BDF8;"></div>
+      </div>
+      <div style="display:flex; gap: 8px; justify-content: center;">
+        <button type="button" class="flank-btn is-secondary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-sub">- 1 Cup</button>
+        <button type="button" class="flank-btn is-primary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-add">+ 1 Cup</button>
+      </div>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; flex-direction:column; gap: 2px;">
+        <span style="font-size: 12px; font-weight: 600;">Posture &amp; Stretch</span>
+        <span style="font-size: 11px; color: var(--flank-color-text-muted);">Last break: ${h.lastStretchMin}m ago</span>
+      </div>
+      <button type="button" class="flank-chip" data-action="habit-log-stretch" style="font-size: 11px;">Log Stretch</button>
+    </div>
+  `;
+}
+
+function renderStorageCardInner(state: FlankState): string {
+  const s = state.storage || { primaryPercent: 68, primaryDrive: 'C:', drives: [] };
+  const drives = s.drives || [];
+
+  const driveRows = drives.map((d) => `
+    <div class="flank-subcard" style="padding: 8px 10px; margin-bottom: 6px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
+          ${iconSvg('hard-drive', 14)} <strong>${escapeHtml(d.letter)}</strong> ${escapeHtml(d.label)}
+        </span>
+        <span style="font-size: 11px; color: var(--flank-color-text-muted); font-family: var(--flank-type-mono);">${d.freeGb} GB free (${d.percent}%)</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 5px; margin-bottom: 6px;">
+        <div class="flank-meter__fill" style="width: ${d.percent}%; background: ${d.percent > 90 ? '#EF4444' : d.percent > 80 ? '#F59E0B' : 'var(--flank-color-accent)'};"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size: 10px; color: var(--flank-color-text-muted);">${d.usedGb} / ${d.totalGb} GB</span>
+        <button type="button" class="flank-chip" style="height: 20px; padding: 0 8px; font-size: 10px;" data-action="open-drive" data-drive="${escapeHtml(d.letter)}">Open Explorer</button>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Storage &amp; Drives</span>
+      <span class="flank-live-pill">${drives.length} drives</span>
+    </div>
+    ${driveRows}
+    <button type="button" class="flank-btn is-secondary" style="width: 100%; justify-content: center; height: 28px; font-size: 11px; margin-top: 4px;" data-action="launch-disk-cleanup">
+      <span>Open Windows Disk Cleanup</span>
+    </button>
+  `;
+}
+
+function renderDisplayCardInner(state: FlankState): string {
+  const d = state.display || { brightness: 85, nightLight: false, resolution: '1920 × 1080', refreshRate: 144, scaling: 100 };
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Display &amp; Brightness</span>
+      <span class="flank-live-pill">${d.refreshRate}Hz</span>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">${iconSvg('sun', 14)} Screen Brightness</span>
+        <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);" id="flank-disp-val">${d.brightness}%</span>
+      </div>
+      <input type="range" id="flank-brightness-slider" min="10" max="100" value="${d.brightness}" style="width:100%; cursor: pointer;" />
+    </div>
+    <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft);">
+      <span style="font-size: 12px; color: var(--flank-color-text-muted);">Active Resolution</span>
+      <span style="font-size: 12px; font-weight: 600; font-family: var(--flank-type-mono);">${escapeHtml(d.resolution)}</span>
+    </div>
+    <div class="flank-row" style="padding: 6px 0;">
+      <span style="font-size: 12px; color: var(--flank-color-text-muted);">Night Light</span>
+      <button type="button" class="flank-chip${d.nightLight ? ' is-active' : ''}" data-action="toggle-night-light" style="font-size: 11px;">${d.nightLight ? 'Active' : 'Off'}</button>
+    </div>
+  `;
+}
+
+function renderPrivacyCardInner(state: FlankState): string {
+  const prv = state.privacy || { micActive: false, cameraActive: false, micMuted: false, activeApps: [] };
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Privacy Guard</span>
+      <span class="flank-live-pill" style="${prv.micActive ? 'color: #EF4444;' : ''}">
+        <span class="flank-live-dot" style="${prv.micActive ? 'background: #EF4444;' : ''}"></span>
+        ${prv.micActive ? 'Mic Active' : 'Protected'}
+      </span>
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap: 8px;">
+          ${iconSvg(prv.micMuted ? 'mic-off' : 'mic', 18)}
+          <div>
+            <div style="font-size: 12px; font-weight: 600;">System Microphone</div>
+            <div style="font-size: 11px; color: var(--flank-color-text-muted);">${prv.micMuted ? 'Muted globally' : prv.micActive ? 'In use by apps' : 'Idle'}</div>
+          </div>
+        </div>
+        <button type="button" class="flank-chip${prv.micMuted ? ' is-active' : ''}" data-action="toggle-mic-mute" style="font-size: 11px;">
+          ${prv.micMuted ? 'Unmute' : 'Mute Mic'}
+        </button>
+      </div>
+    </div>
+    <div class="flank-row" style="padding: 6px 0;">
+      <span style="font-size: 12px; color: var(--flank-color-text-muted);">Webcam Status</span>
+      <span style="font-size: 12px; font-weight: 600; color: ${prv.cameraActive ? '#EF4444' : 'var(--flank-color-text)'};">${prv.cameraActive ? 'Camera In Use' : 'Camera Off'}</span>
+    </div>
+  `;
+}
+
+function renderAmbientCardInner(state: FlankState): string {
+  const amb = state.ambient || { playing: false, sound: 'rain', volume: 65 };
+  const presets: Array<{ id: string; name: string; emoji: string }> = [
+    { id: 'rain', name: 'Rain', emoji: '🌧️' },
+    { id: 'waves', name: 'Waves', emoji: '🌊' },
+    { id: 'campfire', name: 'Campfire', emoji: '🪵' },
+    { id: 'coffee', name: 'Cafe', emoji: '☕' },
+    { id: 'wind', name: 'Wind', emoji: '🍃' },
+    { id: 'brown', name: 'Brown Noise', emoji: '📻' },
+  ];
+
+  const chipsHtml = presets.map((p) => `
+    <button type="button" class="flank-chip${amb.sound === p.id ? ' is-active' : ''}" data-action="select-ambient-sound" data-sound="${p.id}" style="font-size: 11px; padding: 4px 8px;">
+      ${p.emoji} ${p.name}
+    </button>
+  `).join('');
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Focus Ambiance</span>
+      <span class="flank-live-pill">${amb.playing ? 'Playing' : 'Muted'}</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 12px;">
+      ${chipsHtml}
+    </div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+        <span>Ambiance Volume</span>
+        <span style="font-weight: 700; font-family: var(--flank-type-mono);" id="flank-amb-vol-text">${amb.volume}%</span>
+      </div>
+      <input type="range" id="flank-ambient-volume" min="0" max="100" value="${amb.volume}" style="width:100%; cursor: pointer;" />
+    </div>
+    <button type="button" class="flank-btn is-primary" style="width: 100%; justify-content: center; height: 32px; gap: 8px;" data-action="toggle-ambient">
+      ${iconSvg(amb.playing ? 'pause' : 'play', 15)}
+      <span>${amb.playing ? 'Pause Ambiance' : 'Play Soundscape'}</span>
+    </button>
+  `;
+}
+
+function renderRunnerCardInner(state: FlankState): string {
+  const run = state.runner || { running: false, lastCmd: '', lastOutput: '', commands: [] };
+  const commands = run.commands || [];
+
+  const cmdChips = commands.map((c) => `
+    <button type="button" class="flank-chip" data-action="run-preset-cmd" data-cmd="${escapeHtml(c.cmd)}" title="${escapeHtml(c.desc)}" style="font-size: 11px; padding: 4px 8px;">
+      ${escapeHtml(c.name)}
+    </button>
+  `).join('');
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">Quick Command Runner</span>
+      <span class="flank-live-pill">>_ CLI</span>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap: 6px; margin-bottom: 8px;">
+      ${cmdChips}
+    </div>
+    <div style="display:flex; gap: 6px; margin-bottom: 8px;">
+      <input type="text" id="flank-runner-input" class="flank-card-input" placeholder="Enter shell command (e.g. ping 8.8.8.8)..." style="flex: 1; height: 30px; font-family: var(--flank-type-mono); font-size: 11px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--flank-color-divider-soft); background: var(--flank-color-tile-bg); color: var(--flank-color-text);" />
+      <button type="button" class="flank-btn is-primary" style="height: 30px; padding: 0 10px; font-size: 11px;" data-action="run-custom-cmd">Run</button>
+    </div>
+    ${run.lastOutput ? `
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--flank-color-divider-soft); border-radius: 6px; padding: 8px; font-family: var(--flank-type-mono); font-size: 10px; color: var(--flank-color-text); max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+        <div style="color: var(--flank-color-accent); margin-bottom: 4px;">$ ${escapeHtml(run.lastCmd)}</div>${escapeHtml(run.lastOutput)}
+      </div>
+    ` : ''}
+  `;
+}
+
+function renderGpuCardInner(state: FlankState): string {
+  const gpu = state.gpu || { name: 'GPU Diagnostics', utilizationPercent: 40, tempC: 54, vramUsedGb: 3.5, vramTotalGb: 8.0, driverVersion: 'DirectX 12' };
+  const vramPct = Math.min(100, Math.round((gpu.vramUsedGb / (gpu.vramTotalGb || 8.0)) * 100));
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">GPU Diagnostics</span>
+      <span class="flank-live-pill">${gpu.tempC}°C</span>
+    </div>
+    <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--flank-color-text);">${escapeHtml(gpu.name)}</div>
+    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom: 4px;">
+        <span>3D Engine Load</span>
+        <span style="font-weight:700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${gpu.utilizationPercent}%</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 5px; margin-bottom: 8px;">
+        <div class="flank-meter__fill" style="width: ${gpu.utilizationPercent}%;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom: 4px;">
+        <span>VRAM (${gpu.vramUsedGb} / ${gpu.vramTotalGb} GB)</span>
+        <span style="font-weight:700; font-family: var(--flank-type-mono);">${vramPct}%</span>
+      </div>
+      <div class="flank-meter__bar" style="height: 5px;">
+        <div class="flank-meter__fill" style="width: ${vramPct}%; background: #A855F7;"></div>
+      </div>
+    </div>
+    <div class="flank-row" style="padding: 4px 0; font-size: 11px;">
+      <span style="color: var(--flank-color-text-muted);">Driver / API</span>
+      <span style="font-family: var(--flank-type-mono);">${escapeHtml(gpu.driverVersion || 'DirectX 12')}</span>
+    </div>
+  `;
+}
+
+function renderGithubCardInner(state: FlankState): string {
+  const gh = state.github || { connected: true, pendingCount: 0, items: [] };
+  const items = gh.items || [];
+
+  const rows = items.map((it) => `
+    <div class="flank-row" style="padding: 6px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); gap: 8px;">
+      <div style="display:flex; flex-direction:column; gap: 2px; min-width:0; flex:1;">
+        <div style="font-size: 12px; font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: var(--flank-color-text);" title="${escapeHtml(it.title)}">${escapeHtml(it.title)}</div>
+        <div style="font-size: 10px; color: var(--flank-color-text-muted);">${escapeHtml(it.repo)} · ${escapeHtml(it.status)}</div>
+      </div>
+      <button type="button" class="flank-chip" style="font-size: 10px; padding: 2px 8px; flex-shrink: 0;" data-item-kind="link" data-item-id="${escapeHtml(it.id)}" data-target="${escapeHtml(it.url)}">View</button>
+    </div>
+  `).join('');
+
+  return `
+    <div class="flank-card__header">
+      <span class="flank-card__title">GitHub Activity</span>
+      <span class="flank-live-pill">${gh.pendingCount} PRs</span>
+    </div>
+    <div style="max-height: 180px; overflow-y: auto;">
+      ${rows || '<div style="padding:16px 0; text-align:center; font-size:12px; color:var(--flank-color-text-muted);">All caught up! No pending PRs.</div>'}
+    </div>
+    <button type="button" class="flank-btn is-secondary" style="width: 100%; justify-content: center; height: 28px; font-size: 11px; margin-top: 6px;" data-item-kind="link" data-item-id="gh-notifications" data-target="https://github.com/notifications">
+      <span>Open GitHub Notifications</span>
+      <span style="display:flex; width: 12px; height: 12px; flex-shrink: 0;">${iconSvg('arrow-up-right', 12)}</span>
+    </button>
+  `;
+}
+
 export function renderHoverCardHtml(state: FlankState, theme: FlankTheme): string {
   const active = state.activeWidget;
   if (!active || state.activeFullWindow) return '';
@@ -893,6 +1221,46 @@ export function renderHoverCardHtml(state: FlankState, theme: FlankTheme): strin
     case 'bluetooth':
       label = 'Bluetooth & Peripherals';
       inner = renderBluetoothCardInner(state);
+      break;
+    case 'tasks':
+      label = 'Tasks and To-Do';
+      inner = renderTasksCardInner(state);
+      break;
+    case 'calculator':
+      label = 'Smart Calculator';
+      inner = renderCalculatorCardInner(state);
+      break;
+    case 'habits':
+      label = 'Habits & Hydration';
+      inner = renderHabitsCardInner(state);
+      break;
+    case 'storage':
+      label = 'Storage & Drives';
+      inner = renderStorageCardInner(state);
+      break;
+    case 'display':
+      label = 'Display & Brightness';
+      inner = renderDisplayCardInner(state);
+      break;
+    case 'privacy':
+      label = 'Privacy Guard';
+      inner = renderPrivacyCardInner(state);
+      break;
+    case 'ambient':
+      label = 'Focus Ambiance';
+      inner = renderAmbientCardInner(state);
+      break;
+    case 'runner':
+      label = 'Command Runner';
+      inner = renderRunnerCardInner(state);
+      break;
+    case 'gpu':
+      label = 'GPU Diagnostics';
+      inner = renderGpuCardInner(state);
+      break;
+    case 'github':
+      label = 'GitHub Activity';
+      inner = renderGithubCardInner(state);
       break;
   }
 

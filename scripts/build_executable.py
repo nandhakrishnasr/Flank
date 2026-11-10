@@ -138,10 +138,13 @@ def install_flank(silent: bool, no_launch: bool) -> None:
 
     clean_env = os.environ.copy()
     clean_env.pop('_MEIPASS2', None)
+    clean_env.pop('_MEIPASS', None)
+
+    detach_flags = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
 
     if silent:
         if not no_launch and os.path.isfile(exe_path):
-            subprocess.Popen([exe_path], cwd=install_dir, env=clean_env)
+            subprocess.Popen([exe_path], cwd=install_dir, env=clean_env, creationflags=detach_flags)
         return
 
     ans = ctypes.windll.user32.MessageBoxW(
@@ -151,7 +154,7 @@ def install_flank(silent: bool, no_launch: bool) -> None:
         MB_YESNO | MB_ICONINFORMATION,
     )
     if ans == IDYES and os.path.isfile(exe_path):
-        subprocess.Popen([exe_path], cwd=install_dir, env=clean_env)
+        subprocess.Popen([exe_path], cwd=install_dir, env=clean_env, creationflags=detach_flags)
 
 
 if __name__ == '__main__':

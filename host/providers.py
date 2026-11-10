@@ -281,12 +281,24 @@ class SystemProviders:
         self._player_title = 'No media playing'
         self._player_artist = 'Play audio in browser or music app'
         self._player_source_app = 'System Media'
+        self._player_artwork = ''
         self._player_pos = 0
         self._player_dur = 0
         self._player_base_pos = 0
         self._player_last_updated = 0.0
         self._last_media_poll_ts = 0.0
         self._media_polling = False
+
+        self._tasks_file = os.path.join(self.app_data_dir, 'tasks.json')
+        self._habits_file = os.path.join(self.app_data_dir, 'habits.json')
+        self._last_storage_scan = 0.0
+        self._storage_cache: Dict[str, Any] = {}
+        self._last_display_scan = 0.0
+        self._display_cache: Dict[str, Any] = {}
+        self._last_gpu_scan = 0.0
+        self._gpu_cache: Dict[str, Any] = {}
+        self._runner_last_output = ''
+        self._runner_last_cmd = ''
 
         self._focus_running = False
         self._focus_mode = 'focus'
@@ -993,6 +1005,17 @@ class SystemProviders:
                 "$p = Await ($s.TryGetMediaPropertiesAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionMediaProperties]); "
                 "$info = $s.GetPlaybackInfo(); "
                 "$tl = $s.GetTimelineProperties(); "
+                "$b64 = ''; "
+                "if ($p.Thumbnail) { "
+                "try { "
+                "$stream = Await ($p.Thumbnail.OpenReadAsync()) ([Windows.Storage.Streams.IRandomAccessStreamWithContentType]); "
+                "$asStreamMethod = ([System.IO.WindowsRuntimeStreamExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsStream' -and $_.GetParameters().Count -eq 1 })[0]; "
+                "$netStream = $asStreamMethod.Invoke($null, @($stream)); "
+                "$ms = New-Object System.IO.MemoryStream; "
+                "$netStream.CopyTo($ms); "
+                "$bytes = $ms.ToArray(); "
+                "if ($bytes.Length -gt 0 -and $bytes.Length -lt 5000000) { $b64 = [Convert]::ToBase64String($bytes) } "
+                "} catch {} }; "
                 "[PSCustomObject]@{ "
                 "Source=$s.SourceAppUserModelId; "
                 "Title=$p.Title; "
@@ -1001,7 +1024,8 @@ class SystemProviders:
                 "Status=$info.PlaybackStatus.ToString(); "
                 "PosSec=[int]$tl.Position.TotalSeconds; "
                 "EndSec=[int]$tl.EndTime.TotalSeconds; "
-                "LastUpdated=[int][double]::Parse((Get-Date $tl.LastUpdatedTime.UtcDateTime -UFormat %s)) "
+                "LastUpdated=[int][double]::Parse((Get-Date $tl.LastUpdatedTime.UtcDateTime -UFormat %s)); "
+                "ArtworkBase64=$b64 "
                 "} | ConvertTo-Json -Compress }"
             )
             res = subprocess.run(
@@ -1009,7 +1033,7 @@ class SystemProviders:
                 capture_output=True,
                 encoding='utf-8',
                 errors='replace',
-                timeout=3.0,
+                timeout=4.0,
                 creationflags=0x08000000,
             )
             if res.returncode == 0 and res.stdout and res.stdout.strip():
@@ -1021,6 +1045,10 @@ class SystemProviders:
                 pos_sec = max(0, int(data.get('PosSec') or 0))
                 end_sec = max(0, int(data.get('EndSec') or 0))
                 last_updated = float(data.get('LastUpdated') or 0.0)
+                art_b64 = (data.get('ArtworkBase64') or '').strip()
+
+                if art_b64:
+                    self._player_artwork = f"data:image/jpeg;base64,{art_b64}"
 
                 if title:
                     self._player_title = title
@@ -1063,6 +1091,7 @@ class SystemProviders:
             'playing': self._player_playing,
             'title': self._player_title,
             'artist': self._player_artist,
+            'artworkUrl': self._player_artwork,
             'sourceApp': self._player_source_app,
             'positionSec': self._player_pos,
             'durationSec': self._player_dur,
@@ -1985,6 +2014,398 @@ class SystemProviders:
         }
         self._bluetooth_last_scan = now
         return self._bluetooth_cache
+
+    # ========================================================================
+    # 8. TASKS & TO-DO
+    # ========================================================================
+
+    def sample_tasks(self) -> Dict[str, Any]:
+        tasks = []
+        if os.path.isfile(self._tasks_file):
+            try:
+                with open(self._tasks_file, 'r', encoding='utf-8') as f:
+                    tasks = json.load(f)
+            except Exception:
+                pass
+        if not tasks:
+            tasks = [
+                {'id': 'task-1', 'text': 'Review pull request for telemetry pipeline', 'done': False, 'createdAt': '10:30 AM'},
+                {'id': 'task-2', 'text': 'Prepare release notes for Flank v1.1', 'done': False, 'createdAt': '11:15 AM'},
+                {'id': 'task-3', 'text': 'Sync meeting with design team', 'done': True, 'createdAt': '09:00 AM'},
+                {'id': 'task-4', 'text': 'Benchmark liquid glass blur performance', 'done': False, 'createdAt': '01:45 PM'},
+            ]
+        pending = sum(1 for t in tasks if not t.get('done'))
+        return {'items': tasks, 'pendingCount': pending}
+
+    def tasks_action(self, action: str, param: str = '') -> Dict[str, Any]:
+        cur = self.sample_tasks()
+        items = cur.get('items', [])
+        if action == 'add' and param:
+            new_item = {
+                'id': f'task-{int(time.time() * 1000)}',
+                'text': param.strip(),
+                'done': False,
+                'createdAt': 'Just now',
+            }
+            items.insert(0, new_item)
+        elif action == 'toggle' and param:
+            for it in items:
+                if it.get('id') == param:
+                    it['done'] = not it.get('done', False)
+                    break
+        elif action == 'delete' and param:
+            items = [it for it in items if it.get('id') != param]
+        elif action == 'clear_completed':
+            items = [it for it in items if not it.get('done')]
+
+        try:
+            with open(self._tasks_file, 'w', encoding='utf-8') as f:
+                json.dump(items, f, indent=2)
+        except Exception:
+            pass
+        return self.sample_tasks()
+
+    # ========================================================================
+    # 9. SMART CALCULATOR
+    # ========================================================================
+
+    def sample_calculator(self) -> Dict[str, Any]:
+        return {
+            'lastExpr': '120 * 1.18',
+            'lastResult': '141.6',
+            'history': [
+                {'expr': '120 * 1.18', 'result': '141.6'},
+                {'expr': '16 GB to MB', 'result': '16,384 MB'},
+                {'expr': 'sqrt(256) * 4', 'result': '64'},
+            ],
+        }
+
+    # ========================================================================
+    # 10. DAILY HABITS & HYDRATION
+    # ========================================================================
+
+    def sample_habits(self) -> Dict[str, Any]:
+        data = {'waterGlasses': 5, 'waterGoal': 8, 'lastStretchMin': 22, 'streakDays': 4}
+        if os.path.isfile(self._habits_file):
+            try:
+                with open(self._habits_file, 'r', encoding='utf-8') as f:
+                    saved = json.load(f)
+                if isinstance(saved, dict):
+                    data.update(saved)
+            except Exception:
+                pass
+        return data
+
+    def habits_action(self, action: str, val: int = 1) -> Dict[str, Any]:
+        cur = self.sample_habits()
+        if action == 'add_water':
+            cur['waterGlasses'] = min(20, cur.get('waterGlasses', 0) + val)
+        elif action == 'sub_water':
+            cur['waterGlasses'] = max(0, cur.get('waterGlasses', 0) - val)
+        elif action == 'log_stretch':
+            cur['lastStretchMin'] = 0
+
+        try:
+            with open(self._habits_file, 'w', encoding='utf-8') as f:
+                json.dump(cur, f, indent=2)
+        except Exception:
+            pass
+        return cur
+
+    # ========================================================================
+    # 11. STORAGE & DRIVES
+    # ========================================================================
+
+    def sample_storage(self) -> Dict[str, Any]:
+        now = time.time()
+        if self._storage_cache and (now - self._last_storage_scan < 10.0):
+            return self._storage_cache
+
+        import shutil
+        drives = []
+        primary_pct = 68
+        try:
+            bitmask = kernel32.GetLogicalDrives()
+            for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                if bitmask & 1:
+                    path = f'{letter}:\\\\'
+                    dtype = kernel32.GetDriveTypeW(path)
+                    if dtype in (2, 3):  # Removable or Fixed
+                        try:
+                            usage = shutil.disk_usage(path)
+                            pct = round(((usage.total - usage.free) / usage.total) * 100) if usage.total > 0 else 0
+                            if letter == 'C':
+                                primary_pct = pct
+                            drives.append({
+                                'letter': f'{letter}:',
+                                'label': 'Windows' if letter == 'C' else 'Volume',
+                                'type': 'SSD / NVMe' if dtype == 3 else 'Removable',
+                                'usedGb': round((usage.total - usage.free) / (1024 ** 3), 1),
+                                'totalGb': round(usage.total / (1024 ** 3), 1),
+                                'freeGb': round(usage.free / (1024 ** 3), 1),
+                                'percent': pct,
+                            })
+                        except Exception:
+                            pass
+                bitmask >>= 1
+        except Exception:
+            pass
+
+        if not drives:
+            drives = [
+                {'letter': 'C:', 'label': 'Windows', 'type': 'SSD / NVMe', 'usedGb': 340, 'totalGb': 500, 'freeGb': 160, 'percent': 68}
+            ]
+
+        self._storage_cache = {
+            'primaryPercent': primary_pct,
+            'primaryDrive': 'C:',
+            'drives': drives,
+        }
+        self._last_storage_scan = now
+        return self._storage_cache
+
+    def open_drive(self, drive_letter: str) -> bool:
+        try:
+            letter = (drive_letter or 'C:').strip()
+            if not letter.endswith('\\'):
+                letter += '\\'
+            subprocess.Popen(['explorer.exe', letter])
+            return True
+        except Exception:
+            return False
+
+    def launch_disk_cleanup(self) -> bool:
+        try:
+            subprocess.Popen(['cleanmgr.exe'])
+            return True
+        except Exception:
+            return False
+
+    # ========================================================================
+    # 12. DISPLAY & BRIGHTNESS
+    # ========================================================================
+
+    def sample_display(self) -> Dict[str, Any]:
+        now = time.time()
+        if self._display_cache and (now - self._last_display_scan < 8.0):
+            return self._display_cache
+
+        brightness = 85
+        try:
+            ps = 'Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction SilentlyContinue | Select-Object -ExpandProperty CurrentBrightness'
+            res = subprocess.run(
+                ['powershell', '-NoProfile', '-NonInteractive', '-Command', ps],
+                capture_output=True,
+                text=True,
+                timeout=2.0,
+                creationflags=0x08000000,
+            )
+            if res.returncode == 0 and res.stdout.strip().isdigit():
+                brightness = int(res.stdout.strip())
+        except Exception:
+            pass
+
+        sw = user32.GetSystemMetrics(0) or 1920
+        sh = user32.GetSystemMetrics(1) or 1080
+
+        self._display_cache = {
+            'brightness': brightness,
+            'nightLight': False,
+            'resolution': f'{sw} × {sh}',
+            'refreshRate': 144,
+            'scaling': 100,
+        }
+        self._last_display_scan = now
+        return self._display_cache
+
+    def set_brightness(self, val: int) -> Dict[str, Any]:
+        val = max(10, min(100, int(val)))
+        if self._display_cache:
+            self._display_cache['brightness'] = val
+        try:
+            ps = f'(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods).WmiSetBrightness(1, {val})'
+            subprocess.Popen(
+                ['powershell', '-NoProfile', '-NonInteractive', '-Command', ps],
+                creationflags=0x08000000,
+            )
+        except Exception:
+            pass
+        return self.sample_display()
+
+    def toggle_night_light(self) -> Dict[str, Any]:
+        try:
+            subprocess.Popen(['explorer.exe', 'ms-settings:nightlight'])
+        except Exception:
+            pass
+        return self.sample_display()
+
+    # ========================================================================
+    # 13. PRIVACY GUARD
+    # ========================================================================
+
+    def sample_privacy(self) -> Dict[str, Any]:
+        mic_active = False
+        camera_active = False
+        active_apps = []
+
+        import winreg
+        try:
+            key_path = r'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone\NonPackaged'
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path) as k:
+                subcount, _, _ = winreg.QueryInfoKey(k)
+                for i in range(subcount):
+                    sub = winreg.EnumKey(k, i)
+                    with winreg.OpenKey(k, sub) as sk:
+                        try:
+                            stop, _ = winreg.QueryValueEx(sk, 'LastUsedTimeStop')
+                            if stop == 0:
+                                mic_active = True
+                                app_name = sub.split('#')[-1].replace('.exe', '')
+                                active_apps.append(app_name)
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+        return {
+            'micActive': mic_active,
+            'cameraActive': camera_active,
+            'micMuted': self._audio_mic_muted,
+            'activeApps': active_apps,
+        }
+
+    def toggle_mic_mute(self) -> Dict[str, Any]:
+        self._audio_mic_muted = not self._audio_mic_muted
+        return self.sample_privacy()
+
+    # ========================================================================
+    # 14. FOCUS AMBIANCE
+    # ========================================================================
+
+    def sample_ambient(self) -> Dict[str, Any]:
+        return {
+            'playing': False,
+            'sound': 'rain',
+            'volume': 65,
+        }
+
+    # ========================================================================
+    # 15. COMMAND RUNNER
+    # ========================================================================
+
+    def sample_runner(self) -> Dict[str, Any]:
+        return {
+            'running': False,
+            'lastCmd': self._runner_last_cmd or 'ipconfig /flushdns',
+            'lastOutput': self._runner_last_output or 'Ready to execute commands.',
+            'commands': [
+                {'id': 'flushdns', 'name': 'Flush DNS', 'cmd': 'ipconfig /flushdns', 'desc': 'Clear local DNS cache'},
+                {'id': 'killnode', 'name': 'Kill Node.js', 'cmd': 'taskkill /F /IM node.exe', 'desc': 'Stop running dev servers'},
+                {'id': 'pinggoogle', 'name': 'Ping 8.8.8.8', 'cmd': 'ping -n 4 8.8.8.8', 'desc': 'Check network gateway latency'},
+                {'id': 'gitfetch', 'name': 'Git Fetch All', 'cmd': 'git fetch --all --prune', 'desc': 'Fetch latest remote branches'},
+            ],
+        }
+
+    def execute_runner_command(self, cmd: str) -> Dict[str, Any]:
+        cmd = (cmd or '').strip()
+        if not cmd:
+            return self.sample_runner()
+
+        self._runner_last_cmd = cmd
+        try:
+            res = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=12.0,
+                creationflags=0x08000000,
+            )
+            out = (res.stdout or '') + ('\n' + res.stderr if res.stderr else '')
+            self._runner_last_output = out.strip() or f'Command completed with exit code {res.returncode}.'
+        except subprocess.TimeoutExpired:
+            self._runner_last_output = 'Command timed out after 12 seconds.'
+        except Exception as e:
+            self._runner_last_output = f'Error executing command: {e}'
+
+        return self.sample_runner()
+
+    # ========================================================================
+    # 16. GPU & GRAPHICS
+    # ========================================================================
+
+    def sample_gpu(self) -> Dict[str, Any]:
+        now = time.time()
+        if self._gpu_cache and (now - self._last_gpu_scan < 3.0):
+            return self._gpu_cache
+
+        name = 'Graphics Processor'
+        util = 25
+        temp = 52
+        vram_used = 2.5
+        vram_total = 6.0
+        driver = 'DirectX 12'
+
+        try:
+            res = subprocess.run(
+                ['nvidia-smi', '--query-gpu=name,utilization.gpu,temperature.gpu,memory.used,memory.total,driver_version', '--format=csv,noheader,nounits'],
+                capture_output=True,
+                text=True,
+                timeout=2.0,
+                creationflags=0x08000000,
+            )
+            if res.returncode == 0 and res.stdout.strip():
+                parts = [p.strip() for p in res.stdout.strip().split(',')]
+                if len(parts) >= 5:
+                    name = parts[0]
+                    util = int(float(parts[1]))
+                    temp = int(float(parts[2]))
+                    vram_used = round(float(parts[3]) / 1024.0, 1)
+                    vram_total = round(float(parts[4]) / 1024.0, 1)
+                    if len(parts) >= 6:
+                        driver = f'NVIDIA {parts[5]}'
+        except Exception:
+            pass
+
+        self._gpu_cache = {
+            'name': name,
+            'utilizationPercent': util,
+            'tempC': temp,
+            'vramUsedGb': vram_used,
+            'vramTotalGb': vram_total,
+            'driverVersion': driver,
+        }
+        self._last_gpu_scan = now
+        return self._gpu_cache
+
+    # ========================================================================
+    # 17. GITHUB ACTIVITY
+    # ========================================================================
+
+    def sample_github(self) -> Dict[str, Any]:
+        return {
+            'username': 'nandhakrishnasr',
+            'connected': True,
+            'pendingCount': 2,
+            'items': [
+                {
+                    'id': 'pr-14',
+                    'title': 'feat: add album art & YouTube thumbnail',
+                    'repo': 'Flank',
+                    'type': 'pr',
+                    'url': 'https://github.com/nandhakrishnasr/Flank/pull/14',
+                    'status': 'Review requested',
+                },
+                {
+                    'id': 'pr-12',
+                    'title': 'fix: edge dock positioning multi-monitor',
+                    'repo': 'Flank',
+                    'type': 'pr',
+                    'url': 'https://github.com/nandhakrishnasr/Flank/pull/12',
+                    'status': 'Approved',
+                },
+            ],
+        }
 
 
 

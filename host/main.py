@@ -500,13 +500,23 @@ DEFAULT_ITEMS: List[Dict[str, Any]] = [
     {'id': 'widget-weather', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'weather', 'label': 'Weather', 'shortCode': 'wthr', 'icon': 'sun', 'shortcut': 'Alt+W', 'enabled': True},
     {'id': 'widget-battery', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'battery', 'label': 'Laptop battery', 'shortCode': 'bat', 'icon': 'battery', 'shortcut': 'Alt+B', 'enabled': True},
     {'id': 'widget-audio', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'audio', 'label': 'Audio & mic mixer', 'shortCode': 'vol', 'icon': 'volume', 'shortcut': 'Alt+U', 'enabled': True},
+    {'id': 'widget-player', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'player', 'label': 'Mini player', 'shortCode': 'play', 'icon': 'equalizer', 'shortcut': 'Alt+P', 'enabled': True},
+    {'id': 'widget-tasks', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'tasks', 'label': 'Quick to-do', 'shortCode': 'todo', 'icon': 'check-square', 'shortcut': 'Alt+T', 'enabled': True},
+    {'id': 'widget-calculator', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'calculator', 'label': 'Smart calculator', 'shortCode': 'calc', 'icon': 'calculator', 'shortcut': 'Alt+Q', 'enabled': True},
+    {'id': 'widget-habits', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'habits', 'label': 'Habits & hydration', 'shortCode': 'hbt', 'icon': 'droplet', 'shortcut': 'Alt+H', 'enabled': True},
+    {'id': 'widget-storage', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'storage', 'label': 'Storage & drives', 'shortCode': 'dsk', 'icon': 'hard-drive', 'shortcut': 'Alt+D', 'enabled': True},
+    {'id': 'widget-display', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'display', 'label': 'Display & brightness', 'shortCode': 'dsp', 'icon': 'sun', 'shortcut': 'Alt+L', 'enabled': True},
+    {'id': 'widget-gpu', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'gpu', 'label': 'GPU diagnostics', 'shortCode': 'gpu', 'icon': 'activity', 'shortcut': 'Alt+G', 'enabled': True},
+    {'id': 'widget-ambient', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'ambient', 'label': 'Focus ambiance', 'shortCode': 'amb', 'icon': 'waves', 'shortcut': 'Alt+A', 'enabled': True},
+    {'id': 'widget-privacy', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'privacy', 'label': 'Privacy guard', 'shortCode': 'prv', 'icon': 'shield', 'shortcut': 'Alt+Y', 'enabled': True},
+    {'id': 'widget-runner', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'runner', 'label': 'Command runner', 'shortCode': 'run', 'icon': 'terminal', 'shortcut': 'Alt+R', 'enabled': True},
+    {'id': 'widget-github', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'github', 'label': 'GitHub activity', 'shortCode': 'git', 'icon': 'github', 'shortcut': 'Alt+J', 'enabled': True},
     {'id': 'widget-focus', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'focus', 'label': 'Focus timer', 'shortCode': 'fcs', 'icon': 'focus', 'shortcut': 'Alt+F', 'enabled': True},
     {'id': 'widget-bluetooth', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'bluetooth', 'label': 'Bluetooth & peripherals', 'shortCode': 'bt', 'icon': 'bluetooth', 'shortcut': 'Alt+E', 'enabled': True},
     {'id': 'widget-calendar', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'calendar', 'label': 'Agenda & meetings', 'shortCode': 'cal', 'icon': 'calendar', 'shortcut': 'Alt+M', 'enabled': True},
     # Secondary Widgets (Available in Settings, Default OFF)
     {'id': 'widget-clipboard', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'clipboard', 'label': 'Clipboard history', 'shortCode': 'clip', 'icon': 'clipboard', 'shortcut': 'Ctrl+Alt+V', 'enabled': False},
     {'id': 'widget-stats', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'stats', 'label': 'System diagnostics', 'shortCode': 'cpu', 'icon': 'cpu', 'shortcut': 'Alt+S', 'enabled': False},
-    {'id': 'widget-player', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'player', 'label': 'Mini player', 'shortCode': 'play', 'icon': 'equalizer', 'shortcut': 'Alt+P', 'enabled': False},
     {'id': 'widget-scratchpad', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'scratchpad', 'label': 'Quick scratchpad', 'shortCode': 'pad', 'icon': 'scratchpad', 'shortcut': 'Alt+N', 'enabled': False},
     {'id': 'widget-colorpicker', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'colorpicker', 'label': 'Color picker', 'shortCode': 'clr', 'icon': 'eyedropper', 'shortcut': 'Alt+K', 'enabled': False},
     {'id': 'widget-network', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'network', 'label': 'Network & ports', 'shortCode': 'net', 'icon': 'wifi', 'shortcut': 'Alt+I', 'enabled': False},
@@ -791,7 +801,7 @@ class FlankHostApi:
                         changed = True
                     existing_ids = {it.get('id') for it in items if isinstance(it, dict) and it.get('id')}
 
-                    # Merge new default widgets (e.g., Focus timer, World clock) if not yet in saved config
+                    # Merge new default widgets (e.g., Focus timer, World clock, Tasks, Calculator, etc.) if not yet in saved config
                     migrated_ids = set(prefs.get('migratedWidgets') or [])
                     for def_item in DEFAULT_ITEMS:
                         did = def_item['id']
@@ -802,6 +812,7 @@ class FlankHostApi:
                         elif did not in migrated_ids:
                             migrated_ids.add(did)
                             changed = True
+                    prefs['items'] = items
                     prefs['migratedWidgets'] = list(migrated_ids)
                     if changed and settings_exists:
                         try:
@@ -885,6 +896,16 @@ class FlankHostApi:
             'audio': self._providers.sample_audio(),
             'network': self._providers.sample_network(),
             'bluetooth': self._providers.sample_bluetooth(),
+            'tasks': self._providers.sample_tasks(),
+            'calculator': self._providers.sample_calculator(),
+            'habits': self._providers.sample_habits(),
+            'storage': self._providers.sample_storage(),
+            'display': self._providers.sample_display(),
+            'privacy': self._providers.sample_privacy(),
+            'ambient': self._providers.sample_ambient(),
+            'runner': self._providers.sample_runner(),
+            'gpu': self._providers.sample_gpu(),
+            'github': self._providers.sample_github(),
             'topProcesses': self._providers.sample_top_processes(30),
             'backdrop': init_backdrop,
         }
@@ -1506,6 +1527,16 @@ class FlankHostApi:
             'clipboard': 350,
             'clock': 420,
             'colorpicker': 290,
+            'tasks': 310,
+            'calculator': 260,
+            'habits': 260,
+            'storage': 280,
+            'display': 240,
+            'privacy': 220,
+            'ambient': 270,
+            'runner': 300,
+            'gpu': 260,
+            'github': 260,
         }
         cur_theme = self.prefs.get('themeId', 'paper')
         default_cw = 320 if cur_theme in ('glass', 'liquid-glass') else 292
@@ -1900,6 +1931,48 @@ class FlankHostApi:
     def copy_raw_text(self, text: str) -> bool:
         return self._clipboard.set_clipboard_text(text)
 
+    def tasks_action(self, action: str, param: str = '') -> Dict[str, Any]:
+        data = self._providers.tasks_action(action, param)
+        payload = {'tasks': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def habits_action(self, action: str, val: int = 1) -> Dict[str, Any]:
+        data = self._providers.habits_action(action, val)
+        payload = {'habits': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def open_drive(self, drive_letter: str) -> bool:
+        return self._providers.open_drive(drive_letter)
+
+    def launch_disk_cleanup(self) -> bool:
+        return self._providers.launch_disk_cleanup()
+
+    def set_brightness(self, val: int) -> Dict[str, Any]:
+        data = self._providers.set_brightness(val)
+        payload = {'display': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def toggle_night_light(self) -> Dict[str, Any]:
+        data = self._providers.toggle_night_light()
+        payload = {'display': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def toggle_mic_mute(self) -> Dict[str, Any]:
+        data = self._providers.toggle_mic_mute()
+        payload = {'privacy': data}
+        self._broadcast_update(payload)
+        return payload
+
+    def execute_runner_command(self, cmd: str) -> Dict[str, Any]:
+        data = self._providers.execute_runner_command(cmd)
+        payload = {'runner': data}
+        self._broadcast_update(payload)
+        return payload
+
     def _broadcast_update(self, payload: Dict[str, Any]) -> None:
         js_arg = json.dumps(payload)
         for w in list(windows.values()):
@@ -2126,6 +2199,14 @@ def start_telemetry_loop(api: FlankHostApi) -> None:
                 payload['clipboard'] = api._clipboard.get_payload()
             if tick % 4 == 0:
                 payload['battery'] = api._providers.sample_battery()
+                payload['gpu'] = api._providers.sample_gpu()
+                payload['privacy'] = api._providers.sample_privacy()
+            if tick % 6 == 0:
+                payload['display'] = api._providers.sample_display()
+                payload['habits'] = api._providers.sample_habits()
+            if tick % 10 == 0:
+                payload['storage'] = api._providers.sample_storage()
+                payload['tasks'] = api._providers.sample_tasks()
             if tick % 90 == 0:
                 payload['weather'] = api._providers.fetch_weather()
 
