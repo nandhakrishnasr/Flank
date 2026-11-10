@@ -1478,49 +1478,6 @@ function setupEventDelegation(): void {
       renderApp();
       return;
     }
-    if (action === 'test-ai-key') {
-      const keyInput = document.getElementById('flank-ai-apikey-input') as HTMLInputElement | null;
-      const keyVal = keyInput?.value.trim() || '';
-      btn.textContent = 'Testing...';
-      try {
-        const res = await (window.pywebview?.api as any)?.test_ai_key?.(keyVal);
-        if (res?.ok) {
-          alert(res.message || 'Connected to Google Gemini API successfully!');
-        } else {
-          alert(res?.message || 'Connection check failed. Please verify API key.');
-        }
-      } catch (e) {
-        alert('Error connecting: ' + String(e));
-      } finally {
-        btn.textContent = 'Test';
-      }
-      return;
-    }
-    if (action === 'save-ai-settings') {
-      const keyInput = document.getElementById('flank-ai-apikey-input') as HTMLInputElement | null;
-      const provSelect = document.getElementById('flank-ai-provider-select') as HTMLSelectElement | null;
-      const planSelect = document.getElementById('flank-ai-plan-select') as HTMLSelectElement | null;
-      const payload = {
-        apiKey: keyInput?.value.trim() || '',
-        provider: provSelect?.value || 'google',
-        plan: planSelect?.value || 'pro',
-      };
-      btn.textContent = 'Saving...';
-      try {
-        const res = await (window.pywebview?.api as any)?.save_ai_settings?.(payload);
-        if (res?.ai) {
-          state.ai = res.ai;
-        }
-      } catch (e) {
-        console.error('Failed to save AI settings:', e);
-      } finally {
-        btn.textContent = 'Saved!';
-        setTimeout(() => {
-          renderApp();
-        }, 600);
-      }
-      return;
-    }
 
     // 4. Media player, Focus timer, and World Clock controls
     const mediaAction = btn.getAttribute('data-media-action');
@@ -2504,14 +2461,8 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
   if (patch.network) {
     state.network = { ...state.network, ...patch.network };
   }
-  if (patch.ai) {
-    state.ai = { ...state.ai, ...patch.ai };
-  }
   if (patch.clipboard) {
     state.clipboard = { ...state.clipboard, ...patch.clipboard };
-  }
-  if (patch.activity) {
-    state.activity = { ...state.activity, ...patch.activity };
   }
   if (patch.bluetooth) {
     state.bluetooth = { ...state.bluetooth, ...patch.bluetooth };
@@ -2545,9 +2496,7 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
       (w === 'calendar' && !!patch.calendar) ||
       (w === 'audio' && !!patch.audio) ||
       (w === 'network' && !!patch.network) ||
-      (w === 'ai' && !!patch.ai) ||
       (w === 'clipboard' && !!patch.clipboard) ||
-      (w === 'activity' && !!patch.activity) ||
       (w === 'bluetooth' && !!patch.bluetooth);
     if (!hasWidgetUpdate) {
       return;
@@ -2590,7 +2539,6 @@ async function bootstrap(): Promise<void> {
     state.clipboard.count = 0;
     state.calendar.events = [];
     state.calendar.nextSummary = '';
-    if (state.aiTasks) state.aiTasks = [];
     if (state.bluetooth) state.bluetooth.devices = [];
   }
 

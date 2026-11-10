@@ -721,65 +721,6 @@ function renderNetworkCardInner(state: FlankState): string {
   `;
 }
 
-function renderAiCardInner(state: FlankState): string {
-  const ai = state.ai || {
-    totalPercent: 37,
-    planName: 'Google AI Pro Plan',
-    connected: true,
-    resetText: 'Resets in 23 days',
-    categories: [
-      { label: 'Gemini 2.0 Flash', percent: 42 },
-      { label: 'Gemini 1.5 Pro', percent: 28 },
-      { label: 'Coding Agents & Tools', percent: 19 },
-    ],
-  };
-  const clamped = Math.max(0, Math.min(100, ai.totalPercent));
-  const circumference = 213.6;
-  const dash = ((clamped / 100) * circumference).toFixed(1);
-
-  const catRows = (ai.categories || [])
-    .map(
-      (c) => `<div class="flank-meter">
-        <div class="flank-meter__header">
-          <span class="flank-meter__header-label">${escapeHtml(c.label)}</span>
-          <span class="flank-meter__header-val">${c.percent}%</span>
-        </div>
-        <div class="flank-meter__bar"><div class="flank-meter__fill" style="width: ${c.percent}%"></div></div>
-      </div>`
-    )
-    .join('');
-
-  return `
-    <div class="flank-card__header">
-      <div style="display:flex; align-items:center; gap: 8px; min-width: 0;">
-        <span class="flank-card__title">AI Usage</span>
-        <span class="flank-live-dot" style="background: ${ai.connected !== false ? '#10B981' : '#F59E0B'}; flex-shrink: 0;"></span>
-      </div>
-      <span class="flank-chip" style="height: 22px; padding: 0 10px; font-size: 11px; flex-shrink: 0; white-space: nowrap;">
-        ${escapeHtml(ai.planName || 'Google AI Pro')}
-      </span>
-    </div>
-    <div style="display:flex; align-items:center; gap: 14px; padding: 4px 0;">
-      <svg viewBox="0 0 88 88" fill="none" role="img" aria-label="${clamped} percent of usage limit used" style="width: 64px; height: 64px; flex-shrink: 0;">
-        <circle cx="44" cy="44" r="34" stroke="var(--flank-color-track-bg)" stroke-width="7"/>
-        <circle cx="44" cy="44" r="34" stroke="var(--flank-color-accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${dash} 213.6" transform="rotate(-90 44 44)"/>
-        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor">${clamped}%</text>
-      </svg>
-      <div style="display:flex; flex-direction:column; gap: 2px; min-width: 0;">
-        <span style="font-size: 13px; font-weight: 600; color: var(--flank-color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Model Consumption</span>
-        <span style="font-size: 11px; color: var(--flank-color-text-muted);">${escapeHtml(ai.resetText || 'Monthly quota')}</span>
-      </div>
-    </div>
-    <div style="display:flex; flex-direction:column; gap: 6px;">
-      ${catRows}
-    </div>
-    <button type="button" class="flank-btn is-secondary" style="width: 100%; justify-content: center; height: 30px; font-size: 11px; margin-top: 4px; gap: 6px;" data-action="open-settings" data-settings-tab="widgets">
-      <span>Connect / Adjust AI Plan</span>
-      <span style="display:flex; width: 12px; height: 12px; flex-shrink: 0;">${iconSvg('arrow-up-right', 12)}</span>
-    </button>
-  `;
-}
-
 function renderClipboardCardInner(state: FlankState): string {
   const recent = state.clipboard.items.slice(0, 3);
   const rows = recent
@@ -834,56 +775,6 @@ function renderWidgetsGridCardInner(state: FlankState): string {
     <div class="flank-widgets-grid">
       ${widgetTiles}
     </div>
-  `;
-}
-
-function renderActivityCardInner(state: FlankState): string {
-  const act = state.activity || {
-    runningCount: 0,
-    waitingCount: 0,
-    activeSessions: [],
-  };
-  const sessions = act.activeSessions || [];
-  const total = sessions.length;
-
-  const sessionRows = sessions.map((s) => {
-    const statusColor = s.status === 'running' ? '#10B981' : s.status === 'waiting' ? '#F59E0B' : '#64748B';
-    const statusLabel = s.status === 'running' ? 'Active' : s.status === 'waiting' ? 'Waiting' : 'Idle';
-    return `
-      <div class="flank-subcard" style="padding: 10px 12px; border-radius: 10px; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); display:flex; flex-direction:column; gap: 6px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; align-items:center; gap: 6px; min-width: 0;">
-            <span style="display:flex; width: 14px; height: 14px; color: var(--flank-color-accent); flex-shrink: 0;">${iconSvg('activity', 14)}</span>
-            <span style="font-size: 13px; font-weight: 600; color: var(--flank-color-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(s.agentName)}</span>
-          </div>
-          <span class="flank-chip" style="height: 20px; padding: 0 6px; font-size: 10px; display:flex; align-items:center; gap: 4px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor};"></span>
-            ${statusLabel}
-          </span>
-        </div>
-        <div style="font-size: 11px; color: var(--flank-color-text-muted); display:flex; justify-content:space-between; align-items:center;">
-          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 170px;" title="${escapeHtml(s.projectPath || s.projectName)}">${escapeHtml(s.projectName || 'Active Task')}</span>
-          <span class="tabular-nums">${s.memoryMb ? `${Math.round(s.memoryMb)} MB` : `PID ${s.pid}`}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <div class="flank-card__header">
-      <div style="display:flex; align-items:center; gap: 8px;">
-        <span class="flank-card__title">AI Agent Activity</span>
-        <span class="flank-live-pill">
-          <span class="flank-live-dot"></span>
-          ${total} ${total === 1 ? 'task' : 'tasks'}
-        </span>
-      </div>
-    </div>
-    ${total === 0 ? renderEmptyState('No AI agent tasks active', 'Coding agents & CLI tasks will appear here') : `
-      <div style="display:flex; flex-direction:column; gap: 8px;">
-        ${sessionRows}
-      </div>
-    `}
   `;
 }
 
@@ -995,17 +886,9 @@ export function renderHoverCardHtml(state: FlankState, theme: FlankTheme): strin
       label = 'Network and dev ports';
       inner = renderNetworkCardInner(state);
       break;
-    case 'ai':
-      label = 'AI usage';
-      inner = renderAiCardInner(state);
-      break;
     case 'clipboard':
       label = 'Clipboard history';
       inner = renderClipboardCardInner(state);
-      break;
-    case 'activity':
-      label = 'AI Agent Activity';
-      inner = renderActivityCardInner(state);
       break;
     case 'bluetooth':
       label = 'Bluetooth & Peripherals';

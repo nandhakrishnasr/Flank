@@ -21,20 +21,21 @@ function formatDuration(sec: number): string {
   return `${m}:${rem < 10 ? '0' : ''}${rem}`;
 }
 
-function renderAiRingSvg(percent: number, compact: boolean): string {
-  const clamped = Math.max(0, Math.min(100, percent));
+function renderRingMeterSvg(percent: number, compact: boolean): string {
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const circumference = 62.83;
   const dash = ((clamped / 100) * circumference).toFixed(1);
+  const strokeColor = clamped >= 90 ? '#EF4444' : clamped >= 75 ? '#F59E0B' : 'var(--flank-color-accent)';
   if (compact) {
     return `<svg viewBox="0 0 28 28" fill="none" aria-hidden="true" style="width: var(--flank-scale-icon-20); height: var(--flank-scale-icon-20)">
       <circle cx="14" cy="14" r="10" stroke="var(--flank-color-track-bg)" stroke-width="3"/>
-      <circle cx="14" cy="14" r="10" stroke="var(--flank-color-accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
+      <circle cx="14" cy="14" r="10" stroke="${strokeColor}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
     </svg>`;
   }
   return `<svg viewBox="0 0 28 28" fill="none" aria-hidden="true" style="width: var(--flank-scale-ring-tile); height: var(--flank-scale-ring-tile)">
     <circle cx="14" cy="14" r="10" stroke="var(--flank-color-track-bg)" stroke-width="3"/>
-    <circle cx="14" cy="14" r="10" stroke="var(--flank-color-accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
-    <text x="14" y="17.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor">${Math.round(clamped)}</text>
+    <circle cx="14" cy="14" r="10" stroke="${strokeColor}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
+    <text x="14" y="17.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor">${clamped}</text>
   </svg>`;
 }
 
@@ -180,18 +181,6 @@ function renderWidgetTileInner(
           extraClass: '',
           html: `<span class="flank-row-left"><span class="flank-row-code">net</span><span>ports</span></span><span class="flank-row-right">${state.network?.pingMs ?? 14}ms</span>`,
         };
-      case 'ai':
-        return {
-          ariaLabel: `AI usage, ${state.ai.totalPercent} percent`,
-          extraClass: '',
-          html: `<span class="flank-row-left"><span class="flank-row-code">ai</span><span>usage</span></span><span class="flank-row-right">${state.ai.totalPercent}%</span>`,
-        };
-      case 'activity':
-        return {
-          ariaLabel: `AI activity, ${state.activity?.activeCount ?? 0} active sessions`,
-          extraClass: '',
-          html: `<span class="flank-row-left"><span class="flank-row-code">act</span><span>agents</span></span><span class="flank-row-right is-accent">${state.activity?.activeCount ?? 0}</span>`,
-        };
       case 'bluetooth':
         return {
           ariaLabel: `Bluetooth, ${state.bluetooth?.connectedCount ?? 0} connected devices`,
@@ -276,18 +265,6 @@ function renderWidgetTileInner(
           extraClass: '',
           html: `<span class="flank-tile-value">${state.network?.pingMs ?? 14}ms</span>${railIndicator}`,
         };
-      case 'ai':
-        return {
-          ariaLabel: `AI usage, ${state.ai.totalPercent} percent`,
-          extraClass: '',
-          html: `${renderAiRingSvg(state.ai.totalPercent, true)}${railIndicator}`,
-        };
-      case 'activity':
-        return {
-          ariaLabel: `AI activity, ${state.activity?.activeCount ?? 0} active`,
-          extraClass: '',
-          html: `${iconSvg('activity')}${railIndicator}`,
-        };
       case 'bluetooth':
         return {
           ariaLabel: `Bluetooth, ${state.bluetooth?.connectedCount ?? 0} devices`,
@@ -316,7 +293,7 @@ function renderWidgetTileInner(
         return {
           ariaLabel: `CPU ${state.stats.cpuPercent} percent`,
           extraClass: '',
-          html: renderAiRingSvg(state.stats.cpuPercent, false),
+          html: renderRingMeterSvg(state.stats.cpuPercent, false),
         };
       case 'battery':
         return {
@@ -371,18 +348,6 @@ function renderWidgetTileInner(
           ariaLabel: `Network ${state.network?.pingMs ?? 14}ms`,
           extraClass: 'is-widget-pill',
           html: `${iconSvg('wifi')}${state.network?.pingMs ?? 14}ms`,
-        };
-      case 'ai':
-        return {
-          ariaLabel: `AI usage, ${state.ai.totalPercent} percent`,
-          extraClass: 'is-widget-pill',
-          html: `${renderAiRingSvg(state.ai.totalPercent, true)}${state.ai.totalPercent}%`,
-        };
-      case 'activity':
-        return {
-          ariaLabel: `AI activity, ${state.activity?.activeCount ?? 0} active sessions`,
-          extraClass: 'is-widget-pill',
-          html: `${iconSvg('activity')}Agents (${state.activity?.activeCount ?? 0})`,
         };
       case 'bluetooth':
         return {
@@ -488,22 +453,6 @@ function renderWidgetTileInner(
         ariaLabel: `Network ${state.network?.pingMs ?? 14}ms`,
         extraClass: '',
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('wifi', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(ping)}</span></span>`,
-      };
-    }
-    case 'ai': {
-      const aiVal = `${state.ai.totalPercent}%`;
-      return {
-        ariaLabel: `AI usage, ${state.ai.totalPercent} percent`,
-        extraClass: '',
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon" style="width: 20px; height: 20px">${renderAiRingSvg(state.ai.totalPercent, true)}</span><span class="flank-widget-value flank-num">${truncateValue(aiVal)}</span></span>`,
-      };
-    }
-    case 'activity': {
-      const cnt = state.activity?.activeCount ?? 0;
-      return {
-        ariaLabel: `AI activity, ${cnt} active sessions`,
-        extraClass: '',
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('activity', 20)}</span><span class="flank-widget-value flank-num">${cnt}a</span></span>${renderBadge(cnt)}`,
       };
     }
     case 'bluetooth':

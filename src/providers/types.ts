@@ -11,8 +11,6 @@ export type WidgetKind =
   | 'calendar'
   | 'audio'
   | 'network'
-  | 'ai'
-  | 'activity'
   | 'bluetooth'
   | 'widgets';
 
@@ -218,35 +216,6 @@ export interface NetworkPayload {
   ports: ListeningPort[];
 }
 
-export interface AiCategoryUsage {
-  label: string;
-  percent: number;
-}
-
-export interface AiUsagePayload {
-  totalPercent: number;
-  resetText: string;
-  categories: AiCategoryUsage[];
-  planName?: string;
-  connected?: boolean;
-}
-
-export interface AiActivitySession {
-  id: string;
-  name: string;
-  project: string;
-  path?: string;
-  status: 'running' | 'waiting' | 'idle';
-  statusText: string;
-  memoryMb: number;
-  pid: number;
-}
-
-export interface AiActivityPayload {
-  activeCount: number;
-  sessions: AiActivitySession[];
-}
-
 export interface BluetoothDeviceItem {
   id: string;
   name: string;
@@ -303,8 +272,8 @@ export interface FlankState {
   calendar: CalendarPayload;
   audio: AudioPayload;
   network: NetworkPayload;
-  ai: AiUsagePayload;
-  activity?: AiActivityPayload;
+  ai?: any;
+  activity?: any;
   bluetooth?: BluetoothPayload;
   topProcesses?: ProcessItem[];
 }

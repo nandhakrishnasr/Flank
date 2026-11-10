@@ -1547,17 +1547,6 @@ function createSampleState() {
         widgetKind: "network",
         shortcut: "Alt+I",
         enabled: false
-      },
-      {
-        id: "widget-ai",
-        group: "widgets",
-        kind: "widget",
-        label: "AI usage",
-        shortCode: "ai",
-        icon: "globe",
-        widgetKind: "ai",
-        shortcut: "Alt+A",
-        enabled: false
       }
     ],
     clipboard: {
@@ -1748,49 +1737,6 @@ function createSampleState() {
       ports: [
         { port: 3e3, pid: 14208, processName: "node.exe", url: "http://localhost:3000" },
         { port: 8080, pid: 9812, processName: "python.exe", url: "http://localhost:8080" }
-      ]
-    },
-    ai: {
-      totalPercent: 68,
-      planName: "Google AI Pro Plan",
-      connected: true,
-      resetText: "Resets in 12 days",
-      categories: [
-        { label: "Claude 3.7 Sonnet", percent: 74 },
-        { label: "Gemini 2.5 Pro", percent: 45 },
-        { label: "GPT-4.5 Preview", percent: 32 }
-      ]
-    },
-    activity: {
-      activeCount: 2,
-      sessions: [
-        {
-          id: "agent-1",
-          name: "AI Coding Assistant",
-          project: "Workspace Engine",
-          status: "running",
-          statusText: "Active session \xB7 code generation",
-          memoryMb: 412.5,
-          pid: 14208
-        },
-        {
-          id: "agent-2",
-          name: "Research & Context Agent",
-          project: "Knowledge Graph RAG",
-          status: "waiting",
-          statusText: "Awaiting telemetry validation",
-          memoryMb: 285.3,
-          pid: 21840
-        },
-        {
-          id: "agent-3",
-          name: "Task & Build Worker",
-          project: "Automation Pipeline",
-          status: "idle",
-          statusText: "Standby \xB7 watching changes",
-          memoryMb: 92.4,
-          pid: 10564
-        }
       ]
     },
     bluetooth: {
@@ -2003,20 +1949,21 @@ function formatDuration(sec) {
   }
   return `${m}:${rem < 10 ? "0" : ""}${rem}`;
 }
-function renderAiRingSvg(percent, compact) {
-  const clamped = Math.max(0, Math.min(100, percent));
+function renderRingMeterSvg(percent, compact) {
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const circumference = 62.83;
   const dash = (clamped / 100 * circumference).toFixed(1);
+  const strokeColor = clamped >= 90 ? "#EF4444" : clamped >= 75 ? "#F59E0B" : "var(--flank-color-accent)";
   if (compact) {
     return `<svg viewBox="0 0 28 28" fill="none" aria-hidden="true" style="width: var(--flank-scale-icon-20); height: var(--flank-scale-icon-20)">
       <circle cx="14" cy="14" r="10" stroke="var(--flank-color-track-bg)" stroke-width="3"/>
-      <circle cx="14" cy="14" r="10" stroke="var(--flank-color-accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
+      <circle cx="14" cy="14" r="10" stroke="${strokeColor}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
     </svg>`;
   }
   return `<svg viewBox="0 0 28 28" fill="none" aria-hidden="true" style="width: var(--flank-scale-ring-tile); height: var(--flank-scale-ring-tile)">
     <circle cx="14" cy="14" r="10" stroke="var(--flank-color-track-bg)" stroke-width="3"/>
-    <circle cx="14" cy="14" r="10" stroke="var(--flank-color-accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
-    <text x="14" y="17.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor">${Math.round(clamped)}</text>
+    <circle cx="14" cy="14" r="10" stroke="${strokeColor}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} 62.8" transform="rotate(-90 14 14)"/>
+    <text x="14" y="17.2" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor">${clamped}</text>
   </svg>`;
 }
 function renderBadge(count) {
@@ -2145,18 +2092,6 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
           extraClass: "",
           html: `<span class="flank-row-left"><span class="flank-row-code">net</span><span>ports</span></span><span class="flank-row-right">${state2.network?.pingMs ?? 14}ms</span>`
         };
-      case "ai":
-        return {
-          ariaLabel: `AI usage, ${state2.ai.totalPercent} percent`,
-          extraClass: "",
-          html: `<span class="flank-row-left"><span class="flank-row-code">ai</span><span>usage</span></span><span class="flank-row-right">${state2.ai.totalPercent}%</span>`
-        };
-      case "activity":
-        return {
-          ariaLabel: `AI activity, ${state2.activity?.activeCount ?? 0} active sessions`,
-          extraClass: "",
-          html: `<span class="flank-row-left"><span class="flank-row-code">act</span><span>agents</span></span><span class="flank-row-right is-accent">${state2.activity?.activeCount ?? 0}</span>`
-        };
       case "bluetooth":
         return {
           ariaLabel: `Bluetooth, ${state2.bluetooth?.connectedCount ?? 0} connected devices`,
@@ -2239,18 +2174,6 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
           extraClass: "",
           html: `<span class="flank-tile-value">${state2.network?.pingMs ?? 14}ms</span>${railIndicator}`
         };
-      case "ai":
-        return {
-          ariaLabel: `AI usage, ${state2.ai.totalPercent} percent`,
-          extraClass: "",
-          html: `${renderAiRingSvg(state2.ai.totalPercent, true)}${railIndicator}`
-        };
-      case "activity":
-        return {
-          ariaLabel: `AI activity, ${state2.activity?.activeCount ?? 0} active`,
-          extraClass: "",
-          html: `${iconSvg("activity")}${railIndicator}`
-        };
       case "bluetooth":
         return {
           ariaLabel: `Bluetooth, ${state2.bluetooth?.connectedCount ?? 0} devices`,
@@ -2277,7 +2200,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         return {
           ariaLabel: `CPU ${state2.stats.cpuPercent} percent`,
           extraClass: "",
-          html: renderAiRingSvg(state2.stats.cpuPercent, false)
+          html: renderRingMeterSvg(state2.stats.cpuPercent, false)
         };
       case "battery":
         return {
@@ -2332,18 +2255,6 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
           ariaLabel: `Network ${state2.network?.pingMs ?? 14}ms`,
           extraClass: "is-widget-pill",
           html: `${iconSvg("wifi")}${state2.network?.pingMs ?? 14}ms`
-        };
-      case "ai":
-        return {
-          ariaLabel: `AI usage, ${state2.ai.totalPercent} percent`,
-          extraClass: "is-widget-pill",
-          html: `${renderAiRingSvg(state2.ai.totalPercent, true)}${state2.ai.totalPercent}%`
-        };
-      case "activity":
-        return {
-          ariaLabel: `AI activity, ${state2.activity?.activeCount ?? 0} active sessions`,
-          extraClass: "is-widget-pill",
-          html: `${iconSvg("activity")}Agents (${state2.activity?.activeCount ?? 0})`
         };
       case "bluetooth":
         return {
@@ -2447,22 +2358,6 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         ariaLabel: `Network ${state2.network?.pingMs ?? 14}ms`,
         extraClass: "",
         html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("wifi", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(ping)}</span></span>`
-      };
-    }
-    case "ai": {
-      const aiVal = `${state2.ai.totalPercent}%`;
-      return {
-        ariaLabel: `AI usage, ${state2.ai.totalPercent} percent`,
-        extraClass: "",
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon" style="width: 20px; height: 20px">${renderAiRingSvg(state2.ai.totalPercent, true)}</span><span class="flank-widget-value flank-num">${truncateValue(aiVal)}</span></span>`
-      };
-    }
-    case "activity": {
-      const cnt = state2.activity?.activeCount ?? 0;
-      return {
-        ariaLabel: `AI activity, ${cnt} active sessions`,
-        extraClass: "",
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("activity", 20)}</span><span class="flank-widget-value flank-num">${cnt}a</span></span>${renderBadge(cnt)}`
       };
     }
     case "bluetooth":
@@ -3211,60 +3106,6 @@ function renderNetworkCardInner(state2) {
     </div>
   `;
 }
-function renderAiCardInner(state2) {
-  const ai = state2.ai || {
-    totalPercent: 37,
-    planName: "Google AI Pro Plan",
-    connected: true,
-    resetText: "Resets in 23 days",
-    categories: [
-      { label: "Gemini 2.0 Flash", percent: 42 },
-      { label: "Gemini 1.5 Pro", percent: 28 },
-      { label: "Coding Agents & Tools", percent: 19 }
-    ]
-  };
-  const clamped = Math.max(0, Math.min(100, ai.totalPercent));
-  const circumference = 213.6;
-  const dash = (clamped / 100 * circumference).toFixed(1);
-  const catRows = (ai.categories || []).map(
-    (c) => `<div class="flank-meter">
-        <div class="flank-meter__header">
-          <span class="flank-meter__header-label">${escapeHtml2(c.label)}</span>
-          <span class="flank-meter__header-val">${c.percent}%</span>
-        </div>
-        <div class="flank-meter__bar"><div class="flank-meter__fill" style="width: ${c.percent}%"></div></div>
-      </div>`
-  ).join("");
-  return `
-    <div class="flank-card__header">
-      <div style="display:flex; align-items:center; gap: 8px; min-width: 0;">
-        <span class="flank-card__title">AI Usage</span>
-        <span class="flank-live-dot" style="background: ${ai.connected !== false ? "#10B981" : "#F59E0B"}; flex-shrink: 0;"></span>
-      </div>
-      <span class="flank-chip" style="height: 22px; padding: 0 10px; font-size: 11px; flex-shrink: 0; white-space: nowrap;">
-        ${escapeHtml2(ai.planName || "Google AI Pro")}
-      </span>
-    </div>
-    <div style="display:flex; align-items:center; gap: 14px; padding: 4px 0;">
-      <svg viewBox="0 0 88 88" fill="none" role="img" aria-label="${clamped} percent of usage limit used" style="width: 64px; height: 64px; flex-shrink: 0;">
-        <circle cx="44" cy="44" r="34" stroke="var(--flank-color-track-bg)" stroke-width="7"/>
-        <circle cx="44" cy="44" r="34" stroke="var(--flank-color-accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${dash} 213.6" transform="rotate(-90 44 44)"/>
-        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor">${clamped}%</text>
-      </svg>
-      <div style="display:flex; flex-direction:column; gap: 2px; min-width: 0;">
-        <span style="font-size: 13px; font-weight: 600; color: var(--flank-color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Model Consumption</span>
-        <span style="font-size: 11px; color: var(--flank-color-text-muted);">${escapeHtml2(ai.resetText || "Monthly quota")}</span>
-      </div>
-    </div>
-    <div style="display:flex; flex-direction:column; gap: 6px;">
-      ${catRows}
-    </div>
-    <button type="button" class="flank-btn is-secondary" style="width: 100%; justify-content: center; height: 30px; font-size: 11px; margin-top: 4px; gap: 6px;" data-action="open-settings" data-settings-tab="widgets">
-      <span>Connect / Adjust AI Plan</span>
-      <span style="display:flex; width: 12px; height: 12px; flex-shrink: 0;">${iconSvg("arrow-up-right", 12)}</span>
-    </button>
-  `;
-}
 function renderClipboardCardInner(state2) {
   const recent = state2.clipboard.items.slice(0, 3);
   const rows = recent.map(
@@ -3312,53 +3153,6 @@ function renderWidgetsGridCardInner(state2) {
     <div class="flank-widgets-grid">
       ${widgetTiles}
     </div>
-  `;
-}
-function renderActivityCardInner(state2) {
-  const act = state2.activity || {
-    runningCount: 0,
-    waitingCount: 0,
-    activeSessions: []
-  };
-  const sessions = act.activeSessions || [];
-  const total = sessions.length;
-  const sessionRows = sessions.map((s) => {
-    const statusColor = s.status === "running" ? "#10B981" : s.status === "waiting" ? "#F59E0B" : "#64748B";
-    const statusLabel = s.status === "running" ? "Active" : s.status === "waiting" ? "Waiting" : "Idle";
-    return `
-      <div class="flank-subcard" style="padding: 10px 12px; border-radius: 10px; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); display:flex; flex-direction:column; gap: 6px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; align-items:center; gap: 6px; min-width: 0;">
-            <span style="display:flex; width: 14px; height: 14px; color: var(--flank-color-accent); flex-shrink: 0;">${iconSvg("activity", 14)}</span>
-            <span style="font-size: 13px; font-weight: 600; color: var(--flank-color-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml2(s.agentName)}</span>
-          </div>
-          <span class="flank-chip" style="height: 20px; padding: 0 6px; font-size: 10px; display:flex; align-items:center; gap: 4px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor};"></span>
-            ${statusLabel}
-          </span>
-        </div>
-        <div style="font-size: 11px; color: var(--flank-color-text-muted); display:flex; justify-content:space-between; align-items:center;">
-          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 170px;" title="${escapeHtml2(s.projectPath || s.projectName)}">${escapeHtml2(s.projectName || "Active Task")}</span>
-          <span class="tabular-nums">${s.memoryMb ? `${Math.round(s.memoryMb)} MB` : `PID ${s.pid}`}</span>
-        </div>
-      </div>
-    `;
-  }).join("");
-  return `
-    <div class="flank-card__header">
-      <div style="display:flex; align-items:center; gap: 8px;">
-        <span class="flank-card__title">AI Agent Activity</span>
-        <span class="flank-live-pill">
-          <span class="flank-live-dot"></span>
-          ${total} ${total === 1 ? "task" : "tasks"}
-        </span>
-      </div>
-    </div>
-    ${total === 0 ? renderEmptyState("No AI agent tasks active", "Coding agents & CLI tasks will appear here") : `
-      <div style="display:flex; flex-direction:column; gap: 8px;">
-        ${sessionRows}
-      </div>
-    `}
   `;
 }
 function renderBluetoothCardInner(state2) {
@@ -3460,17 +3254,9 @@ function renderHoverCardHtml(state2, theme) {
       label = "Network and dev ports";
       inner = renderNetworkCardInner(state2);
       break;
-    case "ai":
-      label = "AI usage";
-      inner = renderAiCardInner(state2);
-      break;
     case "clipboard":
       label = "Clipboard history";
       inner = renderClipboardCardInner(state2);
-      break;
-    case "activity":
-      label = "AI Agent Activity";
-      inner = renderActivityCardInner(state2);
       break;
     case "bluetooth":
       label = "Bluetooth & Peripherals";
@@ -5080,48 +4866,6 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
       label: "Launch Flank on Windows sign-in",
       description: "Automatically starts Flank in background.",
       controlHtml: Switch({ checked: Boolean(state2.autostart), actionAttr: 'data-action="toggle-autostart"' })
-    })}
-        <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); margin: 8px 0;"></div>
-        ${SectionHeader({
-      title: "AI Model Usage & Plan Connection",
-      description: "Connect your Google AI Pro / Gemini API key to track real token limits, models, and usage."
-    })}
-        ${Row({
-      label: "AI Subscription / Plan",
-      description: "Provider to monitor in the AI widget.",
-      controlHtml: `
-            <select id="flank-ai-provider-select" class="flank-input" style="width: 220px; height: 32px;">
-              <option value="google" selected>Google AI Pro (Gemini 2.0 / 1.5)</option>
-              <option value="google-one">Google One AI Premium</option>
-              <option value="openai">OpenAI ChatGPT Plus</option>
-              <option value="claude">Anthropic Claude Pro</option>
-            </select>
-          `
-    })}
-        ${Row({
-      label: "Google Gemini API Key",
-      description: "Used to verify connection and query model quota.",
-      controlHtml: `
-            <div style="display:flex; gap: 8px; width: 260px;">
-              <input type="password" id="flank-ai-apikey-input" class="flank-input" style="flex: 1; height: 32px;" placeholder="AIzaSy..." value="${escapeHtml5(state2.ai?.apiKey || "")}" />
-              <button type="button" class="flank-btn is-secondary" data-action="test-ai-key" style="height: 32px; padding: 0 10px; font-size: 11px;">Test</button>
-            </div>
-          `
-    })}
-        ${Row({
-      label: "Plan Quota Tier",
-      description: "Configures model breakdown and monthly cycle.",
-      controlHtml: `
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 8px;">
-              <select id="flank-ai-plan-select" class="flank-input" style="width: 260px; height: 32px;">
-                <option value="pro" selected>Google AI Pro (2,000,000 tokens)</option>
-                <option value="premium">Google One AI Premium (2M context)</option>
-                <option value="flash">Gemini Flash Pay-as-you-go</option>
-                <option value="free">Free Tier (15 RPM / 1M TPM)</option>
-              </select>
-              <button type="button" class="flank-btn is-primary" data-action="save-ai-settings" style="height: 32px; padding: 0 14px;">Save AI Settings</button>
-            </div>
-          `
     })}
       </div>
     `;
@@ -7253,49 +6997,6 @@ function setupEventDelegation() {
       renderApp();
       return;
     }
-    if (action === "test-ai-key") {
-      const keyInput = document.getElementById("flank-ai-apikey-input");
-      const keyVal = keyInput?.value.trim() || "";
-      btn.textContent = "Testing...";
-      try {
-        const res = await window.pywebview?.api?.test_ai_key?.(keyVal);
-        if (res?.ok) {
-          alert(res.message || "Connected to Google Gemini API successfully!");
-        } else {
-          alert(res?.message || "Connection check failed. Please verify API key.");
-        }
-      } catch (e) {
-        alert("Error connecting: " + String(e));
-      } finally {
-        btn.textContent = "Test";
-      }
-      return;
-    }
-    if (action === "save-ai-settings") {
-      const keyInput = document.getElementById("flank-ai-apikey-input");
-      const provSelect = document.getElementById("flank-ai-provider-select");
-      const planSelect = document.getElementById("flank-ai-plan-select");
-      const payload = {
-        apiKey: keyInput?.value.trim() || "",
-        provider: provSelect?.value || "google",
-        plan: planSelect?.value || "pro"
-      };
-      btn.textContent = "Saving...";
-      try {
-        const res = await window.pywebview?.api?.save_ai_settings?.(payload);
-        if (res?.ai) {
-          state.ai = res.ai;
-        }
-      } catch (e) {
-        console.error("Failed to save AI settings:", e);
-      } finally {
-        btn.textContent = "Saved!";
-        setTimeout(() => {
-          renderApp();
-        }, 600);
-      }
-      return;
-    }
     const mediaAction = btn.getAttribute("data-media-action");
     if (mediaAction) {
       if (mediaAction === "play-pause") {
@@ -8205,14 +7906,8 @@ window.flankReceiveHostUpdate = (patch) => {
   if (patch.network) {
     state.network = { ...state.network, ...patch.network };
   }
-  if (patch.ai) {
-    state.ai = { ...state.ai, ...patch.ai };
-  }
   if (patch.clipboard) {
     state.clipboard = { ...state.clipboard, ...patch.clipboard };
-  }
-  if (patch.activity) {
-    state.activity = { ...state.activity, ...patch.activity };
   }
   if (patch.bluetooth) {
     state.bluetooth = { ...state.bluetooth, ...patch.bluetooth };
@@ -8229,7 +7924,7 @@ window.flankReceiveHostUpdate = (patch) => {
   }
   if (currentView === "card" && state.activeWidget && !prefsChanged) {
     const w = state.activeWidget;
-    const hasWidgetUpdate = w === "stats" && !!patch.stats || w === "battery" && !!patch.battery || w === "weather" && !!patch.weather || w === "player" && !!patch.player || w === "focus" && !!patch.focus || w === "clock" && !!patch.clock || w === "scratchpad" && !!patch.scratchpad || w === "colorpicker" && !!patch.colorpicker || w === "calendar" && !!patch.calendar || w === "audio" && !!patch.audio || w === "network" && !!patch.network || w === "ai" && !!patch.ai || w === "clipboard" && !!patch.clipboard || w === "activity" && !!patch.activity || w === "bluetooth" && !!patch.bluetooth;
+    const hasWidgetUpdate = w === "stats" && !!patch.stats || w === "battery" && !!patch.battery || w === "weather" && !!patch.weather || w === "player" && !!patch.player || w === "focus" && !!patch.focus || w === "clock" && !!patch.clock || w === "scratchpad" && !!patch.scratchpad || w === "colorpicker" && !!patch.colorpicker || w === "calendar" && !!patch.calendar || w === "audio" && !!patch.audio || w === "network" && !!patch.network || w === "clipboard" && !!patch.clipboard || w === "bluetooth" && !!patch.bluetooth;
     if (!hasWidgetUpdate) {
       return;
     }
@@ -8268,7 +7963,6 @@ async function bootstrap() {
     state.clipboard.count = 0;
     state.calendar.events = [];
     state.calendar.nextSummary = "";
-    if (state.aiTasks) state.aiTasks = [];
     if (state.bluetooth) state.bluetooth.devices = [];
   }
   initDockState(state.dockState || (state.startCollapsed ? "collapsed" : "expanded"));

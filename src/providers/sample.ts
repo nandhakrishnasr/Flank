@@ -203,17 +203,6 @@ export function createSampleState(): FlankState {
         shortcut: 'Alt+I',
         enabled: false,
       },
-      {
-        id: 'widget-ai',
-        group: 'widgets',
-        kind: 'widget',
-        label: 'AI usage',
-        shortCode: 'ai',
-        icon: 'globe',
-        widgetKind: 'ai',
-        shortcut: 'Alt+A',
-        enabled: false,
-      },
     ],
     clipboard: {
       count: 24,
@@ -403,49 +392,6 @@ export function createSampleState(): FlankState {
       ports: [
         { port: 3000, pid: 14208, processName: 'node.exe', url: 'http://localhost:3000' },
         { port: 8080, pid: 9812, processName: 'python.exe', url: 'http://localhost:8080' },
-      ],
-    },
-    ai: {
-      totalPercent: 68,
-      planName: 'Google AI Pro Plan',
-      connected: true,
-      resetText: 'Resets in 12 days',
-      categories: [
-        { label: 'Claude 3.7 Sonnet', percent: 74 },
-        { label: 'Gemini 2.5 Pro', percent: 45 },
-        { label: 'GPT-4.5 Preview', percent: 32 },
-      ],
-    },
-    activity: {
-      activeCount: 2,
-      sessions: [
-        {
-          id: 'agent-1',
-          name: 'AI Coding Assistant',
-          project: 'Workspace Engine',
-          status: 'running',
-          statusText: 'Active session · code generation',
-          memoryMb: 412.5,
-          pid: 14208,
-        },
-        {
-          id: 'agent-2',
-          name: 'Research & Context Agent',
-          project: 'Knowledge Graph RAG',
-          status: 'waiting',
-          statusText: 'Awaiting telemetry validation',
-          memoryMb: 285.3,
-          pid: 21840,
-        },
-        {
-          id: 'agent-3',
-          name: 'Task & Build Worker',
-          project: 'Automation Pipeline',
-          status: 'idle',
-          statusText: 'Standby · watching changes',
-          memoryMb: 92.4,
-          pid: 10564,
-        },
       ],
     },
     bluetooth: {

@@ -963,48 +963,6 @@ export function renderSettingsWindowHtml(
           description: 'Automatically starts Flank in background.',
           controlHtml: Switch({ checked: Boolean(state.autostart), actionAttr: 'data-action="toggle-autostart"' }),
         })}
-        <div style="border-top: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); margin: 8px 0;"></div>
-        ${SectionHeader({
-          title: 'AI Model Usage & Plan Connection',
-          description: 'Connect your Google AI Pro / Gemini API key to track real token limits, models, and usage.',
-        })}
-        ${Row({
-          label: 'AI Subscription / Plan',
-          description: 'Provider to monitor in the AI widget.',
-          controlHtml: `
-            <select id="flank-ai-provider-select" class="flank-input" style="width: 220px; height: 32px;">
-              <option value="google" selected>Google AI Pro (Gemini 2.0 / 1.5)</option>
-              <option value="google-one">Google One AI Premium</option>
-              <option value="openai">OpenAI ChatGPT Plus</option>
-              <option value="claude">Anthropic Claude Pro</option>
-            </select>
-          `,
-        })}
-        ${Row({
-          label: 'Google Gemini API Key',
-          description: 'Used to verify connection and query model quota.',
-          controlHtml: `
-            <div style="display:flex; gap: 8px; width: 260px;">
-              <input type="password" id="flank-ai-apikey-input" class="flank-input" style="flex: 1; height: 32px;" placeholder="AIzaSy..." value="${escapeHtml(state.ai?.apiKey || '')}" />
-              <button type="button" class="flank-btn is-secondary" data-action="test-ai-key" style="height: 32px; padding: 0 10px; font-size: 11px;">Test</button>
-            </div>
-          `,
-        })}
-        ${Row({
-          label: 'Plan Quota Tier',
-          description: 'Configures model breakdown and monthly cycle.',
-          controlHtml: `
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap: 8px;">
-              <select id="flank-ai-plan-select" class="flank-input" style="width: 260px; height: 32px;">
-                <option value="pro" selected>Google AI Pro (2,000,000 tokens)</option>
-                <option value="premium">Google One AI Premium (2M context)</option>
-                <option value="flash">Gemini Flash Pay-as-you-go</option>
-                <option value="free">Free Tier (15 RPM / 1M TPM)</option>
-              </select>
-              <button type="button" class="flank-btn is-primary" data-action="save-ai-settings" style="height: 32px; padding: 0 14px;">Save AI Settings</button>
-            </div>
-          `,
-        })}
       </div>
     `;
   } else {

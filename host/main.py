@@ -501,7 +501,6 @@ DEFAULT_ITEMS: List[Dict[str, Any]] = [
     {'id': 'widget-battery', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'battery', 'label': 'Laptop battery', 'shortCode': 'bat', 'icon': 'battery', 'shortcut': 'Alt+B', 'enabled': True},
     {'id': 'widget-audio', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'audio', 'label': 'Audio & mic mixer', 'shortCode': 'vol', 'icon': 'volume', 'shortcut': 'Alt+U', 'enabled': True},
     {'id': 'widget-focus', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'focus', 'label': 'Focus timer', 'shortCode': 'fcs', 'icon': 'focus', 'shortcut': 'Alt+F', 'enabled': True},
-    {'id': 'widget-activity', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'activity', 'label': 'AI activity', 'shortCode': 'act', 'icon': 'activity', 'shortcut': 'Alt+Y', 'enabled': True},
     {'id': 'widget-bluetooth', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'bluetooth', 'label': 'Bluetooth & peripherals', 'shortCode': 'bt', 'icon': 'bluetooth', 'shortcut': 'Alt+E', 'enabled': True},
     {'id': 'widget-calendar', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'calendar', 'label': 'Agenda & meetings', 'shortCode': 'cal', 'icon': 'calendar', 'shortcut': 'Alt+M', 'enabled': True},
     # Secondary Widgets (Available in Settings, Default OFF)
@@ -511,7 +510,6 @@ DEFAULT_ITEMS: List[Dict[str, Any]] = [
     {'id': 'widget-scratchpad', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'scratchpad', 'label': 'Quick scratchpad', 'shortCode': 'pad', 'icon': 'scratchpad', 'shortcut': 'Alt+N', 'enabled': False},
     {'id': 'widget-colorpicker', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'colorpicker', 'label': 'Color picker', 'shortCode': 'clr', 'icon': 'eyedropper', 'shortcut': 'Alt+K', 'enabled': False},
     {'id': 'widget-network', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'network', 'label': 'Network & ports', 'shortCode': 'net', 'icon': 'wifi', 'shortcut': 'Alt+I', 'enabled': False},
-    {'id': 'widget-ai', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'ai', 'label': 'AI usage', 'shortCode': 'ai', 'icon': 'globe', 'shortcut': 'Alt+A', 'enabled': False},
 ]
 
 
@@ -785,13 +783,20 @@ class FlankHostApi:
                             if not item.get('group'):
                                 item['group'] = 'apps' if item.get('kind') in ('app', 'link') else 'widgets'
                                 changed = True
+                    # Remove obsolete widgets if present in saved config
+                    old_len = len(items)
+                    items = [it for it in items if it.get('id') not in ('widget-ai', 'widget-activity') and it.get('widgetKind') not in ('ai', 'activity')]
+                    if len(items) != old_len:
+                        prefs['items'] = items
+                        changed = True
+                    existing_ids = {it.get('id') for it in items if isinstance(it, dict) and it.get('id')}
+
                     # Merge new default widgets (e.g., Focus timer, World clock) if not yet in saved config
                     migrated_ids = set(prefs.get('migratedWidgets') or [])
                     for def_item in DEFAULT_ITEMS:
                         did = def_item['id']
                         if did not in existing_ids:
-                            ai_idx = next((idx for idx, it in enumerate(items) if it.get('id') == 'widget-ai'), len(items))
-                            items.insert(ai_idx, dict(def_item))
+                            items.append(dict(def_item))
                             migrated_ids.add(did)
                             changed = True
                         elif did not in migrated_ids:
@@ -879,9 +884,7 @@ class FlankHostApi:
             'calendar': self._providers.sample_calendar(),
             'audio': self._providers.sample_audio(),
             'network': self._providers.sample_network(),
-            'ai': self._providers.sample_ai_usage(),
             'bluetooth': self._providers.sample_bluetooth(),
-            'activity': self._providers.sample_ai_activity(),
             'topProcesses': self._providers.sample_top_processes(30),
             'backdrop': init_backdrop,
         }
@@ -1499,12 +1502,9 @@ class FlankHostApi:
             'focus': 292,
             'network': 310,
             'bluetooth': 540,
-            'ai_usage': 290,
-            'ai': 290,
             'scratchpad': 310,
             'clipboard': 350,
             'clock': 420,
-            'activity': 320,
             'colorpicker': 290,
         }
         cur_theme = self.prefs.get('themeId', 'paper')
@@ -1919,14 +1919,6 @@ class FlankHostApi:
         self._broadcast_update(payload)
         return {'weather': wx}
 
-    def save_ai_settings(self, ai_data: Dict[str, Any]) -> Dict[str, Any]:
-        res = self._providers.save_ai_settings(ai_data)
-        self._broadcast_update({'ai': res})
-        return {'ok': True, 'ai': res}
-
-    def test_ai_key(self, api_key: str) -> Dict[str, Any]:
-        return self._providers.test_ai_key(api_key)
-
     def register_item_shortcut(self, item_id: str, shortcut: str) -> Dict[str, Any]:
         parsed = parse_shortcut_combo(shortcut)
         if not parsed:
@@ -2087,7 +2079,7 @@ def start_hotkey_listener(api: FlankHostApi) -> None:
                         wkind = item.get('widgetKind') or item.get('widget')
                         if wkind in ('clipboard', 'stats', 'battery', 'clock'):
                             api.open_window(wkind)
-                        elif wkind in ('weather', 'player', 'focus', 'scratchpad', 'colorpicker', 'calendar', 'audio', 'network', 'ai'):
+                        elif wkind in ('weather', 'player', 'focus', 'scratchpad', 'colorpicker', 'calendar', 'audio', 'network'):
                             api.show_hover_card(wkind, 260)
             except Exception:
                 pass
@@ -2123,7 +2115,6 @@ def start_telemetry_loop(api: FlankHostApi) -> None:
             }
             if tick % 2 == 0:
                 payload['topProcesses'] = api._providers.sample_top_processes(30)
-                payload['activity'] = api._providers.sample_ai_activity()
             if tick % 4 == 0:
                 payload['bluetooth'] = api._providers.sample_bluetooth()
             if tick % 5 == 0:
