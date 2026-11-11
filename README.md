@@ -19,6 +19,8 @@
     &nbsp;·&nbsp;
     <a href="#keyboard-shortcuts">Shortcuts</a>
     &nbsp;·&nbsp;
+    <a href="#create-your-own-widget">Build a Widget</a>
+    &nbsp;·&nbsp;
     <a href="docs/wiki/Home.md">Wiki</a>
     &nbsp;·&nbsp;
     <a href="#development">Development</a>
@@ -179,6 +181,48 @@ Hovering any tile opens its live interactive card beside the dock—or open the 
   - `#card` (`view=card`): Hover flyout card aligned to the active dock tile.
   - `#modal` (`view=modal`): Focusable Settings, Clipboard History, World Clock, and System Telemetry dialogs (`960×680`).
 - **Frontend & Design Tokens** — Vanilla TypeScript bundled via `esbuild` into `public/bundle.js`, styled strictly with `--flank-<group>-<token>` custom properties (`themes/` + `public/components.css`).
+
+---
+
+## Create Your Own Widget
+
+Flank widgets follow a clean, modular pattern across the TypeScript UI and Python Windows host. You can build a new widget manually using the checklist below—or paste the prompt directly into any AI coding agent (**Claude Code**, **Cursor**, **Antigravity**, **Codex**, **GitHub Copilot**, etc.).
+
+### Step-by-Step Checklist
+
+1. **Define types & sample state**
+   - Add your widget key to `WidgetKind` and add its optional state payload to `FlankState` in `src/providers/types.ts`.
+   - Provide offline preview data and a default `DockItem` (`kind: 'widget'`, `widgetKind: '<id>'`) in `createSampleState()` in `src/providers/sample.ts`.
+2. **Add an icon, dock tile & flyout card**
+   - Add a `24×24` stroke icon (or reuse an existing one) in `src/ui/icons.ts` (`iconSvg`).
+   - Add the dock tile compact badge/text and accessible ARIA label in `renderWidgetTileInner` inside `src/ui/dock.ts`.
+   - Implement `render<Name>CardInner(state)` and wire it into `renderCardBody` in `src/ui/cards.ts`. Use Flank's shared components (`.flank-card__hdr`, `.flank-pill`, `.flank-chip`, `.flank-btn`) and `--flank-*` CSS variables (`public/components.css`) so all 7 themes work automatically.
+3. **Wire interactivity & optional host data**
+   - Handle card button clicks/inputs via `data-action="..."` in `src/main.ts` and declare any new `window.pywebview?.api` methods.
+   - If the widget needs live OS data, background polling, or commands, add provider helpers in `host/providers.py`, register the default item in `DEFAULT_ITEMS`, hydrate initial state in `get_initial_state()`, set the card height hint in `show_hover_card()`, and expose the bridge method on the API class in `host/main.py`.
+   - *(Optional)* Expose user preferences in `src/ui/windows.ts` (**Settings → Widgets**). Store any user secrets via Windows **DPAPI** (`CryptProtectData` / `CryptUnprotectData`), never plaintext JSON.
+4. **Bundle, test & visually preview**
+   - Rebundle with `npm run build:ui` and verify all tests/token checks pass with `npm test`.
+   - Inspect your card across themes in any browser via `public/_screenshot_harness.html?view=card&theme=paper&widget=<id>` (and `liquid-glass`, `terminal`, etc.), then launch `python host/main.py --smoke-test` and `python host/main.py`.
+
+### Ready-to-Use AI Agent Prompt
+
+Copy this prompt into your preferred coding agent inside the `Flank` repository and fill in the bracketed section at the top:
+
+```text
+Add a new widget to Flank:
+- Widget name: [e.g., Pomodoro Tasks / Spotify / Disk Usage]
+- Widget ID (widgetKind): [e.g., mywidget]
+- Dock badge / short text: [e.g., 2-4 chars or status metric]
+- Features & interactions: [describe what the flyout card displays and what buttons/inputs do]
+- Data source: [UI-only / local Windows command or API / web API]
+
+Follow Flank's exact architecture and conventions:
+1. Update `src/providers/types.ts` (add to `WidgetKind` and define the payload interface on `FlankState`) and `src/providers/sample.ts` (add realistic offline sample data and default `DockItem`).
+2. Add or reuse an SVG icon in `src/ui/icons.ts` (`iconSvg`), render the dock tile in `src/ui/dock.ts` (`renderWidgetTileInner`), and implement the flyout card in `src/ui/cards.ts` (`renderCardBody`) reusing `.flank-card__hdr`, `.flank-chip`, `.flank-btn`, `.flank-pill`, and `--flank-*` CSS tokens so all 7 themes (`paper`, `glass`, `liquid-glass`, `aurora`, `nord`, `terminal`, `rail`) work with proper WCAG contrast. Escape all dynamic strings with `escapeHtml` and never use `eval()` or unsafe inline handlers.
+3. Handle UI actions cleanly in `src/main.ts` (`data-action`). If Windows OS data, background fetching, or host actions are needed, implement them in `host/providers.py` and expose the bridge + `DEFAULT_ITEMS` + `get_initial_state` + flyout height hint in `host/main.py`. If the widget stores any API token/secret, encrypt it locally using Windows DPAPI rather than plaintext JSON.
+4. Add unit tests if introducing parsing/state logic, run `npm run build:ui` and `npm test`, verify the rendered card visually via `public/_screenshot_harness.html?view=card&theme=paper&widget=<widgetKind>`, and run `python host/main.py --smoke-test` to confirm zero startup regressions.
+```
 
 ---
 
