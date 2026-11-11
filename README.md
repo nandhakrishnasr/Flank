@@ -57,6 +57,18 @@ Hovering any widget tile on the dock slides out its interactive flyout card with
 | :---: | :---: | :---: | :---: |
 | <img src="docs/screens/flyout_clipboard.png" alt="Clipboard Flyout" width="210" /> | <img src="docs/screens/flyout_scratchpad.png" alt="Scratchpad Flyout" width="210" /> | <img src="docs/screens/flyout_colorpicker.png" alt="Color Picker Flyout" width="210" /> | <img src="docs/screens/flyout_network.png" alt="Network Flyout" width="210" /> |
 
+| Bluetooth Devices | Tasks To-Do | Calc | Storage Drives |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/flyout_bluetooth.png" alt="Bluetooth Flyout" width="210" /> | <img src="docs/screens/flyout_tasks.png" alt="Tasks To-Do Flyout" width="210" /> | <img src="docs/screens/flyout_calculator.png" alt="Calc Flyout" width="210" /> | <img src="docs/screens/flyout_storage.png" alt="Storage Flyout" width="210" /> |
+
+| Display & Brightness | Privacy Controls | Focus Ambiance | Command Runner |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screens/flyout_display.png" alt="Display & Brightness Flyout" width="210" /> | <img src="docs/screens/flyout_privacy.png" alt="Privacy Flyout" width="210" /> | <img src="docs/screens/flyout_ambient.png" alt="Focus Ambiance Flyout" width="210" /> | <img src="docs/screens/flyout_runner.png" alt="Command Runner Flyout" width="210" /> |
+
+| GPU Telemetry | GitHub Activity | Active Widgets Drawer |
+| :---: | :---: | :---: |
+| <img src="docs/screens/flyout_gpu.png" alt="GPU Telemetry Flyout" width="210" /> | <img src="docs/screens/flyout_github.png" alt="GitHub Activity Flyout" width="210" /> | <img src="docs/screens/flyout_widgets.png" alt="Active Widgets Drawer" width="210" /> |
+
 ---
 
 ### Clipboard History, Settings & Theme Store

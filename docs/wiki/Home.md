@@ -46,6 +46,18 @@ Hovering any widget tile on the dock opens its live card without stealing keyboa
 | :---: | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_clipboard.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_scratchpad.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_colorpicker.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_network.png" width="210" /> |
 
+| Bluetooth Devices | Tasks To-Do | Calc | Storage Drives |
+| :---: | :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_bluetooth.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_tasks.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_calculator.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_storage.png" width="210" /> |
+
+| Display & Brightness | Privacy Controls | Focus Ambiance | Command Runner |
+| :---: | :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_display.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_privacy.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_ambient.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_runner.png" width="210" /> |
+
+| GPU Telemetry | GitHub Activity | Active Widgets Drawer |
+| :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_gpu.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_github.png" width="210" /> | <img src="https://raw.githubusercontent.com/nandhakrishnasr/Flank/master/docs/screens/flyout_widgets.png" width="210" /> |
+
 ---
 
 ### 3. Dock Collapse & Edge Tab (`Ctrl+Alt+F`)
