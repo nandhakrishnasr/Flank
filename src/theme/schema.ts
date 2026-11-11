@@ -677,7 +677,7 @@ export const LIQUID_GLASS_THEME: FlankTheme = {
   },
   glass: {
     mode: 'wallpaper-sampled',
-    modeNote: 'css-only | wallpaper-sampled (default) | flat. See ANTIGRAVITY_PROMPT.md part B.',
+    modeNote: 'css-only | wallpaper-sampled (default) | flat',
     tintRgb: '10,14,32',
     tintAlpha: 0.60,
     tintAlphaMin: 0.40,

@@ -215,7 +215,11 @@ export function renderFullStatsWindowHtml(state: FlankState, ui?: WindowUiState)
   const procs = state.topProcesses || [];
   const q = (ui?.processQuery || '').trim().toLowerCase();
   const filteredProcs = q ? procs.filter((p) => p.name.toLowerCase().includes(q) || String(p.pid).includes(q)) : procs;
-  const maxMem = procs.length > 0 ? Math.max(...procs.map((p) => p.memoryMb || 1), 100) : 100;
+  const getMemMb = (p: any): number => {
+    const v = Number(p?.memMb ?? p?.memoryMb ?? 0);
+    return Number.isFinite(v) ? v : 0;
+  };
+  const maxMem = procs.length > 0 ? Math.max(...procs.map((p) => getMemMb(p) || 1), 100) : 100;
 
   const coreBars = s.cores
     .map(
@@ -260,8 +264,8 @@ export function renderFullStatsWindowHtml(state: FlankState, ui?: WindowUiState)
           <td class="tabular-nums" style="padding: 6px 12px; color: var(--flank-color-text-muted); font-size: 11px;">${p.pid}</td>
           <td style="padding: 6px 12px; width: 220px;">
             <div style="display:flex; align-items:center; gap: 8px;">
-              <div class="flank-meter__bar" style="height: 6px; flex: 1; margin: 0; background: var(--flank-color-track-bg);"><div class="flank-meter__fill" style="width: ${Math.min(100, Math.round((p.memoryMb / maxMem) * 100))}%"></div></div>
-              <span class="tabular-nums" style="font-weight: 600; font-size: 12px; min-width: 60px; text-align: right;">${Math.round(p.memoryMb)} MB</span>
+              <div class="flank-meter__bar" style="height: 6px; flex: 1; margin: 0; background: var(--flank-color-track-bg);"><div class="flank-meter__fill" style="width: ${Math.min(100, Math.max(0, Math.round((getMemMb(p) / maxMem) * 100)))}%"></div></div>
+              <span class="tabular-nums" style="font-weight: 600; font-size: 12px; min-width: 60px; text-align: right;">${Math.round(getMemMb(p))} MB</span>
             </div>
           </td>
           <td class="tabular-nums" style="padding: 6px 12px; color: var(--flank-color-text-muted); text-align: right;">${p.threads || 1}</td>
@@ -525,20 +529,20 @@ export function renderClockWindowHtml(state: FlankState): string {
 
   const cityCards = c.cities
     .map(
-      (item) => `<div class="flank-preview-box" style="justify-content: space-between; align-items: center; padding: 12px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10);">
-        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10)">
-          <span class="flank-row-chip" style="width: var(--flank-scale-ring-tile); height: var(--flank-scale-ring-tile)">${iconSvg(item.isDay ? 'sun' : 'moon', 16)}</span>
-          <span style="display:flex; flex-direction:column; gap: var(--flank-scale-bar-thin)">
+      (item) => `<div class="flank-preview-box" style="justify-content: space-between; align-items: center; padding: 12px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10); flex-shrink: 0;">
+        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10); flex: 1; min-width: 0;">
+          <span class="flank-row-chip" style="width: var(--flank-scale-ring-tile); height: var(--flank-scale-ring-tile); flex-shrink: 0;">${iconSvg(item.isDay ? 'sun' : 'moon', 16)}</span>
+          <span style="display:flex; flex-direction:column; gap: var(--flank-scale-bar-thin); min-width: 0;">
             <span style="font-size: var(--flank-scale-font-body-sm); font-weight: 600; color: var(--flank-color-text);">${escapeHtml(item.city)}</span>
             <span class="flank-row-meta">${escapeHtml(item.country ? `${item.country} · ${item.timezone}` : item.timezone)} · ${escapeHtml(item.offsetText)}</span>
           </span>
         </span>
-        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10)">
-          <span style="display:flex; flex-direction:column; align-items:flex-end; gap: var(--flank-scale-bar-thin)">
-            <span class="flank-stat-val tabular-nums" style="font-size: var(--flank-scale-font-body-sm)">${escapeHtml(item.timeText)}</span>
-            <span class="flank-row-meta">${escapeHtml(item.dateText)}</span>
+        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10); flex-shrink: 0;">
+          <span style="display:flex; flex-direction:column; align-items:flex-end; gap: var(--flank-scale-bar-thin);">
+            <span class="flank-stat-val tabular-nums" style="font-size: var(--flank-scale-font-body-sm); white-space: nowrap;">${escapeHtml(item.timeText)}</span>
+            <span class="flank-row-meta" style="white-space: nowrap;">${escapeHtml(item.dateText)}</span>
           </span>
-          <button type="button" class="flank-ui-btn is-ghost" data-clock-remove="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.city)}" title="Remove ${escapeHtml(item.city)}" style="width: 28px; height: 28px; padding: 0;">
+          <button type="button" class="flank-ui-btn is-ghost" data-clock-remove="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.city)}" title="Remove ${escapeHtml(item.city)}" style="width: 28px; height: 28px; padding: 0; flex-shrink: 0;">
             ${iconSvg('trash', 14)}
           </button>
         </span>
@@ -601,8 +605,8 @@ export function renderClockWindowHtml(state: FlankState): string {
         </div>
 
         <div class="flank-preview-col" style="flex: 1; min-width: 0; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
-          <span class="flank-card-title">Saved world clocks</span>
-          <div style="display:flex; flex-direction:column; gap: var(--flank-scale-space-10)">
+          <span class="flank-card-title" style="flex-shrink: 0;">Saved world clocks</span>
+          <div style="display:flex; flex-direction:column; gap: var(--flank-scale-space-10); flex-shrink: 0;">
             ${cityCards || `<div class="flank-preview-box" style="padding: 16px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10);"><span class="flank-card-muted">No world clocks added yet. Search or click a quick-add city on the left.</span></div>`}
           </div>
         </div>
@@ -988,24 +992,6 @@ export function renderSettingsWindowHtml(
                 <div class="flank-chip-row" style="flex-wrap: wrap; gap: 6px;">
                   ${clockChips || '<span class="flank-card-muted" style="font-size: 11px;">None</span>'}
                 </div>
-              </div>
-            </div>
-          `,
-        })}
-
-        <!-- HABITS & HYDRATION GROUP -->
-        ${Card({
-          children: `
-            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
-              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
-                ${iconSvg('droplet', 16)} Habits &amp; Hydration
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Daily water target</div>
-                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Target number of water glasses or cups per day.</div>
-                </div>
-                <div style="font-size: 13px; font-weight: 600; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${state.habits?.waterGoal || 8} cups</div>
               </div>
             </div>
           `,

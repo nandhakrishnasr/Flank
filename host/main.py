@@ -3,6 +3,7 @@ import os
 os.environ['WEBVIEW2_DEFAULT_BACKGROUND_COLOR'] = '0'
 os.environ['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = '--disable-features=FluentScrollbar,OverlayScrollbar'
 
+import base64
 import ctypes
 from ctypes import wintypes
 import json
@@ -61,6 +62,58 @@ gdi32 = ctypes.WinDLL('gdi32', use_last_error=True)
 shell32 = ctypes.WinDLL('shell32', use_last_error=True)
 dwmapi = ctypes.WinDLL('dwmapi', use_last_error=True)
 ole32 = ctypes.WinDLL('ole32', use_last_error=True)
+crypt32 = ctypes.WinDLL('crypt32', use_last_error=True)
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+
+class _DATA_BLOB(ctypes.Structure):
+    _fields_ = [
+        ('cbData', wintypes.DWORD),
+        ('pbData', ctypes.POINTER(ctypes.c_ubyte)),
+    ]
+
+
+def _dpapi_encrypt_text(plaintext: str) -> str:
+    cleaned = (plaintext or '').strip()
+    if not cleaned:
+        return ''
+    if cleaned.startswith('dpapi:'):
+        return cleaned
+    try:
+        raw = cleaned.encode('utf-8')
+        buf = (ctypes.c_ubyte * len(raw)).from_buffer_copy(raw)
+        in_blob = _DATA_BLOB(len(raw), buf)
+        out_blob = _DATA_BLOB()
+        if crypt32.CryptProtectData(ctypes.byref(in_blob), 'FlankGitHubToken', None, None, None, 0, ctypes.byref(out_blob)):
+            try:
+                enc = ctypes.string_at(out_blob.pbData, out_blob.cbData)
+                return 'dpapi:' + base64.b64encode(enc).decode('ascii')
+            finally:
+                kernel32.LocalFree(out_blob.pbData)
+    except Exception:
+        pass
+    return cleaned
+
+
+def _dpapi_decrypt_text(stored: str) -> str:
+    val = (stored or '').strip()
+    if not val:
+        return ''
+    if not val.startswith('dpapi:'):
+        return val
+    try:
+        raw = base64.b64decode(val[len('dpapi:'):])
+        buf = (ctypes.c_ubyte * len(raw)).from_buffer_copy(raw)
+        in_blob = _DATA_BLOB(len(raw), buf)
+        out_blob = _DATA_BLOB()
+        if crypt32.CryptUnprotectData(ctypes.byref(in_blob), None, None, None, None, 0, ctypes.byref(out_blob)):
+            try:
+                return ctypes.string_at(out_blob.pbData, out_blob.cbData).decode('utf-8')
+            finally:
+                kernel32.LocalFree(out_blob.pbData)
+    except Exception:
+        pass
+    return ''
 
 GWL_EXSTYLE = -20
 WS_EX_TOOLWINDOW = 0x00000080
@@ -503,7 +556,6 @@ DEFAULT_ITEMS: List[Dict[str, Any]] = [
     {'id': 'widget-player', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'player', 'label': 'Mini player', 'shortCode': 'play', 'icon': 'equalizer', 'shortcut': 'Alt+P', 'enabled': True},
     {'id': 'widget-tasks', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'tasks', 'label': 'Quick to-do', 'shortCode': 'todo', 'icon': 'check-square', 'shortcut': 'Alt+T', 'enabled': True},
     {'id': 'widget-calculator', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'calculator', 'label': 'Smart calculator', 'shortCode': 'calc', 'icon': 'calculator', 'shortcut': 'Alt+Q', 'enabled': True},
-    {'id': 'widget-habits', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'habits', 'label': 'Habits & hydration', 'shortCode': 'hbt', 'icon': 'droplet', 'shortcut': 'Alt+H', 'enabled': True},
     {'id': 'widget-storage', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'storage', 'label': 'Storage & drives', 'shortCode': 'dsk', 'icon': 'hard-drive', 'shortcut': 'Alt+D', 'enabled': True},
     {'id': 'widget-display', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'display', 'label': 'Display & brightness', 'shortCode': 'dsp', 'icon': 'sun', 'shortcut': 'Alt+L', 'enabled': True},
     {'id': 'widget-gpu', 'group': 'widgets', 'kind': 'widget', 'widgetKind': 'gpu', 'label': 'GPU diagnostics', 'shortCode': 'gpu', 'icon': 'activity', 'shortcut': 'Alt+G', 'enabled': True},
@@ -695,9 +747,14 @@ class FlankHostApi:
         city = self.prefs.get('weatherCity')
         if city:
             self._providers._weather_city = city
-        gh_token = self.prefs.get('githubToken')
-        if gh_token:
+        raw_gh_token = self.prefs.get('githubToken')
+        if raw_gh_token:
+            gh_token = _dpapi_decrypt_text(str(raw_gh_token))
             self._providers._github_token = gh_token
+            # Migrate any legacy plaintext token on disk to DPAPI-encrypted form
+            if gh_token and not str(raw_gh_token).startswith('dpapi:'):
+                self.prefs['githubToken'] = _dpapi_encrypt_text(gh_token)
+                self._write_prefs_to_disk()
         self._card_hide_timer: threading.Timer | None = None
         self._card_open: bool = False
         self._card_pinned: bool = False
@@ -798,7 +855,7 @@ class FlankHostApi:
                                 changed = True
                     # Remove obsolete widgets if present in saved config
                     old_len = len(items)
-                    items = [it for it in items if it.get('id') not in ('widget-ai', 'widget-activity') and it.get('widgetKind') not in ('ai', 'activity')]
+                    items = [it for it in items if it.get('id') not in ('widget-ai', 'widget-activity', 'widget-habits') and it.get('widgetKind') not in ('ai', 'activity', 'habits')]
                     if len(items) != old_len:
                         prefs['items'] = items
                         changed = True
@@ -901,7 +958,6 @@ class FlankHostApi:
             'bluetooth': self._providers.sample_bluetooth(),
             'tasks': self._providers.sample_tasks(),
             'calculator': self._providers.sample_calculator(),
-            'habits': self._providers.sample_habits(),
             'storage': self._providers.sample_storage(),
             'display': self._providers.sample_display(),
             'privacy': self._providers.sample_privacy(),
@@ -1532,7 +1588,6 @@ class FlankHostApi:
             'colorpicker': 290,
             'tasks': 310,
             'calculator': 260,
-            'habits': 260,
             'storage': 280,
             'display': 240,
             'privacy': 220,
@@ -1940,12 +1995,6 @@ class FlankHostApi:
         self._broadcast_update(payload)
         return payload
 
-    def habits_action(self, action: str, val: int = 1) -> Dict[str, Any]:
-        data = self._providers.habits_action(action, val)
-        payload = {'habits': data}
-        self._broadcast_update(payload)
-        return payload
-
     def open_drive(self, drive_letter: str) -> bool:
         return self._providers.open_drive(drive_letter)
 
@@ -1990,7 +2039,7 @@ class FlankHostApi:
 
     def connect_github(self, token: str) -> Dict[str, Any]:
         cleaned = (token or '').strip()
-        self.prefs['githubToken'] = cleaned
+        self.prefs['githubToken'] = _dpapi_encrypt_text(cleaned)
         self._write_prefs_to_disk()
         data = self._providers.set_github_token(cleaned)
         payload = {'github': data}
@@ -2235,7 +2284,6 @@ def start_telemetry_loop(api: FlankHostApi) -> None:
                 payload['privacy'] = api._providers.sample_privacy()
             if tick % 6 == 0:
                 payload['display'] = api._providers.sample_display()
-                payload['habits'] = api._providers.sample_habits()
             if tick % 10 == 0:
                 payload['storage'] = api._providers.sample_storage()
                 payload['tasks'] = api._providers.sample_tasks()

@@ -44,7 +44,7 @@ function checkAccentContrast(accentHex: string): string | null {
     if (ratio < 3.0) {
       return `Warning: Contrast against surface is ${ratio.toFixed(1)}:1 (recommended >= 3:1). A high-contrast text color has been set.`;
     }
-  } catch {}
+  } catch { }
   return null;
 }
 
@@ -1400,7 +1400,7 @@ function setupEventDelegation(): void {
       state.widgetsCollapsed = !state.widgetsCollapsed;
       try {
         window.pywebview?.api?.set_widgets_collapsed?.(state.widgetsCollapsed);
-      } catch {}
+      } catch { }
       saveUserPrefs();
       renderApp();
       return;
@@ -1784,7 +1784,7 @@ function setupEventDelegation(): void {
       return;
     }
 
-    // 4c. Tasks, Calculator, Habits, Storage, Display, Privacy, Ambient, Runner
+    // 4c. Tasks, Calculator, Storage, Display, Privacy, Ambient, Runner
     if (action === 'add-task') {
       const taskInput = document.getElementById('flank-task-input') as HTMLInputElement | null;
       const text = taskInput?.value.trim() || '';
@@ -1861,7 +1861,7 @@ function setupEventDelegation(): void {
     if (action === 'copy-calc-result') {
       const res = state.calculator?.lastResult;
       if (res && navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(res).catch(() => {});
+        navigator.clipboard.writeText(res).catch(() => { });
       }
       return;
     }
@@ -1874,32 +1874,6 @@ function setupEventDelegation(): void {
       if (!state.calculator) state.calculator = { lastExpr: '', lastResult: '', history: [] };
       state.calculator.lastExpr = recallExpr;
       state.calculator.lastResult = res;
-      renderApp();
-      return;
-    }
-
-    if (action === 'habit-water-add') {
-      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
-      state.habits.waterGlasses += 1;
-      const updated = await window.pywebview?.api?.habits_action?.('add_water', 1);
-      if (updated?.habits) state.habits = updated.habits;
-      renderApp();
-      return;
-    }
-
-    if (action === 'habit-water-sub') {
-      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
-      state.habits.waterGlasses = Math.max(0, state.habits.waterGlasses - 1);
-      const updated = await window.pywebview?.api?.habits_action?.('sub_water', 1);
-      if (updated?.habits) state.habits = updated.habits;
-      renderApp();
-      return;
-    }
-
-    if (action === 'habit-log-stretch') {
-      if (state.habits) state.habits.lastStretchMin = 0;
-      const updated = await window.pywebview?.api?.habits_action?.('log_stretch');
-      if (updated?.habits) state.habits = updated.habits;
       renderApp();
       return;
     }
@@ -1932,45 +1906,6 @@ function setupEventDelegation(): void {
       if (!state.display) state.display = { brightness: val, nightLight: false, resolution: '2560 × 1440', refreshRate: 144, scaling: 100 };
       state.display.brightness = val;
       window.pywebview?.api?.set_brightness?.(val);
-      return;
-    }
-
-    if (action === 'select-refresh-rate') {
-      const rate = Number(btn.getAttribute('data-rate')) || 144;
-      const container = document.getElementById('flank-refresh-rate-options');
-      if (container) {
-        container.querySelectorAll('.flank-refresh-chip').forEach((c) => c.classList.remove('is-active'));
-        btn.classList.add('is-active');
-      }
-      const okBtn = document.getElementById('flank-apply-refresh-btn');
-      if (okBtn) okBtn.setAttribute('data-chosen-rate', String(rate));
-      const statusText = document.getElementById('flank-refresh-status');
-      if (statusText) statusText.textContent = `Selected: ${rate} Hz (click OK to apply)`;
-      return;
-    }
-
-    if (action === 'apply-refresh-rate') {
-      const okBtn = document.getElementById('flank-apply-refresh-btn');
-      let chosenRate = okBtn ? Number(okBtn.getAttribute('data-chosen-rate')) : 0;
-      if (!chosenRate) {
-        const activeChip = document.querySelector('.flank-refresh-chip.is-active');
-        if (activeChip) chosenRate = Number(activeChip.getAttribute('data-rate')) || 144;
-        else chosenRate = state.display?.refreshRate || 144;
-      }
-      const statusText = document.getElementById('flank-refresh-status');
-      if (statusText) statusText.textContent = `Applying ${chosenRate} Hz...`;
-      try {
-        const updated = await window.pywebview?.api?.set_refresh_rate?.(chosenRate);
-        if (updated?.display) {
-          state.display = updated.display;
-        } else if (state.display) {
-          state.display.refreshRate = chosenRate;
-        }
-        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz ✓`;
-        setTimeout(() => renderApp(), 400);
-      } catch (_e) {
-        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz`;
-      }
       return;
     }
 
@@ -2813,9 +2748,6 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
   if (patch.calculator) {
     state.calculator = { ...state.calculator, ...patch.calculator };
   }
-  if (patch.habits) {
-    state.habits = { ...state.habits, ...patch.habits };
-  }
   if (patch.storage) {
     state.storage = { ...state.storage, ...patch.storage };
   }
@@ -2870,7 +2802,6 @@ window.flankReceiveHostUpdate = (patch: Partial<FlankState>) => {
       (w === 'bluetooth' && !!patch.bluetooth) ||
       (w === 'tasks' && !!patch.tasks) ||
       (w === 'calculator' && !!patch.calculator) ||
-      (w === 'habits' && !!patch.habits) ||
       (w === 'storage' && !!patch.storage) ||
       (w === 'display' && !!patch.display) ||
       (w === 'privacy' && !!patch.privacy) ||

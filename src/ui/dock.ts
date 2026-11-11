@@ -197,13 +197,7 @@ function renderWidgetTileInner(
         return {
           ariaLabel: `Smart calculator`,
           extraClass: '',
-          html: `<span class="flank-row-left"><span class="flank-row-code">calc</span><span>math</span></span><span class="flank-row-right">${truncateValue(state.calculator?.lastResult || '=')}</span>`,
-        };
-      case 'habits':
-        return {
-          ariaLabel: `Habits, ${state.habits?.waterGlasses ?? 0} of ${state.habits?.waterGoal ?? 8} glasses`,
-          extraClass: '',
-          html: `<span class="flank-row-left"><span class="flank-row-code">hbt</span><span>water</span></span><span class="flank-row-right">${state.habits?.waterGlasses ?? 0}/${state.habits?.waterGoal ?? 8}</span>`,
+          html: `<span class="flank-row-left"><span class="flank-row-code">calc</span><span>math</span></span><span class="flank-row-right">Calc</span>`,
         };
       case 'storage':
         return {
@@ -343,13 +337,7 @@ function renderWidgetTileInner(
         return {
           ariaLabel: `Smart calculator`,
           extraClass: '',
-          html: `<span class="flank-tile-value">=</span>${railIndicator}`,
-        };
-      case 'habits':
-        return {
-          ariaLabel: `Habits, ${state.habits?.waterGlasses ?? 0} glasses`,
-          extraClass: '',
-          html: `<span class="flank-tile-value">${state.habits?.waterGlasses ?? 0}w</span>${railIndicator}`,
+          html: `<span class="flank-tile-value">Calc</span>${railIndicator}`,
         };
       case 'storage':
         return {
@@ -489,13 +477,7 @@ function renderWidgetTileInner(
         return {
           ariaLabel: `Smart calculator`,
           extraClass: 'is-widget-pill',
-          html: `${iconSvg('calculator')}${escapeHtml(state.calculator?.lastResult || 'Calc')}`,
-        };
-      case 'habits':
-        return {
-          ariaLabel: `Habits, ${state.habits?.waterGlasses ?? 0} cups`,
-          extraClass: 'is-widget-pill',
-          html: `${iconSvg('droplet')}${state.habits?.waterGlasses ?? 0}/8 cups`,
+          html: `${iconSvg('calculator')}Calc`,
         };
       case 'storage':
         return {
@@ -658,20 +640,10 @@ function renderWidgetTileInner(
       };
     }
     case 'calculator': {
-      const res = state.calculator?.lastResult || '=';
       return {
-        ariaLabel: `Smart calculator, ${res}`,
+        ariaLabel: `Smart calculator`,
         extraClass: '',
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('calculator', 20)}</span><span class="flank-widget-value flank-num">${truncateValue(res)}</span></span>`,
-      };
-    }
-    case 'habits': {
-      const w = state.habits?.waterGlasses ?? 0;
-      const g = state.habits?.waterGoal ?? 8;
-      return {
-        ariaLabel: `Habits, ${w} of ${g} glasses`,
-        extraClass: '',
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('droplet', 20)}</span><span class="flank-widget-value flank-num">${w}/${g}</span></span>`,
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg('calculator', 20)}</span><span class="flank-widget-value flank-num">Calc</span></span>`,
       };
     }
     case 'storage': {

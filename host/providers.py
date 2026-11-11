@@ -325,11 +325,11 @@ class SystemProviders:
         self._media_polling = False
 
         self._tasks_file = os.path.join(self.app_data_dir, 'tasks.json')
-        self._habits_file = os.path.join(self.app_data_dir, 'habits.json')
         self._last_storage_scan = 0.0
         self._storage_cache: Dict[str, Any] = {}
         self._last_display_scan = 0.0
         self._display_cache: Dict[str, Any] = {}
+        self._twinkle_monitor_id = ''
         self._last_gpu_scan = 0.0
         self._gpu_cache: Dict[str, Any] = {}
         self._runner_last_output = ''
@@ -722,10 +722,6 @@ class SystemProviders:
                 }
             with open(cache_file, 'w', encoding='utf-8') as f:
                 json.dump(payload, f, indent=2)
-            smabar_cache = os.path.expandvars(r'%LOCALAPPDATA%\smabar\plugins\peripherals\peripherals_state.json')
-            if os.path.isdir(os.path.dirname(smabar_cache)):
-                with open(smabar_cache, 'w', encoding='utf-8') as f:
-                    json.dump(payload, f, indent=2)
         except Exception:
             pass
 
@@ -822,7 +818,6 @@ class SystemProviders:
         if not loaded_periph:
             periph_candidates = [
                 os.path.join(self.app_data_dir, 'peripherals_state.json'),
-                os.path.expandvars(r'%LOCALAPPDATA%\smabar\plugins\peripherals\peripherals_state.json'),
             ]
             for ppath in periph_candidates:
                 if os.path.isfile(ppath):
@@ -2121,39 +2116,7 @@ class SystemProviders:
         }
 
     # ========================================================================
-    # 10. DAILY HABITS & HYDRATION
-    # ========================================================================
-
-    def sample_habits(self) -> Dict[str, Any]:
-        data = {'waterGlasses': 5, 'waterGoal': 8, 'lastStretchMin': 22, 'streakDays': 4}
-        if os.path.isfile(self._habits_file):
-            try:
-                with open(self._habits_file, 'r', encoding='utf-8') as f:
-                    saved = json.load(f)
-                if isinstance(saved, dict):
-                    data.update(saved)
-            except Exception:
-                pass
-        return data
-
-    def habits_action(self, action: str, val: int = 1) -> Dict[str, Any]:
-        cur = self.sample_habits()
-        if action == 'add_water':
-            cur['waterGlasses'] = min(20, cur.get('waterGlasses', 0) + val)
-        elif action == 'sub_water':
-            cur['waterGlasses'] = max(0, cur.get('waterGlasses', 0) - val)
-        elif action == 'log_stretch':
-            cur['lastStretchMin'] = 0
-
-        try:
-            with open(self._habits_file, 'w', encoding='utf-8') as f:
-                json.dump(cur, f, indent=2)
-        except Exception:
-            pass
-        return cur
-
-    # ========================================================================
-    # 11. STORAGE & DRIVES
+    # 10. STORAGE & DRIVES
     # ========================================================================
 
     def sample_storage(self) -> Dict[str, Any]:
@@ -2230,23 +2193,25 @@ class SystemProviders:
         if self._display_cache and (now - self._last_display_scan < 5.0):
             return self._display_cache
 
-        monitor_name = 'M27Q'
+        monitor_name = 'Primary Display'
         brightness = 85
         refresh_rate = 144
         supported_rates = [60, 120, 144]
 
-        # 1. Read Twinkle Tray display state (dedicated for external monitors like M27Q)
+        # 1. Read Twinkle Tray display state if installed for external DDC/CI monitors
         try:
             tt_json_path = os.path.expandvars(r'%APPDATA%\twinkle-tray\known-displays.json')
             if os.path.exists(tt_json_path):
                 with open(tt_json_path, 'r', encoding='utf-8') as f:
                     tt_data = json.load(f)
                 for _k, disp in tt_data.items():
-                    name = str(disp.get('name', ''))
-                    if 'm27q' in name.lower() or 'gbt270d' in str(disp.get('id', '')).lower():
-                        monitor_name = name or 'M27Q'
-                        if 'brightness' in disp and isinstance(disp['brightness'], (int, float)):
-                            brightness = int(disp['brightness'])
+                    if not isinstance(disp, dict):
+                        continue
+                    name = str(disp.get('name', '')).strip()
+                    if 'brightness' in disp and isinstance(disp['brightness'], (int, float)):
+                        monitor_name = name or monitor_name
+                        brightness = int(disp['brightness'])
+                        self._twinkle_monitor_id = str(disp.get('id') or name or '')
                         break
         except Exception:
             pass
@@ -2306,20 +2271,15 @@ class SystemProviders:
         if self._display_cache:
             self._display_cache['brightness'] = val
 
-        # 1. Twinkle Tray CLI for external monitor (M27Q)
+        # 1. Twinkle Tray CLI for external monitors
         tt_path = os.path.expandvars(r'%LOCALAPPDATA%\Programs\twinkle-tray\Twinkle Tray.exe')
         if os.path.exists(tt_path):
             try:
                 env = os.environ.copy()
                 env.pop('ELECTRON_RUN_AS_NODE', None)
-                # Apply specifically to M27Q by MonitorID or partial name
+                tt_target = f'--MonitorID={self._twinkle_monitor_id}' if self._twinkle_monitor_id else '--All'
                 subprocess.Popen(
-                    [tt_path, '--MonitorID=5&27916936&0&UID4355', f'--Set={val}'],
-                    env=env,
-                    creationflags=0x08000000,
-                )
-                subprocess.Popen(
-                    [tt_path, '--MonitorID=M27Q', f'--Set={val}'],
+                    [tt_path, tt_target, f'--Set={val}'],
                     env=env,
                     creationflags=0x08000000,
                 )

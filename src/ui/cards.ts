@@ -444,13 +444,12 @@ function renderScratchpadCardInner(state: FlankState): string {
       <button type="button" class="flank-chip" style="height: 24px; padding: 0 8px; font-size: 11px;" data-action="scratch-new-note" title="New note tab">+ New</button>
     </div>
     <textarea id="flank-scratchpad-textarea" class="flank-input" rows="4" style="width: 100%; height: 86px; resize: none; border-radius: 8px; padding: 8px; font-family: var(--flank-type-mono); font-size: 12px; line-height: 1.45; box-sizing: border-box;" placeholder="Jot down notes, snippets, or math (e.g. 1450 * 12)...">${escapeHtml(active.content)}</textarea>
-    ${
-      mathHint
-        ? `<div class="flank-row" style="padding: 4px 8px; border-radius: 6px; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft);">
+    ${mathHint
+      ? `<div class="flank-row" style="padding: 4px 8px; border-radius: 6px; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft);">
             <span class="tabular-nums" style="font-family: var(--flank-type-mono); font-size: 12px; font-weight: 600; color: var(--flank-color-accent)">${escapeHtml(mathHint)}</span>
             <button type="button" class="flank-chip" style="height: 22px; padding: 0 8px; font-size: 10px;" data-copy-raw="${escapeHtml(mathHint.split('=')[1]?.trim() || '')}">Copy</button>
           </div>`
-        : ''
+      : ''
     }
     <div class="flank-actions">
       <button type="button" class="flank-btn is-primary" style="flex: 1; justify-content: center;" data-action="scratch-copy">
@@ -459,11 +458,10 @@ function renderScratchpadCardInner(state: FlankState): string {
       <button type="button" class="flank-btn is-secondary" style="flex: 0 0 auto; padding: 0 12px;" data-action="scratch-clear">
         <span>Clear</span>
       </button>
-      ${
-        notes.length > 1
-          ? `<button type="button" class="flank-btn is-ghost" style="flex: 0 0 auto; width: 32px; padding: 0;" data-scratch-delete="${escapeHtml(active.id)}" aria-label="Delete note tab" title="Delete note tab">${iconSvg('trash', 14)}</button>`
-          : ''
-      }
+      ${notes.length > 1
+      ? `<button type="button" class="flank-btn is-ghost" style="flex: 0 0 auto; width: 32px; padding: 0;" data-scratch-delete="${escapeHtml(active.id)}" aria-label="Delete note tab" title="Delete note tab">${iconSvg('trash', 14)}</button>`
+      : ''
+    }
     </div>
   `;
 }
@@ -554,22 +552,21 @@ function renderCalendarCardInner(state: FlankState): string {
 
   const eventRows = events.length > 0
     ? events.map((evt) => {
-        return `<div class="flank-cal-row" style="display:flex; align-items:center; min-height: 32px; gap: 8px; padding: 4px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft);">
+      return `<div class="flank-cal-row" style="display:flex; align-items:center; min-height: 32px; gap: 8px; padding: 4px 0; border-bottom: var(--flank-scale-hairline) solid var(--flank-color-divider-soft);">
           <span class="flank-cal-time tabular-nums" style="width: 64px; min-width: 64px; flex-shrink: 0; font-size: 11px; font-weight: 500; color: var(--flank-color-text-muted); font-variant-numeric: tabular-nums;">${escapeHtml(evt.timeText)}</span>
           <span class="flank-cal-content" style="flex: 1; min-width: 0; display:flex; flex-direction:column; justify-content:center;">
             <span class="flank-cal-title" style="font-size: 12px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(evt.title)}">${escapeHtml(evt.title)}</span>
             <span class="flank-row-meta" style="font-size: 11px; color: var(--flank-color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(evt.relativeText)}${evt.provider ? ` · ${escapeHtml(evt.provider)}` : ''}</span>
           </span>
           <span style="flex-shrink: 0; display:flex; align-items:center; gap: 4px;">
-            ${
-              evt.joinUrl
-                ? `<button type="button" class="flank-chip is-active" style="padding: 2px 8px; height: 22px; font-size: 11px; font-weight: 600;" data-item-kind="link" data-item-id="${escapeHtml(evt.id)}" data-target="${escapeHtml(evt.joinUrl)}">Join</button>`
-                : ''
-            }
+            ${evt.joinUrl
+          ? `<button type="button" class="flank-chip is-active" style="padding: 2px 8px; height: 22px; font-size: 11px; font-weight: 600;" data-item-kind="link" data-item-id="${escapeHtml(evt.id)}" data-target="${escapeHtml(evt.joinUrl)}">Join</button>`
+          : ''
+        }
             <button type="button" class="flank-win-btn" style="width: 20px; height: 20px; display:flex; align-items:center; justify-content:center;" data-cal-delete="${escapeHtml(evt.id)}" aria-label="Remove event" title="Remove event">${iconSvg('x', 11)}</button>
           </span>
         </div>`;
-      }).join('')
+    }).join('')
     : renderEmptyState('No upcoming meetings', 'Your schedule is clear for today');
 
   return `
@@ -580,21 +577,19 @@ function renderCalendarCardInner(state: FlankState): string {
         ${escapeHtml(cal.nextSummary)}
       </span>
     </div>
-    ${
-      nextEvt
-        ? `<div class="flank-subcard" style="padding: 10px 12px; border-radius: 10px; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); display:flex; flex-direction:column; gap: 6px;">
+    ${nextEvt
+      ? `<div class="flank-subcard" style="padding: 10px 12px; border-radius: 10px; background: var(--flank-color-tile-bg); border: 1px solid var(--flank-color-divider-soft); display:flex; flex-direction:column; gap: 6px;">
             <span class="flank-card-muted" style="font-size: 11px;">Up next · ${escapeHtml(nextEvt.timeText)} (${escapeHtml(nextEvt.relativeText)})</span>
             <span style="font-size: 13px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(nextEvt.title)}">${escapeHtml(nextEvt.title)}</span>
-            ${
-              nextEvt.joinUrl
-                ? `<button type="button" class="flank-btn is-primary" style="width: 100%; justify-content:center; margin-top: 4px;" data-item-kind="link" data-item-id="${escapeHtml(nextEvt.id)}" data-target="${escapeHtml(nextEvt.joinUrl)}">
+            ${nextEvt.joinUrl
+        ? `<button type="button" class="flank-btn is-primary" style="width: 100%; justify-content:center; margin-top: 4px;" data-item-kind="link" data-item-id="${escapeHtml(nextEvt.id)}" data-target="${escapeHtml(nextEvt.joinUrl)}">
                     <span>Join ${escapeHtml(nextEvt.provider || 'Meeting')}</span>
                     <span style="display:flex; width: 14px; height: 14px">${iconSvg('arrow-up-right', 14)}</span>
                   </button>`
-                : ''
-            }
-          </div>`
         : ''
+      }
+          </div>`
+      : ''
     }
     <div style="display:flex; flex-direction:column; max-height: 130px; overflow-y: auto;">
       ${eventRows}
@@ -908,40 +903,6 @@ function renderCalculatorCardInner(state: FlankState): string {
   `;
 }
 
-function renderHabitsCardInner(state: FlankState): string {
-  const h = state.habits || { waterGlasses: 5, waterGoal: 8, lastStretchMin: 20, streakDays: 3 };
-  const pct = Math.min(100, Math.round((h.waterGlasses / (h.waterGoal || 8)) * 100));
-
-  return `
-    <div class="flank-card__header">
-      <span class="flank-card__title">Habits &amp; Hydration</span>
-      <span class="flank-live-pill">🔥 ${h.streakDays} day streak</span>
-    </div>
-    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
-          ${iconSvg('droplet', 14)} Daily Water Intake
-        </span>
-        <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${h.waterGlasses} / ${h.waterGoal} cups</span>
-      </div>
-      <div class="flank-meter__bar" style="height: 6px; margin-bottom: 8px;">
-        <div class="flank-meter__fill" style="width: ${pct}%; background: #38BDF8;"></div>
-      </div>
-      <div style="display:flex; gap: 8px; justify-content: center;">
-        <button type="button" class="flank-btn is-secondary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-sub">- 1 Cup</button>
-        <button type="button" class="flank-btn is-primary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-add">+ 1 Cup</button>
-      </div>
-    </div>
-    <div class="flank-subcard" style="padding: 10px; display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; flex-direction:column; gap: 2px;">
-        <span style="font-size: 12px; font-weight: 600;">Posture &amp; Stretch</span>
-        <span style="font-size: 11px; color: var(--flank-color-text-muted);">Last break: ${h.lastStretchMin}m ago</span>
-      </div>
-      <button type="button" class="flank-chip" data-action="habit-log-stretch" style="font-size: 11px;">Log Stretch</button>
-    </div>
-  `;
-}
-
 function renderStorageCardInner(state: FlankState): string {
   const s = state.storage || { primaryPercent: 68, primaryDrive: 'C:', drives: [] };
   const drives = s.drives || [];
@@ -978,7 +939,7 @@ function renderStorageCardInner(state: FlankState): string {
 
 function renderDisplayCardInner(state: FlankState): string {
   const d = state.display || {
-    monitorName: 'M27Q',
+    monitorName: 'Primary Display',
     brightness: 85,
     nightLight: false,
     resolution: '2560 × 1440',
@@ -986,8 +947,7 @@ function renderDisplayCardInner(state: FlankState): string {
     supportedRefreshRates: [60, 120, 144],
     scaling: 100,
   };
-  const rates = d.supportedRefreshRates && d.supportedRefreshRates.length > 0 ? d.supportedRefreshRates : [60, 120, 144];
-  const monitorLabel = d.monitorName || 'M27Q';
+  const monitorLabel = d.monitorName || 'Primary Display';
 
   return `
     <div class="flank-card__header">
@@ -1009,30 +969,6 @@ function renderDisplayCardInner(state: FlankState): string {
         <button type="button" class="flank-chip" data-action="set-display-preset" data-val="50" style="font-size: 10px; padding: 2px 8px; flex: 1;">50%</button>
         <button type="button" class="flank-chip" data-action="set-display-preset" data-val="75" style="font-size: 10px; padding: 2px 8px; flex: 1;">75%</button>
         <button type="button" class="flank-chip" data-action="set-display-preset" data-val="100" style="font-size: 10px; padding: 2px 8px; flex: 1;">100%</button>
-      </div>
-    </div>
-
-    <!-- Refresh Rate Subcard -->
-    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
-          ${iconSvg('activity', 14)} Choose Refresh Rate
-        </span>
-        <button type="button" class="flank-chip flank-chip--primary" data-action="apply-refresh-rate" id="flank-apply-refresh-btn" style="background: var(--flank-color-accent); color: #000; font-weight: 700; padding: 3px 12px; border: none; cursor: pointer; border-radius: 6px;">OK</button>
-      </div>
-      <div style="display:flex; gap: 6px; align-items:center;" id="flank-refresh-rate-options">
-        ${rates
-          .map(
-            (r) => `
-          <button type="button" class="flank-chip flank-refresh-chip${r === d.refreshRate ? ' is-active' : ''}" data-action="select-refresh-rate" data-rate="${r}" style="flex: 1; text-align: center; font-size: 11px; padding: 4px 6px;">
-            ${r} Hz
-          </button>
-        `
-          )
-          .join('')}
-      </div>
-      <div id="flank-refresh-status" style="font-size: 11px; color: var(--flank-color-accent); font-weight: 600; margin-top: 6px; text-align: right;">
-        Active: ${d.refreshRate} Hz
       </div>
     </div>
 
@@ -1308,10 +1244,6 @@ export function renderHoverCardHtml(state: FlankState, theme: FlankTheme): strin
     case 'calculator':
       label = 'Smart Calculator';
       inner = renderCalculatorCardInner(state);
-      break;
-    case 'habits':
-      label = 'Habits & Hydration';
-      inner = renderHabitsCardInner(state);
       break;
     case 'storage':
       label = 'Storage & Drives';

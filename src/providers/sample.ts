@@ -1,8 +1,8 @@
 import { type FlankState } from './types.ts';
 
 /**
- * Sample / preview data matching the reference mockups (`docs/design/reference/*.dc.html`).
- * Isolated in this module per AGENT_PROMPT.md Rule 10 so real providers can replace it cleanly.
+ * Sample / preview data for offline UI rendering and tests.
+ * Isolated in this module so real providers can replace it cleanly.
  */
 export function createSampleState(): FlankState {
   return {
@@ -223,17 +223,6 @@ export function createSampleState(): FlankState {
         icon: 'calculator',
         widgetKind: 'calculator',
         shortcut: 'Alt+Q',
-        enabled: true,
-      },
-      {
-        id: 'widget-habits',
-        group: 'widgets',
-        kind: 'widget',
-        label: 'Habits & hydration',
-        shortCode: 'hbt',
-        icon: 'droplet',
-        widgetKind: 'habits',
-        shortcut: 'Alt+H',
         enabled: true,
       },
       {
@@ -507,19 +496,19 @@ export function createSampleState(): FlankState {
     bluetooth: {
       connectedCount: 3,
       devices: [
-        { id: 'wh-1000xm5', name: 'WH-1000XM5', type: 'headphones', connected: true, batteryLevel: 90 },
-        { id: 'airpods', name: 'Wireless ANC Earbuds', type: 'headphones', connected: true, batteryLevel: 85 },
-        { id: 'dragonfly', name: 'Dragonfly R1 Pro', type: 'mouse', connected: true, batteryLevel: 85 },
-        { id: 'cidoo', name: 'CIDOO URX Core 75', type: 'keyboard', connected: true, batteryLevel: 85 },
-        { id: 'orochi', name: 'Orochi V2', type: 'mouse', connected: true, batteryLevel: 70 },
+        { id: 'headphones', name: 'Studio ANC Headphones', type: 'headphones', connected: true, batteryLevel: 90 },
+        { id: 'earbuds', name: 'Wireless ANC Earbuds', type: 'headphones', connected: true, batteryLevel: 85 },
+        { id: 'mouse-pro', name: 'Precision Mouse Pro', type: 'mouse', connected: true, batteryLevel: 85 },
+        { id: 'keyboard-75', name: 'Mechanical Keyboard 75', type: 'keyboard', connected: true, batteryLevel: 85 },
+        { id: 'mouse-compact', name: 'Compact Wireless Mouse', type: 'mouse', connected: true, batteryLevel: 70 },
       ],
     },
     topProcesses: [
-      { pid: 27532, name: 'Dia.exe', memMb: 612.6, threads: 42 },
-      { pid: 6268, name: 'agy.exe', memMb: 552.0, threads: 35 },
-      { pid: 25852, name: 'Antigravity IDE.exe', memMb: 405.3, threads: 68 },
+      { pid: 27532, name: 'msedge.exe', memMb: 612.6, threads: 42 },
+      { pid: 6268, name: 'Code.exe', memMb: 552.0, threads: 35 },
+      { pid: 25852, name: 'WindowsTerminal.exe', memMb: 405.3, threads: 68 },
       { pid: 31316, name: 'explorer.exe', memMb: 331.6, threads: 84 },
-      { pid: 17792, name: 'Raycast.exe', memMb: 285.8, threads: 32 },
+      { pid: 17792, name: 'python.exe', memMb: 285.8, threads: 32 },
     ],
     tasks: {
       pendingCount: 3,
@@ -538,12 +527,6 @@ export function createSampleState(): FlankState {
         { expr: '16 GB to MB', result: '16,384 MB' },
         { expr: 'sqrt(256) * 4', result: '64' },
       ],
-    },
-    habits: {
-      waterGlasses: 5,
-      waterGoal: 8,
-      lastStretchMin: 25,
-      streakDays: 4,
     },
     storage: {
       primaryPercent: 68,
@@ -591,7 +574,7 @@ export function createSampleState(): FlankState {
       driverVersion: '566.14',
     },
     github: {
-      username: 'nandhakrishnasr',
+      username: 'flank-user',
       connected: true,
       pendingCount: 2,
       items: [

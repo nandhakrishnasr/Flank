@@ -259,63 +259,127 @@ export function startAmbientSound(preset: string = 'rain', volume: number = 65):
     windSrc.start();
     activeNodes.push(windSrc, windFilter, windGain, gustLfo, gustLfoGain, flutterLfo, flutterLfoGain);
   } else if (preset === 'coffee') {
-    // Cozy cafe murmur: layered conversational rumble with soft wandering room tone
-    const roomBuf = createNoiseBuffer(ctx, 'pink', 4);
+    // Cozy cafe soundscape: warm indoor room tone, layered multi-band distant chatter,
+    // soft espresso steam hiss, and subtle damped porcelain cup/saucer clinks (no sine beeps).
+    const roomBuf = createNoiseBuffer(ctx, 'pink', 6);
     const roomSrc = ctx.createBufferSource();
     roomSrc.buffer = roomBuf;
     roomSrc.loop = true;
 
-    const filter1 = ctx.createBiquadFilter();
-    filter1.type = 'bandpass';
-    filter1.frequency.setValueAtTime(340, ctx.currentTime);
-    filter1.Q.setValueAtTime(1.2, ctx.currentTime);
+    const roomShelf = ctx.createBiquadFilter();
+    roomShelf.type = 'lowpass';
+    roomShelf.frequency.setValueAtTime(1400, ctx.currentTime);
 
-    const filter2 = ctx.createBiquadFilter();
-    filter2.type = 'lowpass';
-    filter2.frequency.setValueAtTime(750, ctx.currentTime);
+    const roomHighpass = ctx.createBiquadFilter();
+    roomHighpass.type = 'highpass';
+    roomHighpass.frequency.setValueAtTime(120, ctx.currentTime);
 
     const roomGain = ctx.createGain();
-    roomGain.gain.setValueAtTime(0.65, ctx.currentTime);
+    roomGain.gain.setValueAtTime(0.38, ctx.currentTime);
 
-    // Gentle conversational murmur modulation
-    const chatterLfo = ctx.createOscillator();
-    chatterLfo.frequency.setValueAtTime(0.28, ctx.currentTime);
-    const chatterGain = ctx.createGain();
-    chatterGain.gain.setValueAtTime(0.12, ctx.currentTime);
-    chatterLfo.connect(chatterGain);
-    chatterGain.connect(roomGain.gain);
-    chatterLfo.start();
-
-    roomSrc.connect(filter1);
-    filter1.connect(filter2);
-    filter2.connect(roomGain);
+    roomSrc.connect(roomHighpass);
+    roomHighpass.connect(roomShelf);
+    roomShelf.connect(roomGain);
     roomGain.connect(masterGain);
     roomSrc.start();
-    activeNodes.push(roomSrc, filter1, filter2, roomGain, chatterLfo, chatterGain);
+    activeNodes.push(roomSrc, roomHighpass, roomShelf, roomGain);
 
-    // Occasional subtle distant ceramic clink
-    const clinkInterval = window.setInterval(() => {
+    // Multi-voice distant conversational murmur using speech-formant bandpass layers
+    const murmurBuf = createNoiseBuffer(ctx, 'pink', 5);
+    const formantBands = [
+      { freq: 380, q: 2.0, gain: 0.28 },
+      { freq: 760, q: 2.4, gain: 0.22 },
+      { freq: 1350, q: 2.2, gain: 0.14 },
+    ];
+    const bandGains: GainNode[] = [];
+    for (const band of formantBands) {
+      const src = ctx.createBufferSource();
+      src.buffer = murmurBuf;
+      src.loop = true;
+      src.playbackRate.setValueAtTime(0.92 + Math.random() * 0.16, ctx.currentTime);
+
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(band.freq, ctx.currentTime);
+      bp.Q.setValueAtTime(band.q, ctx.currentTime);
+
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(band.gain, ctx.currentTime);
+
+      src.connect(bp);
+      bp.connect(g);
+      g.connect(masterGain);
+      src.start(0, Math.random() * 4);
+      activeNodes.push(src, bp, g);
+      bandGains.push(g);
+    }
+
+    // Organic irregular speech-cadence swells across the formant bands
+    const chatterTimer = window.setInterval(() => {
       if (!audioCtx || !isPlaying) return;
-      if (Math.random() < 0.22) {
+      const now = audioCtx.currentTime;
+      bandGains.forEach((g, idx) => {
+        const base = formantBands[idx].gain;
+        const target = base * (0.55 + Math.random() * 0.95);
+        g.gain.cancelScheduledValues(now);
+        g.gain.setTargetAtTime(target, now, 0.18 + Math.random() * 0.25);
+      });
+    }, 320);
+    activeTimers.push(chatterTimer);
+
+    // Occasional distant espresso machine steam / milk froth hiss & damped porcelain clink
+    const steamBuf = createNoiseBuffer(ctx, 'white', 2);
+    const cafeEventsTimer = window.setInterval(() => {
+      if (!audioCtx || !isPlaying) return;
+      const now = audioCtx.currentTime;
+      const roll = Math.random();
+
+      if (roll < 0.14 && masterGain) {
+        // Soft distant espresso steam burst (filtered white noise, gentle fade)
         try {
-          const osc = audioCtx.createOscillator();
-          const clinkGain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(2200 + Math.random() * 600, audioCtx.currentTime);
+          const steamSrc = audioCtx.createBufferSource();
+          steamSrc.buffer = steamBuf;
+          const steamFilter = audioCtx.createBiquadFilter();
+          steamFilter.type = 'bandpass';
+          steamFilter.frequency.setValueAtTime(2600 + Math.random() * 900, now);
+          steamFilter.Q.setValueAtTime(1.4, now);
 
-          clinkGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-          clinkGain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.003);
-          clinkGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+          const steamGain = audioCtx.createGain();
+          const dur = 0.9 + Math.random() * 0.8;
+          steamGain.gain.setValueAtTime(0.0001, now);
+          steamGain.gain.linearRampToValueAtTime(0.06, now + 0.18);
+          steamGain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
-          osc.connect(clinkGain);
-          if (masterGain) clinkGain.connect(masterGain);
+          steamSrc.connect(steamFilter);
+          steamFilter.connect(steamGain);
+          steamGain.connect(masterGain);
+          steamSrc.start(now);
+          steamSrc.stop(now + dur + 0.05);
+        } catch {}
+      } else if (roll < 0.26 && masterGain) {
+        // Subtle damped ceramic cup/saucer clink using filtered noise transient (not a sine beep)
+        try {
+          const hitSrc = audioCtx.createBufferSource();
+          hitSrc.buffer = steamBuf;
+          const hitFilter = audioCtx.createBiquadFilter();
+          hitFilter.type = 'bandpass';
+          hitFilter.frequency.setValueAtTime(3400 + Math.random() * 1400, now);
+          hitFilter.Q.setValueAtTime(14.0, now);
 
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.09);
+          const hitGain = audioCtx.createGain();
+          hitGain.gain.setValueAtTime(0.0001, now);
+          hitGain.gain.linearRampToValueAtTime(0.09, now + 0.002);
+          hitGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+
+          hitSrc.connect(hitFilter);
+          hitFilter.connect(hitGain);
+          hitGain.connect(masterGain);
+          hitSrc.start(now);
+          hitSrc.stop(now + 0.05);
         } catch {}
       }
-    }, 400);
-    activeTimers.push(clinkInterval);
+    }, 1200);
+    activeTimers.push(cafeEventsTimer);
   } else {
     // Pure deep brownian focus noise
     const brownBuf = createNoiseBuffer(ctx, 'brown', 6);

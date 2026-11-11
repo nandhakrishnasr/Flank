@@ -533,7 +533,7 @@ var LIQUID_GLASS_THEME = {
   },
   glass: {
     mode: "wallpaper-sampled",
-    modeNote: "css-only | wallpaper-sampled (default) | flat. See ANTIGRAVITY_PROMPT.md part B.",
+    modeNote: "css-only | wallpaper-sampled (default) | flat",
     tintRgb: "10,14,32",
     tintAlpha: 0.6,
     tintAlphaMin: 0.4,
@@ -1571,17 +1571,6 @@ function createSampleState() {
         enabled: true
       },
       {
-        id: "widget-habits",
-        group: "widgets",
-        kind: "widget",
-        label: "Habits & hydration",
-        shortCode: "hbt",
-        icon: "droplet",
-        widgetKind: "habits",
-        shortcut: "Alt+H",
-        enabled: true
-      },
-      {
         id: "widget-storage",
         group: "widgets",
         kind: "widget",
@@ -1852,19 +1841,19 @@ function createSampleState() {
     bluetooth: {
       connectedCount: 3,
       devices: [
-        { id: "wh-1000xm5", name: "WH-1000XM5", type: "headphones", connected: true, batteryLevel: 90 },
-        { id: "airpods", name: "Wireless ANC Earbuds", type: "headphones", connected: true, batteryLevel: 85 },
-        { id: "dragonfly", name: "Dragonfly R1 Pro", type: "mouse", connected: true, batteryLevel: 85 },
-        { id: "cidoo", name: "CIDOO URX Core 75", type: "keyboard", connected: true, batteryLevel: 85 },
-        { id: "orochi", name: "Orochi V2", type: "mouse", connected: true, batteryLevel: 70 }
+        { id: "headphones", name: "Studio ANC Headphones", type: "headphones", connected: true, batteryLevel: 90 },
+        { id: "earbuds", name: "Wireless ANC Earbuds", type: "headphones", connected: true, batteryLevel: 85 },
+        { id: "mouse-pro", name: "Precision Mouse Pro", type: "mouse", connected: true, batteryLevel: 85 },
+        { id: "keyboard-75", name: "Mechanical Keyboard 75", type: "keyboard", connected: true, batteryLevel: 85 },
+        { id: "mouse-compact", name: "Compact Wireless Mouse", type: "mouse", connected: true, batteryLevel: 70 }
       ]
     },
     topProcesses: [
-      { pid: 27532, name: "Dia.exe", memMb: 612.6, threads: 42 },
-      { pid: 6268, name: "agy.exe", memMb: 552, threads: 35 },
-      { pid: 25852, name: "Antigravity IDE.exe", memMb: 405.3, threads: 68 },
+      { pid: 27532, name: "msedge.exe", memMb: 612.6, threads: 42 },
+      { pid: 6268, name: "Code.exe", memMb: 552, threads: 35 },
+      { pid: 25852, name: "WindowsTerminal.exe", memMb: 405.3, threads: 68 },
       { pid: 31316, name: "explorer.exe", memMb: 331.6, threads: 84 },
-      { pid: 17792, name: "Raycast.exe", memMb: 285.8, threads: 32 }
+      { pid: 17792, name: "python.exe", memMb: 285.8, threads: 32 }
     ],
     tasks: {
       pendingCount: 3,
@@ -1883,12 +1872,6 @@ function createSampleState() {
         { expr: "16 GB to MB", result: "16,384 MB" },
         { expr: "sqrt(256) * 4", result: "64" }
       ]
-    },
-    habits: {
-      waterGlasses: 5,
-      waterGoal: 8,
-      lastStretchMin: 25,
-      streakDays: 4
     },
     storage: {
       primaryPercent: 68,
@@ -1936,7 +1919,7 @@ function createSampleState() {
       driverVersion: "566.14"
     },
     github: {
-      username: "nandhakrishnasr",
+      username: "flank-user",
       connected: true,
       pendingCount: 2,
       items: [
@@ -2086,7 +2069,6 @@ function iconSvg(name, sizePx) {
       return `<svg ${sizeStyle} ${strokeAttr}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>`;
     case "droplet":
     case "water":
-    case "habits":
       return `<svg ${sizeStyle} ${strokeAttr}><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>`;
     case "hard-drive":
     case "storage":
@@ -2321,13 +2303,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         return {
           ariaLabel: `Smart calculator`,
           extraClass: "",
-          html: `<span class="flank-row-left"><span class="flank-row-code">calc</span><span>math</span></span><span class="flank-row-right">${truncateValue(state2.calculator?.lastResult || "=")}</span>`
-        };
-      case "habits":
-        return {
-          ariaLabel: `Habits, ${state2.habits?.waterGlasses ?? 0} of ${state2.habits?.waterGoal ?? 8} glasses`,
-          extraClass: "",
-          html: `<span class="flank-row-left"><span class="flank-row-code">hbt</span><span>water</span></span><span class="flank-row-right">${state2.habits?.waterGlasses ?? 0}/${state2.habits?.waterGoal ?? 8}</span>`
+          html: `<span class="flank-row-left"><span class="flank-row-code">calc</span><span>math</span></span><span class="flank-row-right">Calc</span>`
         };
       case "storage":
         return {
@@ -2463,13 +2439,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         return {
           ariaLabel: `Smart calculator`,
           extraClass: "",
-          html: `<span class="flank-tile-value">=</span>${railIndicator}`
-        };
-      case "habits":
-        return {
-          ariaLabel: `Habits, ${state2.habits?.waterGlasses ?? 0} glasses`,
-          extraClass: "",
-          html: `<span class="flank-tile-value">${state2.habits?.waterGlasses ?? 0}w</span>${railIndicator}`
+          html: `<span class="flank-tile-value">Calc</span>${railIndicator}`
         };
       case "storage":
         return {
@@ -2605,13 +2575,7 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
         return {
           ariaLabel: `Smart calculator`,
           extraClass: "is-widget-pill",
-          html: `${iconSvg("calculator")}${escapeHtml(state2.calculator?.lastResult || "Calc")}`
-        };
-      case "habits":
-        return {
-          ariaLabel: `Habits, ${state2.habits?.waterGlasses ?? 0} cups`,
-          extraClass: "is-widget-pill",
-          html: `${iconSvg("droplet")}${state2.habits?.waterGlasses ?? 0}/8 cups`
+          html: `${iconSvg("calculator")}Calc`
         };
       case "storage":
         return {
@@ -2770,20 +2734,10 @@ function renderWidgetTileInner(kind, state2, theme, item, isActive) {
       };
     }
     case "calculator": {
-      const res = state2.calculator?.lastResult || "=";
       return {
-        ariaLabel: `Smart calculator, ${res}`,
+        ariaLabel: `Smart calculator`,
         extraClass: "",
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("calculator", 20)}</span><span class="flank-widget-value flank-num">${truncateValue(res)}</span></span>`
-      };
-    }
-    case "habits": {
-      const w = state2.habits?.waterGlasses ?? 0;
-      const g = state2.habits?.waterGoal ?? 8;
-      return {
-        ariaLabel: `Habits, ${w} of ${g} glasses`,
-        extraClass: "",
-        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("droplet", 20)}</span><span class="flank-widget-value flank-num">${w}/${g}</span></span>`
+        html: `<span class="flank-widget-glance"><span class="flank-widget-icon">${iconSvg("calculator", 20)}</span><span class="flank-widget-value flank-num">Calc</span></span>`
       };
     }
     case "storage": {
@@ -3749,38 +3703,6 @@ function renderCalculatorCardInner(state2) {
     ` : ""}
   `;
 }
-function renderHabitsCardInner(state2) {
-  const h = state2.habits || { waterGlasses: 5, waterGoal: 8, lastStretchMin: 20, streakDays: 3 };
-  const pct = Math.min(100, Math.round(h.waterGlasses / (h.waterGoal || 8) * 100));
-  return `
-    <div class="flank-card__header">
-      <span class="flank-card__title">Habits &amp; Hydration</span>
-      <span class="flank-live-pill">\u{1F525} ${h.streakDays} day streak</span>
-    </div>
-    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
-          ${iconSvg("droplet", 14)} Daily Water Intake
-        </span>
-        <span style="font-size: 12px; font-weight: 700; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${h.waterGlasses} / ${h.waterGoal} cups</span>
-      </div>
-      <div class="flank-meter__bar" style="height: 6px; margin-bottom: 8px;">
-        <div class="flank-meter__fill" style="width: ${pct}%; background: #38BDF8;"></div>
-      </div>
-      <div style="display:flex; gap: 8px; justify-content: center;">
-        <button type="button" class="flank-btn is-secondary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-sub">- 1 Cup</button>
-        <button type="button" class="flank-btn is-primary" style="flex:1; height: 26px; font-size: 11px;" data-action="habit-water-add">+ 1 Cup</button>
-      </div>
-    </div>
-    <div class="flank-subcard" style="padding: 10px; display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; flex-direction:column; gap: 2px;">
-        <span style="font-size: 12px; font-weight: 600;">Posture &amp; Stretch</span>
-        <span style="font-size: 11px; color: var(--flank-color-text-muted);">Last break: ${h.lastStretchMin}m ago</span>
-      </div>
-      <button type="button" class="flank-chip" data-action="habit-log-stretch" style="font-size: 11px;">Log Stretch</button>
-    </div>
-  `;
-}
 function renderStorageCardInner(state2) {
   const s = state2.storage || { primaryPercent: 68, primaryDrive: "C:", drives: [] };
   const drives = s.drives || [];
@@ -3814,7 +3736,7 @@ function renderStorageCardInner(state2) {
 }
 function renderDisplayCardInner(state2) {
   const d = state2.display || {
-    monitorName: "M27Q",
+    monitorName: "Primary Display",
     brightness: 85,
     nightLight: false,
     resolution: "2560 \xD7 1440",
@@ -3822,8 +3744,7 @@ function renderDisplayCardInner(state2) {
     supportedRefreshRates: [60, 120, 144],
     scaling: 100
   };
-  const rates = d.supportedRefreshRates && d.supportedRefreshRates.length > 0 ? d.supportedRefreshRates : [60, 120, 144];
-  const monitorLabel = d.monitorName || "M27Q";
+  const monitorLabel = d.monitorName || "Primary Display";
   return `
     <div class="flank-card__header">
       <span class="flank-card__title">Display &amp; Brightness</span>
@@ -3844,28 +3765,6 @@ function renderDisplayCardInner(state2) {
         <button type="button" class="flank-chip" data-action="set-display-preset" data-val="50" style="font-size: 10px; padding: 2px 8px; flex: 1;">50%</button>
         <button type="button" class="flank-chip" data-action="set-display-preset" data-val="75" style="font-size: 10px; padding: 2px 8px; flex: 1;">75%</button>
         <button type="button" class="flank-chip" data-action="set-display-preset" data-val="100" style="font-size: 10px; padding: 2px 8px; flex: 1;">100%</button>
-      </div>
-    </div>
-
-    <!-- Refresh Rate Subcard -->
-    <div class="flank-subcard" style="padding: 10px; margin-bottom: 8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 600; display:flex; align-items:center; gap: 6px;">
-          ${iconSvg("activity", 14)} Choose Refresh Rate
-        </span>
-        <button type="button" class="flank-chip flank-chip--primary" data-action="apply-refresh-rate" id="flank-apply-refresh-btn" style="background: var(--flank-color-accent); color: #000; font-weight: 700; padding: 3px 12px; border: none; cursor: pointer; border-radius: 6px;">OK</button>
-      </div>
-      <div style="display:flex; gap: 6px; align-items:center;" id="flank-refresh-rate-options">
-        ${rates.map(
-    (r) => `
-          <button type="button" class="flank-chip flank-refresh-chip${r === d.refreshRate ? " is-active" : ""}" data-action="select-refresh-rate" data-rate="${r}" style="flex: 1; text-align: center; font-size: 11px; padding: 4px 6px;">
-            ${r} Hz
-          </button>
-        `
-  ).join("")}
-      </div>
-      <div id="flank-refresh-status" style="font-size: 11px; color: var(--flank-color-accent); font-weight: 600; margin-top: 6px; text-align: right;">
-        Active: ${d.refreshRate} Hz
       </div>
     </div>
 
@@ -4126,10 +4025,6 @@ function renderHoverCardHtml(state2, theme) {
       label = "Smart Calculator";
       inner = renderCalculatorCardInner(state2);
       break;
-    case "habits":
-      label = "Habits & Hydration";
-      inner = renderHabitsCardInner(state2);
-      break;
     case "storage":
       label = "Storage & Drives";
       inner = renderStorageCardInner(state2);
@@ -4306,6 +4201,132 @@ function resetDockMagnification() {
 }
 
 // src/ui/calc.ts
+function evalSafeMathExpr(expr) {
+  let pos = 0;
+  const skipWs = () => {
+    while (pos < expr.length && /\s/.test(expr[pos])) pos++;
+  };
+  const parseExpr = () => {
+    let val = parseTerm();
+    while (true) {
+      skipWs();
+      const ch = expr[pos];
+      if (ch === "+") {
+        pos++;
+        val += parseTerm();
+      } else if (ch === "-") {
+        pos++;
+        val -= parseTerm();
+      } else {
+        break;
+      }
+    }
+    return val;
+  };
+  const parseTerm = () => {
+    let val = parsePower();
+    while (true) {
+      skipWs();
+      const ch = expr[pos];
+      if (ch === "*") {
+        if (expr[pos + 1] === "*") break;
+        pos++;
+        val *= parsePower();
+      } else if (ch === "/") {
+        pos++;
+        val /= parsePower();
+      } else if (ch === "%") {
+        pos++;
+        val %= parsePower();
+      } else {
+        break;
+      }
+    }
+    return val;
+  };
+  const parsePower = () => {
+    const base = parseUnary();
+    skipWs();
+    if (expr[pos] === "^") {
+      pos++;
+      return Math.pow(base, parsePower());
+    }
+    if (expr[pos] === "*" && expr[pos + 1] === "*") {
+      pos += 2;
+      return Math.pow(base, parsePower());
+    }
+    return base;
+  };
+  const parseUnary = () => {
+    skipWs();
+    if (expr[pos] === "+") {
+      pos++;
+      return parseUnary();
+    }
+    if (expr[pos] === "-") {
+      pos++;
+      return -parseUnary();
+    }
+    return parsePrimary();
+  };
+  const parsePrimary = () => {
+    skipWs();
+    if (expr[pos] === "(") {
+      pos++;
+      const inner = parseExpr();
+      skipWs();
+      if (expr[pos] !== ")") throw new Error("Unbalanced parentheses");
+      pos++;
+      return inner;
+    }
+    const numMatch = /^(?:\d+(?:\.\d*)?|\.\d+)/.exec(expr.slice(pos));
+    if (numMatch) {
+      pos += numMatch[0].length;
+      return Number(numMatch[0]);
+    }
+    const identMatch = /^[a-zA-Z]+/.exec(expr.slice(pos));
+    if (identMatch) {
+      const name = identMatch[0].toLowerCase();
+      pos += identMatch[0].length;
+      if (name === "pi") return Math.PI;
+      if (name === "e") return Math.E;
+      skipWs();
+      if (expr[pos] !== "(") throw new Error(`Unknown identifier: ${name}`);
+      pos++;
+      const arg = parseExpr();
+      skipWs();
+      if (expr[pos] !== ")") throw new Error("Unbalanced function call");
+      pos++;
+      switch (name) {
+        case "sqrt":
+          return Math.sqrt(arg);
+        case "cbrt":
+          return Math.cbrt(arg);
+        case "sin":
+          return Math.sin(arg);
+        case "cos":
+          return Math.cos(arg);
+        case "tan":
+          return Math.tan(arg);
+        case "abs":
+          return Math.abs(arg);
+        case "log":
+          return Math.log10(arg);
+        case "ln":
+          return Math.log(arg);
+        default:
+          throw new Error(`Unsupported function: ${name}`);
+      }
+    }
+    throw new Error("Unexpected token");
+  };
+  const result = parseExpr();
+  skipWs();
+  if (pos !== expr.length) {
+    throw new Error("Trailing characters");
+  }
+  return result;
+}
 function evaluateExpression(expr) {
   const trimmed = expr.trim();
   if (!trimmed) return "0";
@@ -4346,18 +4367,14 @@ function evaluateExpression(expr) {
       return formatNum(pct / 100 * base);
     }
   }
+  if (!/^[0-9+\-*/().,%^\sA-Za-z]+$/.test(trimmed)) {
+    return "Invalid";
+  }
   try {
-    let sanitized = trimmed.replace(/\^/g, "**").replace(/sqrt\(/gi, "Math.sqrt(").replace(/cbrt\(/gi, "Math.cbrt(").replace(/sin\(/gi, "Math.sin(").replace(/cos\(/gi, "Math.cos(").replace(/tan\(/gi, "Math.tan(").replace(/abs\(/gi, "Math.abs(").replace(/log\(/gi, "Math.log10(").replace(/ln\(/gi, "Math.log(").replace(/pi/gi, "Math.PI").replace(/e(?![a-zA-Z])/gi, "Math.E");
-    if (!/^[0-9+\-*/().,%*\sMathPIEsqrtcbsintanblg]+$/.test(sanitized)) {
-      return "Invalid";
-    }
-    const res = new Function(`"use strict"; return (${sanitized});`)();
-    if (typeof res === "number") {
-      if (isNaN(res)) return "NaN";
-      if (!isFinite(res)) return "Infinity";
-      return formatNum(res);
-    }
-    return String(res);
+    const res = evalSafeMathExpr(trimmed);
+    if (isNaN(res)) return "NaN";
+    if (!isFinite(res)) return "Infinity";
+    return formatNum(res);
   } catch {
     return "...";
   }
@@ -4580,52 +4597,107 @@ function startAmbientSound(preset = "rain", volume = 65) {
     windSrc.start();
     activeNodes.push(windSrc, windFilter, windGain, gustLfo, gustLfoGain, flutterLfo, flutterLfoGain);
   } else if (preset === "coffee") {
-    const roomBuf = createNoiseBuffer(ctx, "pink", 4);
+    const roomBuf = createNoiseBuffer(ctx, "pink", 6);
     const roomSrc = ctx.createBufferSource();
     roomSrc.buffer = roomBuf;
     roomSrc.loop = true;
-    const filter1 = ctx.createBiquadFilter();
-    filter1.type = "bandpass";
-    filter1.frequency.setValueAtTime(340, ctx.currentTime);
-    filter1.Q.setValueAtTime(1.2, ctx.currentTime);
-    const filter2 = ctx.createBiquadFilter();
-    filter2.type = "lowpass";
-    filter2.frequency.setValueAtTime(750, ctx.currentTime);
+    const roomShelf = ctx.createBiquadFilter();
+    roomShelf.type = "lowpass";
+    roomShelf.frequency.setValueAtTime(1400, ctx.currentTime);
+    const roomHighpass = ctx.createBiquadFilter();
+    roomHighpass.type = "highpass";
+    roomHighpass.frequency.setValueAtTime(120, ctx.currentTime);
     const roomGain = ctx.createGain();
-    roomGain.gain.setValueAtTime(0.65, ctx.currentTime);
-    const chatterLfo = ctx.createOscillator();
-    chatterLfo.frequency.setValueAtTime(0.28, ctx.currentTime);
-    const chatterGain = ctx.createGain();
-    chatterGain.gain.setValueAtTime(0.12, ctx.currentTime);
-    chatterLfo.connect(chatterGain);
-    chatterGain.connect(roomGain.gain);
-    chatterLfo.start();
-    roomSrc.connect(filter1);
-    filter1.connect(filter2);
-    filter2.connect(roomGain);
+    roomGain.gain.setValueAtTime(0.38, ctx.currentTime);
+    roomSrc.connect(roomHighpass);
+    roomHighpass.connect(roomShelf);
+    roomShelf.connect(roomGain);
     roomGain.connect(masterGain);
     roomSrc.start();
-    activeNodes.push(roomSrc, filter1, filter2, roomGain, chatterLfo, chatterGain);
-    const clinkInterval = window.setInterval(() => {
+    activeNodes.push(roomSrc, roomHighpass, roomShelf, roomGain);
+    const murmurBuf = createNoiseBuffer(ctx, "pink", 5);
+    const formantBands = [
+      { freq: 380, q: 2, gain: 0.28 },
+      { freq: 760, q: 2.4, gain: 0.22 },
+      { freq: 1350, q: 2.2, gain: 0.14 }
+    ];
+    const bandGains = [];
+    for (const band of formantBands) {
+      const src = ctx.createBufferSource();
+      src.buffer = murmurBuf;
+      src.loop = true;
+      src.playbackRate.setValueAtTime(0.92 + Math.random() * 0.16, ctx.currentTime);
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.setValueAtTime(band.freq, ctx.currentTime);
+      bp.Q.setValueAtTime(band.q, ctx.currentTime);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(band.gain, ctx.currentTime);
+      src.connect(bp);
+      bp.connect(g);
+      g.connect(masterGain);
+      src.start(0, Math.random() * 4);
+      activeNodes.push(src, bp, g);
+      bandGains.push(g);
+    }
+    const chatterTimer = window.setInterval(() => {
       if (!audioCtx || !isPlaying) return;
-      if (Math.random() < 0.22) {
+      const now = audioCtx.currentTime;
+      bandGains.forEach((g, idx) => {
+        const base = formantBands[idx].gain;
+        const target = base * (0.55 + Math.random() * 0.95);
+        g.gain.cancelScheduledValues(now);
+        g.gain.setTargetAtTime(target, now, 0.18 + Math.random() * 0.25);
+      });
+    }, 320);
+    activeTimers.push(chatterTimer);
+    const steamBuf = createNoiseBuffer(ctx, "white", 2);
+    const cafeEventsTimer = window.setInterval(() => {
+      if (!audioCtx || !isPlaying) return;
+      const now = audioCtx.currentTime;
+      const roll = Math.random();
+      if (roll < 0.14 && masterGain) {
         try {
-          const osc = audioCtx.createOscillator();
-          const clinkGain = audioCtx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(2200 + Math.random() * 600, audioCtx.currentTime);
-          clinkGain.gain.setValueAtTime(1e-3, audioCtx.currentTime);
-          clinkGain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 3e-3);
-          clinkGain.gain.exponentialRampToValueAtTime(1e-4, audioCtx.currentTime + 0.08);
-          osc.connect(clinkGain);
-          if (masterGain) clinkGain.connect(masterGain);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.09);
+          const steamSrc = audioCtx.createBufferSource();
+          steamSrc.buffer = steamBuf;
+          const steamFilter = audioCtx.createBiquadFilter();
+          steamFilter.type = "bandpass";
+          steamFilter.frequency.setValueAtTime(2600 + Math.random() * 900, now);
+          steamFilter.Q.setValueAtTime(1.4, now);
+          const steamGain = audioCtx.createGain();
+          const dur = 0.9 + Math.random() * 0.8;
+          steamGain.gain.setValueAtTime(1e-4, now);
+          steamGain.gain.linearRampToValueAtTime(0.06, now + 0.18);
+          steamGain.gain.exponentialRampToValueAtTime(1e-4, now + dur);
+          steamSrc.connect(steamFilter);
+          steamFilter.connect(steamGain);
+          steamGain.connect(masterGain);
+          steamSrc.start(now);
+          steamSrc.stop(now + dur + 0.05);
+        } catch {
+        }
+      } else if (roll < 0.26 && masterGain) {
+        try {
+          const hitSrc = audioCtx.createBufferSource();
+          hitSrc.buffer = steamBuf;
+          const hitFilter = audioCtx.createBiquadFilter();
+          hitFilter.type = "bandpass";
+          hitFilter.frequency.setValueAtTime(3400 + Math.random() * 1400, now);
+          hitFilter.Q.setValueAtTime(14, now);
+          const hitGain = audioCtx.createGain();
+          hitGain.gain.setValueAtTime(1e-4, now);
+          hitGain.gain.linearRampToValueAtTime(0.09, now + 2e-3);
+          hitGain.gain.exponentialRampToValueAtTime(1e-4, now + 0.045);
+          hitSrc.connect(hitFilter);
+          hitFilter.connect(hitGain);
+          hitGain.connect(masterGain);
+          hitSrc.start(now);
+          hitSrc.stop(now + 0.05);
         } catch {
         }
       }
-    }, 400);
-    activeTimers.push(clinkInterval);
+    }, 1200);
+    activeTimers.push(cafeEventsTimer);
   } else {
     const brownBuf = createNoiseBuffer(ctx, "brown", 6);
     const brownSrc = ctx.createBufferSource();
@@ -5442,7 +5514,11 @@ function renderFullStatsWindowHtml(state2, ui) {
   const procs = state2.topProcesses || [];
   const q = (ui?.processQuery || "").trim().toLowerCase();
   const filteredProcs = q ? procs.filter((p) => p.name.toLowerCase().includes(q) || String(p.pid).includes(q)) : procs;
-  const maxMem = procs.length > 0 ? Math.max(...procs.map((p) => p.memoryMb || 1), 100) : 100;
+  const getMemMb = (p) => {
+    const v = Number(p?.memMb ?? p?.memoryMb ?? 0);
+    return Number.isFinite(v) ? v : 0;
+  };
+  const maxMem = procs.length > 0 ? Math.max(...procs.map((p) => getMemMb(p) || 1), 100) : 100;
   const coreBars = s.cores.map(
     (pct, idx) => `<div class="flank-stat-item">
         <div class="flank-stat-header"><span class="flank-stat-label">Core ${idx + 1}</span><span class="flank-stat-val" style="margin-left: 12px;">${pct}%</span></div>
@@ -5475,8 +5551,8 @@ function renderFullStatsWindowHtml(state2, ui) {
           <td class="tabular-nums" style="padding: 6px 12px; color: var(--flank-color-text-muted); font-size: 11px;">${p.pid}</td>
           <td style="padding: 6px 12px; width: 220px;">
             <div style="display:flex; align-items:center; gap: 8px;">
-              <div class="flank-meter__bar" style="height: 6px; flex: 1; margin: 0; background: var(--flank-color-track-bg);"><div class="flank-meter__fill" style="width: ${Math.min(100, Math.round(p.memoryMb / maxMem * 100))}%"></div></div>
-              <span class="tabular-nums" style="font-weight: 600; font-size: 12px; min-width: 60px; text-align: right;">${Math.round(p.memoryMb)} MB</span>
+              <div class="flank-meter__bar" style="height: 6px; flex: 1; margin: 0; background: var(--flank-color-track-bg);"><div class="flank-meter__fill" style="width: ${Math.min(100, Math.max(0, Math.round(getMemMb(p) / maxMem * 100)))}%"></div></div>
+              <span class="tabular-nums" style="font-weight: 600; font-size: 12px; min-width: 60px; text-align: right;">${Math.round(getMemMb(p))} MB</span>
             </div>
           </td>
           <td class="tabular-nums" style="padding: 6px 12px; color: var(--flank-color-text-muted); text-align: right;">${p.threads || 1}</td>
@@ -5708,20 +5784,20 @@ function renderClockWindowHtml(state2) {
     (city) => `<button type="button" class="flank-chip" data-clock-quick-add="${escapeHtml5(city)}">+ ${escapeHtml5(city)}</button>`
   ).join("");
   const cityCards = c.cities.map(
-    (item) => `<div class="flank-preview-box" style="justify-content: space-between; align-items: center; padding: 12px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10);">
-        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10)">
-          <span class="flank-row-chip" style="width: var(--flank-scale-ring-tile); height: var(--flank-scale-ring-tile)">${iconSvg(item.isDay ? "sun" : "moon", 16)}</span>
-          <span style="display:flex; flex-direction:column; gap: var(--flank-scale-bar-thin)">
+    (item) => `<div class="flank-preview-box" style="justify-content: space-between; align-items: center; padding: 12px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10); flex-shrink: 0;">
+        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10); flex: 1; min-width: 0;">
+          <span class="flank-row-chip" style="width: var(--flank-scale-ring-tile); height: var(--flank-scale-ring-tile); flex-shrink: 0;">${iconSvg(item.isDay ? "sun" : "moon", 16)}</span>
+          <span style="display:flex; flex-direction:column; gap: var(--flank-scale-bar-thin); min-width: 0;">
             <span style="font-size: var(--flank-scale-font-body-sm); font-weight: 600; color: var(--flank-color-text);">${escapeHtml5(item.city)}</span>
             <span class="flank-row-meta">${escapeHtml5(item.country ? `${item.country} \xB7 ${item.timezone}` : item.timezone)} \xB7 ${escapeHtml5(item.offsetText)}</span>
           </span>
         </span>
-        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10)">
-          <span style="display:flex; flex-direction:column; align-items:flex-end; gap: var(--flank-scale-bar-thin)">
-            <span class="flank-stat-val tabular-nums" style="font-size: var(--flank-scale-font-body-sm)">${escapeHtml5(item.timeText)}</span>
-            <span class="flank-row-meta">${escapeHtml5(item.dateText)}</span>
+        <span style="display:flex; align-items:center; gap: var(--flank-scale-space-10); flex-shrink: 0;">
+          <span style="display:flex; flex-direction:column; align-items:flex-end; gap: var(--flank-scale-bar-thin);">
+            <span class="flank-stat-val tabular-nums" style="font-size: var(--flank-scale-font-body-sm); white-space: nowrap;">${escapeHtml5(item.timeText)}</span>
+            <span class="flank-row-meta" style="white-space: nowrap;">${escapeHtml5(item.dateText)}</span>
           </span>
-          <button type="button" class="flank-ui-btn is-ghost" data-clock-remove="${escapeHtml5(item.id)}" aria-label="Remove ${escapeHtml5(item.city)}" title="Remove ${escapeHtml5(item.city)}" style="width: 28px; height: 28px; padding: 0;">
+          <button type="button" class="flank-ui-btn is-ghost" data-clock-remove="${escapeHtml5(item.id)}" aria-label="Remove ${escapeHtml5(item.city)}" title="Remove ${escapeHtml5(item.city)}" style="width: 28px; height: 28px; padding: 0; flex-shrink: 0;">
             ${iconSvg("trash", 14)}
           </button>
         </span>
@@ -5782,8 +5858,8 @@ function renderClockWindowHtml(state2) {
         </div>
 
         <div class="flank-preview-col" style="flex: 1; min-width: 0; background: var(--flank-color-tile-bg); border-radius: var(--flank-scale-radius-12); border: var(--flank-scale-hairline) solid var(--flank-color-divider-soft); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
-          <span class="flank-card-title">Saved world clocks</span>
-          <div style="display:flex; flex-direction:column; gap: var(--flank-scale-space-10)">
+          <span class="flank-card-title" style="flex-shrink: 0;">Saved world clocks</span>
+          <div style="display:flex; flex-direction:column; gap: var(--flank-scale-space-10); flex-shrink: 0;">
             ${cityCards || `<div class="flank-preview-box" style="padding: 16px; background: var(--flank-surface-card-bg); border-radius: var(--flank-scale-radius-10);"><span class="flank-card-muted">No world clocks added yet. Search or click a quick-add city on the left.</span></div>`}
           </div>
         </div>
@@ -6135,24 +6211,6 @@ function renderSettingsWindowHtml(state2, currentTheme, ui) {
                 <div class="flank-chip-row" style="flex-wrap: wrap; gap: 6px;">
                   ${clockChips || '<span class="flank-card-muted" style="font-size: 11px;">None</span>'}
                 </div>
-              </div>
-            </div>
-          `
-    })}
-
-        <!-- HABITS & HYDRATION GROUP -->
-        ${Card({
-      children: `
-            <div style="display:flex; flex-direction:column; gap: 12px; padding: 14px;">
-              <div style="display:flex; align-items:center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--flank-color-text);">
-                ${iconSvg("droplet", 16)} Habits &amp; Hydration
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <div style="font-size: 12px; font-weight: 500; color: var(--flank-color-text);">Daily water target</div>
-                  <div style="font-size: 11px; color: var(--flank-color-text-muted);">Target number of water glasses or cups per day.</div>
-                </div>
-                <div style="font-size: 13px; font-weight: 600; font-family: var(--flank-type-mono); color: var(--flank-color-accent);">${state2.habits?.waterGoal || 8} cups</div>
               </div>
             </div>
           `
@@ -8719,29 +8777,6 @@ function setupEventDelegation() {
       renderApp();
       return;
     }
-    if (action === "habit-water-add") {
-      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
-      state.habits.waterGlasses += 1;
-      const updated = await window.pywebview?.api?.habits_action?.("add_water", 1);
-      if (updated?.habits) state.habits = updated.habits;
-      renderApp();
-      return;
-    }
-    if (action === "habit-water-sub") {
-      if (!state.habits) state.habits = { waterGlasses: 0, waterGoal: 8, lastStretchMin: 0, streakDays: 1 };
-      state.habits.waterGlasses = Math.max(0, state.habits.waterGlasses - 1);
-      const updated = await window.pywebview?.api?.habits_action?.("sub_water", 1);
-      if (updated?.habits) state.habits = updated.habits;
-      renderApp();
-      return;
-    }
-    if (action === "habit-log-stretch") {
-      if (state.habits) state.habits.lastStretchMin = 0;
-      const updated = await window.pywebview?.api?.habits_action?.("log_stretch");
-      if (updated?.habits) state.habits = updated.habits;
-      renderApp();
-      return;
-    }
     const openDrive = btn.getAttribute("data-drive");
     if (action === "open-drive" && openDrive) {
       window.pywebview?.api?.open_drive?.(openDrive);
@@ -8767,43 +8802,6 @@ function setupEventDelegation() {
       if (!state.display) state.display = { brightness: val, nightLight: false, resolution: "2560 \xD7 1440", refreshRate: 144, scaling: 100 };
       state.display.brightness = val;
       window.pywebview?.api?.set_brightness?.(val);
-      return;
-    }
-    if (action === "select-refresh-rate") {
-      const rate = Number(btn.getAttribute("data-rate")) || 144;
-      const container = document.getElementById("flank-refresh-rate-options");
-      if (container) {
-        container.querySelectorAll(".flank-refresh-chip").forEach((c) => c.classList.remove("is-active"));
-        btn.classList.add("is-active");
-      }
-      const okBtn = document.getElementById("flank-apply-refresh-btn");
-      if (okBtn) okBtn.setAttribute("data-chosen-rate", String(rate));
-      const statusText = document.getElementById("flank-refresh-status");
-      if (statusText) statusText.textContent = `Selected: ${rate} Hz (click OK to apply)`;
-      return;
-    }
-    if (action === "apply-refresh-rate") {
-      const okBtn = document.getElementById("flank-apply-refresh-btn");
-      let chosenRate = okBtn ? Number(okBtn.getAttribute("data-chosen-rate")) : 0;
-      if (!chosenRate) {
-        const activeChip = document.querySelector(".flank-refresh-chip.is-active");
-        if (activeChip) chosenRate = Number(activeChip.getAttribute("data-rate")) || 144;
-        else chosenRate = state.display?.refreshRate || 144;
-      }
-      const statusText = document.getElementById("flank-refresh-status");
-      if (statusText) statusText.textContent = `Applying ${chosenRate} Hz...`;
-      try {
-        const updated = await window.pywebview?.api?.set_refresh_rate?.(chosenRate);
-        if (updated?.display) {
-          state.display = updated.display;
-        } else if (state.display) {
-          state.display.refreshRate = chosenRate;
-        }
-        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz \u2713`;
-        setTimeout(() => renderApp(), 400);
-      } catch (_e) {
-        if (statusText) statusText.textContent = `Applied ${chosenRate} Hz`;
-      }
       return;
     }
     if (action === "toggle-mic-mute") {
@@ -9583,9 +9581,6 @@ window.flankReceiveHostUpdate = (patch) => {
   if (patch.calculator) {
     state.calculator = { ...state.calculator, ...patch.calculator };
   }
-  if (patch.habits) {
-    state.habits = { ...state.habits, ...patch.habits };
-  }
   if (patch.storage) {
     state.storage = { ...state.storage, ...patch.storage };
   }
@@ -9619,7 +9614,7 @@ window.flankReceiveHostUpdate = (patch) => {
   }
   if (currentView === "card" && state.activeWidget && !prefsChanged) {
     const w = state.activeWidget;
-    const hasWidgetUpdate = w === "stats" && !!patch.stats || w === "battery" && !!patch.battery || w === "weather" && !!patch.weather || w === "player" && !!patch.player || w === "focus" && !!patch.focus || w === "clock" && !!patch.clock || w === "scratchpad" && !!patch.scratchpad || w === "colorpicker" && !!patch.colorpicker || w === "calendar" && !!patch.calendar || w === "audio" && !!patch.audio || w === "network" && !!patch.network || w === "clipboard" && !!patch.clipboard || w === "bluetooth" && !!patch.bluetooth || w === "tasks" && !!patch.tasks || w === "calculator" && !!patch.calculator || w === "habits" && !!patch.habits || w === "storage" && !!patch.storage || w === "display" && !!patch.display || w === "privacy" && !!patch.privacy || w === "ambient" && !!patch.ambient || w === "runner" && !!patch.runner || w === "gpu" && !!patch.gpu || w === "github" && !!patch.github;
+    const hasWidgetUpdate = w === "stats" && !!patch.stats || w === "battery" && !!patch.battery || w === "weather" && !!patch.weather || w === "player" && !!patch.player || w === "focus" && !!patch.focus || w === "clock" && !!patch.clock || w === "scratchpad" && !!patch.scratchpad || w === "colorpicker" && !!patch.colorpicker || w === "calendar" && !!patch.calendar || w === "audio" && !!patch.audio || w === "network" && !!patch.network || w === "clipboard" && !!patch.clipboard || w === "bluetooth" && !!patch.bluetooth || w === "tasks" && !!patch.tasks || w === "calculator" && !!patch.calculator || w === "storage" && !!patch.storage || w === "display" && !!patch.display || w === "privacy" && !!patch.privacy || w === "ambient" && !!patch.ambient || w === "runner" && !!patch.runner || w === "gpu" && !!patch.gpu || w === "github" && !!patch.github;
     if (!hasWidgetUpdate) {
       return;
     }

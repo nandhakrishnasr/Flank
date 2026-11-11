@@ -2811,9 +2811,19 @@ a:focus-visible,
 
 .flank-card__header .flank-card__title,
 .flank-card__header-title,
+.flank-card-row-between .flank-card-title {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.flank-card-title {
+  flex: 0 0 auto !important;
+}
+
+.flank-card__header .flank-card__title,
+.flank-card__header-title,
 .flank-card-row-between.is-header .flank-card-title,
 .flank-card-title {
-  flex: 1 !important;
   min-width: 0 !important;
   white-space: nowrap !important;
   overflow: hidden !important;

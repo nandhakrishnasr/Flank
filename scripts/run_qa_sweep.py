@@ -18,8 +18,21 @@ import shutil
 import subprocess
 from PIL import Image
 
-EDGE_PATH = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-REPO_DIR = r"C:\Users\NANDHA KRISHNA\Documents\GitHub\Flank"
+EDGE_PATH = (
+    shutil.which("msedge")
+    or next(
+        (
+            p
+            for p in (
+                os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+                os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+            )
+            if os.path.isfile(p)
+        ),
+        "msedge",
+    )
+)
+REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 PUBLIC_DIR = os.path.join(REPO_DIR, "public")
 QA_OUT_DIR = os.path.join(REPO_DIR, "docs", "design", "qa")
 os.makedirs(QA_OUT_DIR, exist_ok=True)

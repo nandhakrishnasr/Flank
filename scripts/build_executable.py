@@ -176,10 +176,34 @@ def build() -> None:
 
     # 2. Build standalone Flank.exe directory bundle via PyInstaller
     print('=== Step 2: Building standalone Flank.exe ===')
-    public_src = os.path.join(ROOT_DIR, 'public')
-    themes_src = os.path.join(ROOT_DIR, 'themes')
+    stage_dir = os.path.join(BUILD_DIR, '_stage')
+    if os.path.isdir(stage_dir):
+        shutil.rmtree(stage_dir)
+    os.makedirs(stage_dir, exist_ok=True)
+
+    public_src = os.path.join(stage_dir, 'public')
+    shutil.copytree(
+        os.path.join(ROOT_DIR, 'public'),
+        public_src,
+        ignore=shutil.ignore_patterns('_screenshot_harness.html', '*.map'),
+    )
+
+    assets_src = os.path.join(stage_dir, 'assets')
+    shutil.copytree(
+        ASSETS_DIR,
+        assets_src,
+        ignore=shutil.ignore_patterns('*.md', 'legacy'),
+    )
+
+    themes_src = os.path.join(stage_dir, 'themes')
+    shutil.copytree(os.path.join(ROOT_DIR, 'themes'), themes_src)
+
     host_dir = os.path.join(ROOT_DIR, 'host')
     main_py = os.path.join(host_dir, 'main.py')
+
+    flank_dist_dir = os.path.join(DIST_DIR, 'Flank')
+    if os.path.isdir(flank_dist_dir):
+        shutil.rmtree(flank_dist_dir)
 
     pyi_cmd = [
         sys.executable,
@@ -198,7 +222,7 @@ def build() -> None:
         '--add-data',
         f'{public_src};public',
         '--add-data',
-        f'{ASSETS_DIR};assets',
+        f'{assets_src};assets',
         '--add-data',
         f'{themes_src};themes',
         '--hidden-import',

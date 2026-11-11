@@ -14,7 +14,6 @@ export type WidgetKind =
   | 'bluetooth'
   | 'tasks'
   | 'calculator'
-  | 'habits'
   | 'storage'
   | 'display'
   | 'privacy'
@@ -270,13 +269,6 @@ export interface CalculatorPayload {
   history: CalculatorHistoryItem[];
 }
 
-export interface HabitsPayload {
-  waterGlasses: number;
-  waterGoal: number;
-  lastStretchMin: number;
-  streakDays: number;
-}
-
 export interface StorageDrive {
   letter: string;
   label: string;
@@ -398,7 +390,6 @@ export interface FlankState {
   topProcesses?: ProcessItem[];
   tasks?: TasksPayload;
   calculator?: CalculatorPayload;
-  habits?: HabitsPayload;
   storage?: StoragePayload;
   display?: DisplayPayload;
   privacy?: PrivacyPayload;

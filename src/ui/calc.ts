@@ -3,6 +3,136 @@
  * Safely evaluates arithmetic expressions and natural language unit conversions.
  */
 
+function evalSafeMathExpr(expr: string): number {
+  let pos = 0;
+
+  const skipWs = (): void => {
+    while (pos < expr.length && /\s/.test(expr[pos])) pos++;
+  };
+
+  const parseExpr = (): number => {
+    let val = parseTerm();
+    while (true) {
+      skipWs();
+      const ch = expr[pos];
+      if (ch === '+') {
+        pos++;
+        val += parseTerm();
+      } else if (ch === '-') {
+        pos++;
+        val -= parseTerm();
+      } else {
+        break;
+      }
+    }
+    return val;
+  };
+
+  const parseTerm = (): number => {
+    let val = parsePower();
+    while (true) {
+      skipWs();
+      const ch = expr[pos];
+      if (ch === '*') {
+        if (expr[pos + 1] === '*') break;
+        pos++;
+        val *= parsePower();
+      } else if (ch === '/') {
+        pos++;
+        val /= parsePower();
+      } else if (ch === '%') {
+        pos++;
+        val %= parsePower();
+      } else {
+        break;
+      }
+    }
+    return val;
+  };
+
+  const parsePower = (): number => {
+    const base = parseUnary();
+    skipWs();
+    if (expr[pos] === '^') {
+      pos++;
+      return Math.pow(base, parsePower());
+    }
+    if (expr[pos] === '*' && expr[pos + 1] === '*') {
+      pos += 2;
+      return Math.pow(base, parsePower());
+    }
+    return base;
+  };
+
+  const parseUnary = (): number => {
+    skipWs();
+    if (expr[pos] === '+') {
+      pos++;
+      return parseUnary();
+    }
+    if (expr[pos] === '-') {
+      pos++;
+      return -parseUnary();
+    }
+    return parsePrimary();
+  };
+
+  const parsePrimary = (): number => {
+    skipWs();
+    if (expr[pos] === '(') {
+      pos++;
+      const inner = parseExpr();
+      skipWs();
+      if (expr[pos] !== ')') throw new Error('Unbalanced parentheses');
+      pos++;
+      return inner;
+    }
+
+    const numMatch = /^(?:\d+(?:\.\d*)?|\.\d+)/.exec(expr.slice(pos));
+    if (numMatch) {
+      pos += numMatch[0].length;
+      return Number(numMatch[0]);
+    }
+
+    const identMatch = /^[a-zA-Z]+/.exec(expr.slice(pos));
+    if (identMatch) {
+      const name = identMatch[0].toLowerCase();
+      pos += identMatch[0].length;
+      if (name === 'pi') return Math.PI;
+      if (name === 'e') return Math.E;
+
+      skipWs();
+      if (expr[pos] !== '(') throw new Error(`Unknown identifier: ${name}`);
+      pos++;
+      const arg = parseExpr();
+      skipWs();
+      if (expr[pos] !== ')') throw new Error('Unbalanced function call');
+      pos++;
+
+      switch (name) {
+        case 'sqrt': return Math.sqrt(arg);
+        case 'cbrt': return Math.cbrt(arg);
+        case 'sin': return Math.sin(arg);
+        case 'cos': return Math.cos(arg);
+        case 'tan': return Math.tan(arg);
+        case 'abs': return Math.abs(arg);
+        case 'log': return Math.log10(arg);
+        case 'ln': return Math.log(arg);
+        default: throw new Error(`Unsupported function: ${name}`);
+      }
+    }
+
+    throw new Error('Unexpected token');
+  };
+
+  const result = parseExpr();
+  skipWs();
+  if (pos !== expr.length) {
+    throw new Error('Trailing characters');
+  }
+  return result;
+}
+
 export function evaluateExpression(expr: string): string {
   const trimmed = expr.trim();
   if (!trimmed) return '0';
@@ -58,35 +188,16 @@ export function evaluateExpression(expr: string): string {
     }
   }
 
-  // 3. Mathematical Expression Evaluator
+  // 3. Recursive-descent mathematical expression evaluator (no eval / new Function)
+  if (!/^[0-9+\-*/().,%^\sA-Za-z]+$/.test(trimmed)) {
+    return 'Invalid';
+  }
+
   try {
-    // Sanitize and replace math functions
-    let sanitized = trimmed
-      .replace(/\^/g, '**')
-      .replace(/sqrt\(/gi, 'Math.sqrt(')
-      .replace(/cbrt\(/gi, 'Math.cbrt(')
-      .replace(/sin\(/gi, 'Math.sin(')
-      .replace(/cos\(/gi, 'Math.cos(')
-      .replace(/tan\(/gi, 'Math.tan(')
-      .replace(/abs\(/gi, 'Math.abs(')
-      .replace(/log\(/gi, 'Math.log10(')
-      .replace(/ln\(/gi, 'Math.log(')
-      .replace(/pi/gi, 'Math.PI')
-      .replace(/e(?![a-zA-Z])/gi, 'Math.E');
-
-    // Only allow safe math tokens
-    if (!/^[0-9+\-*/().,%*\sMathPIEsqrtcbsintanblg]+$/.test(sanitized)) {
-      return 'Invalid';
-    }
-
-    // Evaluate in safe Function context
-    const res = new Function(`"use strict"; return (${sanitized});`)();
-    if (typeof res === 'number') {
-      if (isNaN(res)) return 'NaN';
-      if (!isFinite(res)) return 'Infinity';
-      return formatNum(res);
-    }
-    return String(res);
+    const res = evalSafeMathExpr(trimmed);
+    if (isNaN(res)) return 'NaN';
+    if (!isFinite(res)) return 'Infinity';
+    return formatNum(res);
   } catch {
     return '...';
   }

@@ -35,7 +35,7 @@ This document records engineering and design decisions made during the implement
 
 Stack Detected: **Python + pywebview (WinForms + Edge Chromium WebView2) + Win32/DWM ctypes**.
 
-Investigation of the 7 diagnostic causes specified in `ANTIGRAVITY_PROMPT.md`:
+Investigation of the 7 diagnostic root causes:
 
 1. **Window Transparency & Webview Background**:
    - *Status*: **Applies (Partial)**
