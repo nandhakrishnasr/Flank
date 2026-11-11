@@ -91,6 +91,14 @@ Hovering any widget tile on the dock slides out its interactive flyout card with
 
 ---
 
+## What's New
+
+- **22 Interactive Live Widgets**: Expanded dock widget suite including **Calc** (safe recursive-descent expression parser & history), **Focus Ambiance** (multi-layer Web Audio **Café**, Rain, Fire, Forest & Noise soundscapes), **Tasks To-Do**, **Command Runner** (with terminate control), **GitHub**, **GPU Telemetry**, **Storage Drives**, **Bluetooth**, **Network**, **Display & Brightness**, and **Privacy Controls**.
+- **UI & Telemetry Polish**: Fixed **World Clock** header layout spacing, resolved `NaN MB` memory formatting in **Top 30 Processes**, renamed Smart Calculator dock label to **Calc**, and streamlined **Display & Brightness** (removed Habits/Hydration widgets and refresh-rate switching).
+- **Local Security & Privacy Hardening**: GitHub personal access tokens are encrypted locally via Windows **DPAPI** (`CryptProtectData` / `CryptUnprotectData`), clipboard history respects Windows privacy exclusions, and zero telemetry ever leaves your PC.
+
+---
+
 ## Core Features & Widgets
 
 1. **Collapsible Dock to Edge Tab (`Ctrl+Alt+F`)**:
@@ -101,21 +109,23 @@ Hovering any widget tile on the dock slides out its interactive flyout card with
    - Dock tile with live item counter badge and full `960×680` Clipboard History window.
    - Instant search, category chips (`All`, `Pinned`, `Links`, `Images`, `Files`, `Code`), detail preview pane, and keyboard navigation.
    - Respects Windows privacy flags (`ExcludeClipboardContentFromMonitorProcessing`, `CanIncludeInClipboardHistory=0`).
-3. **Weather**:
-   - Live Open-Meteo geocoding and forecast with condition icon, temperature badge, high/low summary, and 5-hour strip.
-4. **Agenda & Meetings**:
-   - Upcoming schedule with meeting countdown, join buttons for Zoom/Teams/Meet, and friendly empty state.
-5. **Focus Timer**:
-   - Deep focus / short break timer with tabular numerals, session presets (15m, 25m, 45m, 60m), and daily stats.
-6. **System Stats (`Alt+S`)**:
-   - Real-time Win32 telemetry (CPU, RAM, GPU, Disk, Network) with live sparklines (or ASCII bars in Terminal theme).
-7. **Battery & Wireless Peripherals**:
-   - Displays laptop/UPS battery percentage, charging state, power mode, and wireless peripheral levels (Mouse, Keyboard).
-8. **World Clock**:
-   - Track local times across multiple custom IANA timezones.
-9. **Pinned Apps & Links + Global Shortcuts**:
+3. **Productivity & Focus Widgets**:
+   - **Calc (`calculator`)**: Live math, unit conversions, percentages, functions (`sqrt`, trig, logs), history, and safe recursive-descent parser.
+   - **Tasks To-Do (`tasks`)**: Quick capture checklist directly from the dock edge.
+   - **Focus Timer (`focus`) & Focus Ambiance (`ambient`)**: Pomodoro presets (`15m`, `25m`, `45m`, `Break 5m`) paired with synthesized ambient soundscapes (including realistic Café acoustics, Rain, Fire, Forest, and Noise).
+   - **Agenda & Meetings (`calendar`)**: Upcoming schedule with countdowns and one-click Zoom/Teams/Meet join buttons.
+   - **World Clock (`clock`)**, **Scratchpad Notes (`scratchpad`)**, and **Screen Color Picker (`colorpicker`)**.
+4. **Media & Developer Workflows**:
+   - **Media Player (`player`)**: Now-playing controls with album art and YouTube thumbnail support.
+   - **Command Runner (`runner`)**: Launch scripts or commands and terminate running tasks inline.
+   - **GitHub (`github`)**: Track PRs and notifications with DPAPI-encrypted local token storage.
+5. **System & Hardware Telemetry**:
+   - **System Stats (`stats`, `Alt+S`) & GPU (`gpu`)**: CPU, RAM, Top 30 Processes by Memory, GPU load/temperature, sparklines, and ASCII gauges in Terminal theme.
+   - **Display & Brightness (`display`)**: Brightness slider, quick presets, active resolution readout, and Night Light toggle.
+   - **Battery (`battery`)**, **Audio & Mic Mixer (`audio`)**, **Network (`network`)**, **Bluetooth (`bluetooth`)**, **Storage (`storage`)**, **Weather (`weather`)**, and **Privacy (`privacy`)**.
+6. **Pinned Apps & Links + Global Shortcuts**:
    - Custom app & website shortcuts with automatic high-res favicon retrieval, executable icon extraction, and letter-badge fallbacks.
-   - Global hotkey assignment directly from Settings.
+   - Global hotkey assignment directly from **Settings → Items** (see [Wiki](docs/wiki/Home.md) for the full visual gallery).
 
 ---
 
@@ -123,13 +133,13 @@ Hovering any widget tile on the dock slides out its interactive flyout card with
 
 | Theme | Personality | Key Characteristics |
 |---|---|---|
-| **Paper** *(Default)* | Warm Stone & Ink | `#FBFAF7` surface, terracotta accent (`#C85428`), Fraunces serif headings |
-| **Glass** | Translucent Acrylic | Dark translucent acrylic (`rgba(22, 23, 28, 0.72)`), electric indigo (`#7C9BFF`) |
-| **Liquid Glass** | Specular Apple Glass | Multi-layer sheen, 1.5px rim light, dynamic wallpaper sampling with adaptive alpha |
-| **Terminal** | Monospace Strip | Monospace `#0B0D0C` background, phosphor green (`#33FF88`), ASCII gauges |
-| **Rail** | Ultra-Thin Spine | `38px` minimalist icon spine (`#121110`), amber gold (`#F59E0B`) |
-| **Nord** | Arctic Slate | Cool slate `#2E3440`, frost blue (`#88C0D0`), snow storm accents |
-| **Aurora** | Vibrant Night Sky | Deep night `#160A2E`, vibrant neon violet-to-pink glow |
+| **Paper** *(Default)* | Warm Stone & Ink | `#fbfaf7` surface, cobalt accent (`#2F4BFF`), Fraunces display numerals |
+| **Glass** | Translucent Acrylic | Dark translucent acrylic (`rgba(22, 23, 28, 0.72)`), crisp cool accent |
+| **Liquid Glass** | Specular Frosted Glass | Multi-layer sheen, rim highlight, dynamic wallpaper sampling with adaptive alpha |
+| **Aurora** | Vibrant Night Sky | Deep night surface with luminous aurora accents |
+| **Nord** | Arctic Slate | Cool slate palette with frost blue accents |
+| **Terminal** | Monospace Strip | Monospace dark background, phosphor green, ASCII gauges |
+| **Rail** | Ultra-Thin Spine | `38px` minimalist icon spine with high-contrast gold accent |
 
 ---
 
