@@ -502,8 +502,10 @@ export function renderApp(preserveSearchFocus = false): void {
         }
         attachDockMagnification(dockEl, (state.edgeOverride === 'top' ? 'right' : state.edgeOverride || currentTheme.layout.edge) as 'left' | 'right');
         const rect = dockEl.getBoundingClientRect();
+        const scrollable = dockEl.querySelector<HTMLElement>('.flank-dock-scrollable');
+        const extraScroll = scrollable ? Math.max(0, scrollable.scrollHeight - scrollable.clientHeight) : 0;
         const naturalWidth = Math.max(Math.ceil(rect.width), dockEl.scrollWidth, dockEl.offsetWidth);
-        const naturalHeight = Math.max(Math.ceil(rect.height), dockEl.scrollHeight, dockEl.offsetHeight);
+        const naturalHeight = Math.max(Math.ceil(rect.height), dockEl.scrollHeight, dockEl.offsetHeight) + extraScroll;
         const theme = themeEngine.getCurrentTheme();
         const shape = theme.layout.shape || 'pill';
         window.pywebview?.api?.set_dock_bounds?.(

@@ -135,8 +135,10 @@ body[data-view="dock"] [data-edge] .flank-dock {
   position: static !important;
   width: var(--flank-layout-dock-width) !important;
   height: max-content !important;
-  max-height: none !important;
+  max-height: 100vh !important;
   min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
   flex: 0 0 auto !important;
   inset: auto !important;
   transform: none !important;
@@ -277,9 +279,18 @@ html[data-theme="glass"] .flank-glass-backdrop {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
   gap: var(--flank-scale-tile-gap, var(--flank-layout-dock-gap, 6px));
   width: 100%;
   box-sizing: border-box;
+}
+
+.flank-dock-content > .flank-tile,
+.flank-dock-content > .flank-group-divider,
+.flank-dock-content > .flank-dock-collapse-handle {
+  flex-shrink: 0;
 }
 
 .flank-card-content {
@@ -1093,6 +1104,8 @@ a:focus-visible,
 .flank-dock-scrollable {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: var(--flank-scale-space-sm, 8px);
   align-items: center;
   width: 100%;
