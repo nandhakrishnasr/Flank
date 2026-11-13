@@ -7766,17 +7766,98 @@ async function completeOnboardingFlow(result, skipped) {
   }
 }
 function setupEventDelegation() {
-  const handleDockExpand = (ev) => {
-    const target = ev.target;
+  let tabDrag = null;
+  let tabDragRaf = 0;
+  let suppressTabClickUntil = 0;
+  const isCollapsedTabTarget = (target) => {
     const expandBtn = target?.closest('[data-action="expand-dock"], .flank-dock-tab');
-    if (expandBtn || currentView === "dock" && isDockCollapsed()) {
+    if (expandBtn) return expandBtn;
+    if (currentView === "dock" && isDockCollapsed()) return target;
+    return null;
+  };
+  document.addEventListener(
+    "pointerdown",
+    (ev) => {
+      if (ev.button !== 0) return;
+      const tabTarget = isCollapsedTabTarget(ev.target);
+      if (!tabTarget) return;
       ev.preventDefault();
       ev.stopPropagation();
-      expandDock();
+      tabDrag = { pointerId: ev.pointerId, startY: ev.screenY, dragging: false, el: tabTarget };
+      try {
+        tabTarget.setPointerCapture?.(ev.pointerId);
+      } catch {
+      }
+      try {
+        window.pywebview?.api?.begin_collapsed_tab_drag?.();
+      } catch {
+      }
+    },
+    true
+  );
+  window.addEventListener(
+    "pointermove",
+    (ev) => {
+      if (!tabDrag || ev.pointerId !== tabDrag.pointerId) return;
+      if (!tabDrag.dragging && Math.abs(ev.screenY - tabDrag.startY) >= 4) {
+        tabDrag.dragging = true;
+        document.documentElement.classList.add("is-dragging-tab");
+      }
+      if (tabDrag.dragging && !tabDragRaf) {
+        tabDragRaf = requestAnimationFrame(() => {
+          tabDragRaf = 0;
+          try {
+            window.pywebview?.api?.drag_collapsed_tab?.();
+          } catch {
+          }
+        });
+      }
+    },
+    true
+  );
+  const finishTabDrag = (ev, isCancel) => {
+    if (!tabDrag || ev.pointerId !== tabDrag.pointerId) return;
+    const activeDrag = tabDrag;
+    tabDrag = null;
+    if (tabDragRaf) {
+      cancelAnimationFrame(tabDragRaf);
+      tabDragRaf = 0;
+    }
+    document.documentElement.classList.remove("is-dragging-tab");
+    try {
+      activeDrag.el?.releasePointerCapture?.(ev.pointerId);
+    } catch {
+    }
+    suppressTabClickUntil = Date.now() + 250;
+    if (activeDrag.dragging) {
+      try {
+        window.pywebview?.api?.end_collapsed_tab_drag?.(!isCancel);
+      } catch {
+      }
+    } else {
+      try {
+        window.pywebview?.api?.end_collapsed_tab_drag?.(false);
+      } catch {
+      }
+      if (!isCancel) {
+        expandDock();
+      }
     }
   };
-  document.addEventListener("click", handleDockExpand, true);
-  document.addEventListener("pointerdown", handleDockExpand, true);
+  window.addEventListener("pointerup", (ev) => finishTabDrag(ev, false), true);
+  window.addEventListener("pointercancel", (ev) => finishTabDrag(ev, true), true);
+  document.addEventListener(
+    "click",
+    (ev) => {
+      const tabTarget = isCollapsedTabTarget(ev.target);
+      if (!tabTarget) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (Date.now() < suppressTabClickUntil) return;
+      expandDock();
+    },
+    true
+  );
   const stage = document.getElementById("flank-stage");
   if (!stage) return;
   let draggedItemId = null;

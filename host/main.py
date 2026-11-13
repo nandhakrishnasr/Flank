@@ -775,6 +775,7 @@ class FlankHostApi:
         )
         self._tray: FlankTray | None = None
         self._collapsed_due_to_fullscreen = False
+        self._tab_drag_state: dict[str, Any] | None = None
 
     def should_run_onboarding(self) -> bool:
         if '--onboarding' in sys.argv or os.environ.get('FLANK_FORCE_ONBOARDING') == '1':
@@ -1031,10 +1032,13 @@ class FlankHostApi:
                 tab_w = 36 if show_logo else 24
                 tab_h = 104 if show_logo else 72
 
-                # Vertically centered where the dock was
+                # Use saved vertical edge position when available, otherwise vertically center where the dock was
                 _, cur_dock_y, _, cur_dock_h = self._dock_shape_rect
                 dock_center_y = cur_dock_y + (cur_dock_h // 2)
-                tab_y = max(logical_wy + 10, min(logical_wy + logical_wh - tab_h - 10, dock_center_y - (tab_h // 2)))
+                default_tab_y = dock_center_y - (tab_h // 2)
+                saved_tab_y = self.prefs.get('collapsedTabY')
+                raw_tab_y = int(round(saved_tab_y)) if isinstance(saved_tab_y, (int, float)) else default_tab_y
+                tab_y = max(logical_wy + 10, min(logical_wy + logical_wh - tab_h - 10, raw_tab_y))
 
                 pw = int(round(tab_w * scale))
                 ph = int(round(tab_h * scale))
@@ -1071,13 +1075,16 @@ class FlankHostApi:
                     self._tray.update_state(True)
             else:
                 self._is_collapsed = False
-                # Restore to expanded dock bounds
+                # Restore to expanded dock bounds, clamped to fit on screen based on its size
                 dock_x, dock_y, dock_w, dock_h = self._dock_shape_rect
                 if dock_w <= 0 or dock_h <= 0:
                     dock_w = 64
                     dock_h = 420
                     dock_x = (logical_wx + logical_ww - dock_w - 12) if edge == 'right' else (logical_wx + 12)
                     dock_y = logical_wy + (logical_wh - dock_h) // 2
+
+                dock_h = max(120, min(logical_wh - 12, dock_h))
+                dock_y = max(logical_wy + 6, min(logical_wy + logical_wh - dock_h - 6, dock_y))
 
                 pw = int(round(dock_w * scale))
                 ph = int(round(dock_h * scale))
@@ -1112,6 +1119,81 @@ class FlankHostApi:
                 dock.evaluate_js(f"window.flankUpdateBackdrop && window.flankUpdateBackdrop({json.dumps(backdrop)})")
             except Exception:
                 pass
+        except Exception:
+            pass
+
+    def begin_collapsed_tab_drag(self) -> None:
+        """Capture initial cursor and window Y when starting a vertical edge drag of the collapsed tab."""
+        if not self._is_collapsed:
+            return
+        dock = windows.get('dock')
+        if not dock or not hasattr(dock, 'native') or not dock.native:
+            return
+        try:
+            hwnd = dock.native.Handle.ToInt32()
+            pt = wintypes.POINT()
+            rc = RECT()
+            if user32.GetCursorPos(ctypes.byref(pt)) and user32.GetWindowRect(hwnd, ctypes.byref(rc)):
+                self._tab_drag_state = {
+                    'start_cursor_y': pt.y,
+                    'start_win_y': rc.top,
+                    'win_w': rc.right - rc.left,
+                    'win_h': rc.bottom - rc.top,
+                }
+        except Exception:
+            self._tab_drag_state = None
+
+    def drag_collapsed_tab(self) -> None:
+        """Move the collapsed tab vertically along its locked screen edge."""
+        if not self._is_collapsed or not self._tab_drag_state:
+            return
+        dock = windows.get('dock')
+        if not dock or not hasattr(dock, 'native') or not dock.native:
+            return
+        try:
+            hwnd = dock.native.Handle.ToInt32()
+            pt = wintypes.POINT()
+            if not user32.GetCursorPos(ctypes.byref(pt)):
+                return
+            scale = user32.GetDpiForWindow(hwnd) / 96.0 if user32.GetDpiForWindow(hwnd) > 0 else 1.0
+            wx, wy, ww, wh = get_work_area_for_hwnd(hwnd)
+            edge = self.prefs.get('edgeOverride') or 'right'
+            pw = self._tab_drag_state['win_w']
+            ph = self._tab_drag_state['win_h']
+            px = wx if edge == 'left' else (wx + ww) - pw
+            margin = int(round(10 * scale))
+            raw_py = self._tab_drag_state['start_win_y'] + (pt.y - self._tab_drag_state['start_cursor_y'])
+            py = max(wy + margin, min(wy + wh - ph - margin, raw_py))
+            # SWP_NOSIZE (1) | SWP_NOZORDER (4) | SWP_NOACTIVATE (16)
+            user32.SetWindowPos(hwnd, 0, px, py, 0, 0, 0x0001 | 0x0004 | 0x0010)
+        except Exception:
+            pass
+
+    def end_collapsed_tab_drag(self, save: bool = True) -> None:
+        """Finish vertical edge drag and persist the desired collapsed tab Y position."""
+        drag = self._tab_drag_state
+        self._tab_drag_state = None
+        if not save or not drag or not self._is_collapsed:
+            return
+        dock = windows.get('dock')
+        if not dock or not hasattr(dock, 'native') or not dock.native:
+            return
+        try:
+            hwnd = dock.native.Handle.ToInt32()
+            rc = RECT()
+            if user32.GetWindowRect(hwnd, ctypes.byref(rc)):
+                scale = user32.GetDpiForWindow(hwnd) / 96.0 if user32.GetDpiForWindow(hwnd) > 0 else 1.0
+                self.prefs['collapsedTabY'] = int(round(rc.top / scale))
+                self._write_prefs_to_disk()
+                try:
+                    sw = user32.GetSystemMetrics(0) or 1920
+                    sh = user32.GetSystemMetrics(1) or 1080
+                    backdrop = self._wallpaper_mgr.get_backdrop(
+                        sw, sh, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top
+                    )
+                    dock.evaluate_js(f"window.flankUpdateBackdrop && window.flankUpdateBackdrop({json.dumps(backdrop)})")
+                except Exception:
+                    pass
         except Exception:
             pass
 
@@ -1429,7 +1511,7 @@ class FlankHostApi:
         try:
             hwnd = dock.native.Handle.ToInt32()
             scale = user32.GetDpiForWindow(hwnd) / 96.0 if user32.GetDpiForWindow(hwnd) > 0 else 1.0
-            wx, wy, ww, wh = get_work_area()
+            wx, wy, ww, wh = get_work_area_for_hwnd(hwnd)
 
             # Normalize work area to logical DIPs
             logical_wx = int(round(wx / scale))

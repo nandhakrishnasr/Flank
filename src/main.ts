@@ -116,6 +116,9 @@ declare global {
         expand_dock?: () => Promise<void>;
         dock_collapse_done?: () => Promise<void>;
         dock_expand_done?: () => Promise<void>;
+        begin_collapsed_tab_drag?: () => Promise<void>;
+        drag_collapsed_tab?: () => Promise<void>;
+        end_collapsed_tab_drag?: (save?: boolean) => Promise<void>;
         resolve_item_icon?: (itemId: string, target: string, force?: boolean) => Promise<void>;
         choose_custom_icon_file?: (itemId: string) => Promise<void>;
       };
@@ -784,19 +787,100 @@ async function completeOnboardingFlow(
 }
 
 function setupEventDelegation(): void {
-  // Capture-phase click & pointerdown listeners on document guarantee clicking the collapsed edge tab always expands dock
-  const handleDockExpand = (ev: Event) => {
-    const target = ev.target as HTMLElement | null;
+  // Capture-phase listeners on document allow vertical edge-dragging of the collapsed tab
+  // while guaranteeing a clean click (<= 4px vertical movement) expands the dock.
+  let tabDrag: { pointerId: number; startY: number; dragging: boolean; el: HTMLElement | null } | null = null;
+  let tabDragRaf = 0;
+  let suppressTabClickUntil = 0;
+
+  const isCollapsedTabTarget = (target: HTMLElement | null): HTMLElement | null => {
     const expandBtn = target?.closest<HTMLElement>('[data-action="expand-dock"], .flank-dock-tab');
-    if (expandBtn || (currentView === 'dock' && isDockCollapsed())) {
+    if (expandBtn) return expandBtn;
+    if (currentView === 'dock' && isDockCollapsed()) return target;
+    return null;
+  };
+
+  document.addEventListener(
+    'pointerdown',
+    (ev: PointerEvent) => {
+      if (ev.button !== 0) return;
+      const tabTarget = isCollapsedTabTarget(ev.target as HTMLElement | null);
+      if (!tabTarget) return;
       ev.preventDefault();
       ev.stopPropagation();
-      expandDock();
+      tabDrag = { pointerId: ev.pointerId, startY: ev.screenY, dragging: false, el: tabTarget };
+      try {
+        tabTarget.setPointerCapture?.(ev.pointerId);
+      } catch {}
+      try {
+        window.pywebview?.api?.begin_collapsed_tab_drag?.();
+      } catch {}
+    },
+    true
+  );
+
+  window.addEventListener(
+    'pointermove',
+    (ev: PointerEvent) => {
+      if (!tabDrag || ev.pointerId !== tabDrag.pointerId) return;
+      if (!tabDrag.dragging && Math.abs(ev.screenY - tabDrag.startY) >= 4) {
+        tabDrag.dragging = true;
+        document.documentElement.classList.add('is-dragging-tab');
+      }
+      if (tabDrag.dragging && !tabDragRaf) {
+        tabDragRaf = requestAnimationFrame(() => {
+          tabDragRaf = 0;
+          try {
+            window.pywebview?.api?.drag_collapsed_tab?.();
+          } catch {}
+        });
+      }
+    },
+    true
+  );
+
+  const finishTabDrag = (ev: PointerEvent, isCancel: boolean) => {
+    if (!tabDrag || ev.pointerId !== tabDrag.pointerId) return;
+    const activeDrag = tabDrag;
+    tabDrag = null;
+    if (tabDragRaf) {
+      cancelAnimationFrame(tabDragRaf);
+      tabDragRaf = 0;
+    }
+    document.documentElement.classList.remove('is-dragging-tab');
+    try {
+      activeDrag.el?.releasePointerCapture?.(ev.pointerId);
+    } catch {}
+    suppressTabClickUntil = Date.now() + 250;
+    if (activeDrag.dragging) {
+      try {
+        window.pywebview?.api?.end_collapsed_tab_drag?.(!isCancel);
+      } catch {}
+    } else {
+      try {
+        window.pywebview?.api?.end_collapsed_tab_drag?.(false);
+      } catch {}
+      if (!isCancel) {
+        expandDock();
+      }
     }
   };
 
-  document.addEventListener('click', handleDockExpand, true);
-  document.addEventListener('pointerdown', handleDockExpand, true);
+  window.addEventListener('pointerup', (ev: PointerEvent) => finishTabDrag(ev, false), true);
+  window.addEventListener('pointercancel', (ev: PointerEvent) => finishTabDrag(ev, true), true);
+
+  document.addEventListener(
+    'click',
+    (ev: Event) => {
+      const tabTarget = isCollapsedTabTarget(ev.target as HTMLElement | null);
+      if (!tabTarget) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (Date.now() < suppressTabClickUntil) return;
+      expandDock();
+    },
+    true
+  );
 
   const stage = document.getElementById('flank-stage');
   if (!stage) return;

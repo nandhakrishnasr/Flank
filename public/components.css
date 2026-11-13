@@ -551,6 +551,7 @@ body[data-view="modal"] .flank-window {
   justify-content: center;
   gap: var(--flank-scale-space-4);
   cursor: pointer;
+  touch-action: none;
   z-index: 999;
   opacity: 0.78;
   transition: opacity var(--flank-motion-fast, 120ms) var(--flank-motion-easing-standard, ease), width var(--flank-motion-fast, 120ms) var(--flank-motion-easing-standard, ease);
@@ -617,6 +618,12 @@ html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab.has-log
 }
 
 html[data-dock-state="collapsed"] body[data-view="dock"] .flank-dock-tab:hover {
+  opacity: 1 !important;
+}
+
+html.is-dragging-tab .flank-dock-tab,
+html.is-dragging-tab body[data-view="dock"] .flank-dock-tab {
+  cursor: ns-resize !important;
   opacity: 1 !important;
 }
 
