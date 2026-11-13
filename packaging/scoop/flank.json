@@ -1,0 +1,30 @@
+{
+    "version": "1.0.0",
+    "description": "A second dock for Windows with pinned apps, clipboard history, and 22 live interactive widgets.",
+    "homepage": "https://github.com/nandhakrishnasr/Flank",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/nandhakrishnasr/Flank/releases/download/v1.0.0/Flank-windows-x64.zip",
+            "hash": ""
+        }
+    },
+    "bin": "Flank.exe",
+    "shortcuts": [
+        [
+            "Flank.exe",
+            "Flank"
+        ]
+    ],
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/nandhakrishnasr/Flank/releases/download/v$version/Flank-windows-x64.zip",
+                "hash": {
+                    "url": "https://github.com/nandhakrishnasr/Flank/releases/download/v$version/SHA256SUMS.txt"
+                }
+            }
+        }
+    }
+}

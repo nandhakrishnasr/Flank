@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Flank Windows Installer
@@ -14,6 +17,17 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Verify Tag Matches package.json Version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart('v')
+          $pkg = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($tag -ne $pkg) {
+            Write-Error "Tag version ($tag) does not match package.json version ($pkg)."
+            exit 1
+          }
 
       - name: Set up Python 3.14
         uses: actions/setup-python@v5
@@ -24,7 +38,7 @@ jobs:
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'npm'
 
       - name: Install Node Dependencies
@@ -44,9 +58,45 @@ jobs:
       - name: Build Executable & Setup Installer
         run: python scripts/build_executable.py
 
-      - name: Zip Standalone Distribution
+      - name: Sign Binaries (Optional)
+        if: env.WINDOWS_CERT_PFX != ''
+        env:
+          WINDOWS_CERT_PFX: ${{ secrets.WINDOWS_CERT_PFX }}
+          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+        shell: pwsh
         run: |
-          Compress-Archive -Path dist\Flank\* -DestinationPath dist\Flank-windows-x64.zip
+          $certPath = "$env:RUNNER_TEMP\flank-cert.pfx"
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_CERT_PFX))
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $signtool) { throw "signtool.exe not found" }
+          & $signtool sign /f $certPath /p $env:WINDOWS_CERT_PASSWORD /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 dist\Flank\Flank.exe dist\Flank-Setup.exe
+          Remove-Item $certPath -Force
+
+      - name: Zip Standalone Distribution
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\Flank\* -DestinationPath dist\Flank-windows-x64.zip -Force
+
+      - name: Generate SHA-256 Checksums
+        shell: pwsh
+        run: |
+          $files = @('dist\Flank-Setup.exe', 'dist\Flank-windows-x64.zip')
+          $lines = foreach ($f in $files) {
+            $h = (Get-FileHash $f -Algorithm SHA256).Hash.ToLower()
+            $name = Split-Path $f -Leaf
+            "$h  $name"
+          }
+          $lines | Set-Content -Path dist\SHA256SUMS.txt -Encoding ascii
+          Get-Content dist\SHA256SUMS.txt
+
+      - name: Upload Workflow Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flank-windows-release
+          path: |
+            dist/Flank-Setup.exe
+            dist/Flank-windows-x64.zip
+            dist/SHA256SUMS.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -55,6 +105,7 @@ jobs:
           files: |
             dist/Flank-Setup.exe
             dist/Flank-windows-x64.zip
+            dist/SHA256SUMS.txt
           draft: false
           prerelease: false
           generate_release_notes: true

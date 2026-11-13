@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import subprocess
@@ -7,8 +8,58 @@ import zipfile
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 DIST_DIR = os.path.join(ROOT_DIR, 'dist')
 BUILD_DIR = os.path.join(ROOT_DIR, 'build')
-ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
+ASSETS_DIR = os.path.join(ASSETS_DIR_BASE := os.path.join(ROOT_DIR, 'assets'))
 ICON_PATH = os.path.join(ASSETS_DIR, 'brand', 'flank.ico')
+
+
+def get_app_version() -> str:
+    pkg_path = os.path.join(ROOT_DIR, 'package.json')
+    try:
+        with open(pkg_path, 'r', encoding='utf-8') as f:
+            return str(json.load(f).get('version') or '1.0.0').lstrip('v')
+    except Exception:
+        return '1.0.0'
+
+
+def write_version_info(out_path: str, version: str, description: str, original_name: str, internal_name: str) -> str:
+    parts = [int(p) if p.isdigit() else 0 for p in version.split('.')[:4]]
+    while len(parts) < 4:
+        parts.append(0)
+    ver_tuple = tuple(parts)
+    content = f'''VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers={ver_tuple},
+    prodvers={ver_tuple},
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        '040904B0',
+        [
+          StringStruct('CompanyName', 'Flank Desktop'),
+          StringStruct('FileDescription', {description!r}),
+          StringStruct('FileVersion', {version!r}),
+          StringStruct('InternalName', {internal_name!r}),
+          StringStruct('LegalCopyright', 'MIT License'),
+          StringStruct('OriginalFilename', {original_name!r}),
+          StringStruct('ProductName', 'Flank'),
+          StringStruct('ProductVersion', {version!r}),
+        ]
+      )
+    ]),
+    VarFileInfo([VarStruct('Translation', [1033, 1200])])
+  ]
+)
+'''
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    return out_path
 
 INSTALLER_STUB = r'''import ctypes
 import os
@@ -51,7 +102,7 @@ def register_uninstaller(install_dir: str, exe_path: str) -> None:
         key_path = r'Software\Microsoft\Windows\CurrentVersion\Uninstall\Flank'
         with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
             winreg.SetValueEx(key, 'DisplayName', 0, winreg.REG_SZ, 'Flank — A Second Dock for Windows')
-            winreg.SetValueEx(key, 'DisplayVersion', 0, winreg.REG_SZ, '1.0.0')
+            winreg.SetValueEx(key, 'DisplayVersion', 0, winreg.REG_SZ, '__FLANK_VERSION__')
             winreg.SetValueEx(key, 'Publisher', 0, winreg.REG_SZ, 'Flank Desktop')
             winreg.SetValueEx(key, 'DisplayIcon', 0, winreg.REG_SZ, exe_path)
             winreg.SetValueEx(key, 'InstallLocation', 0, winreg.REG_SZ, install_dir)
@@ -169,8 +220,25 @@ if __name__ == '__main__':
 
 
 def build() -> None:
+    app_version = get_app_version()
+    os.makedirs(BUILD_DIR, exist_ok=True)
+    app_ver_file = write_version_info(
+        os.path.join(BUILD_DIR, 'flank_version_info.txt'),
+        app_version,
+        'Flank — A Second Dock for Windows',
+        'Flank.exe',
+        'Flank',
+    )
+    setup_ver_file = write_version_info(
+        os.path.join(BUILD_DIR, 'flank_setup_version_info.txt'),
+        app_version,
+        'Flank Windows Installer',
+        'Flank-Setup.exe',
+        'Flank-Setup',
+    )
+
     # 1. Ensure UI bundle and icon exist
-    print('=== Step 1: Building UI bundle ===')
+    print(f'=== Step 1: Building UI bundle (v{app_version}) ===')
     subprocess.run(['npm', 'run', 'build:ui'], cwd=ROOT_DIR, shell=True, check=True)
     subprocess.run([sys.executable, os.path.join(ROOT_DIR, 'scripts', 'generate_icon.py')], check=True)
 
@@ -217,6 +285,8 @@ def build() -> None:
         'Flank',
         '--icon',
         ICON_PATH,
+        '--version-file',
+        app_ver_file,
         '--paths',
         host_dir,
         '--add-data',
@@ -265,7 +335,7 @@ def build() -> None:
 
     installer_py = os.path.join(BUILD_DIR, 'flank_installer_stub.py')
     with open(installer_py, 'w', encoding='utf-8') as f:
-        f.write(INSTALLER_STUB)
+        f.write(INSTALLER_STUB.replace('__FLANK_VERSION__', app_version))
 
     setup_cmd = [
         sys.executable,
@@ -279,6 +349,8 @@ def build() -> None:
         'Flank-Setup',
         '--icon',
         ICON_PATH,
+        '--version-file',
+        setup_ver_file,
         '--add-data',
         f'{payload_zip};.',
         installer_py,

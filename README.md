@@ -11,7 +11,7 @@
   </p>
 
   <p>
-    <a href="https://github.com/nandhakrishnasr/Flank/releases"><strong>Download Flank-Setup.exe</strong></a>
+    <a href="https://github.com/nandhakrishnasr/Flank/releases/latest"><strong>Download Flank-Setup.exe</strong></a>
     &nbsp;·&nbsp;
     <a href="#live-widget-flyout-cards">Widgets</a>
     &nbsp;·&nbsp;
@@ -49,10 +49,12 @@
 
 ## Installation
 
-Download the latest `Flank-Setup.exe` from [GitHub Releases](https://github.com/nandhakrishnasr/Flank/releases) and launch the installer.
+1. **Installer (Recommended)**: Download `Flank-Setup.exe` from [GitHub Releases (Latest)](https://github.com/nandhakrishnasr/Flank/releases/latest) and run it.
+2. **Portable ZIP**: Download `Flank-windows-x64.zip`, extract it anywhere, and launch `Flank.exe`.
+3. **Verify Integrity (Optional)**: Compare `Get-FileHash Flank-Setup.exe -Algorithm SHA256` against `SHA256SUMS.txt` on the release page.
 
 > [!NOTE]
-> **Windows SmartScreen**: Because Flank is an open-source utility without an enterprise code-signing certificate, Windows Defender SmartScreen may display *"Windows protected your PC — Unknown publisher"*. Select **More info → Run anyway** to proceed. Flank runs completely locally and collects zero telemetry.
+> **Windows SmartScreen**: Because Flank is an open-source utility without an enterprise code-signing certificate, Windows Defender SmartScreen may display *"Windows protected your PC — Unknown publisher"*. Select **More info → Run anyway** to proceed (or extract `Flank-windows-x64.zip`). Flank runs completely locally and collects zero telemetry.
 
 ---
 
