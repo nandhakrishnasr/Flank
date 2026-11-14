@@ -144,7 +144,7 @@ export class OnboardingMachine {
         ? structuredClone(options.items)
         : structuredClone(sample.items);
 
-    const maxDockItems = options.maxDockItems ?? 12;
+    const maxDockItems = options.maxDockItems ?? 26;
 
     let initialWidgets: WidgetKind[];
     if (Array.isArray(options.selectedWidgets)) {

@@ -186,6 +186,7 @@ export function deriveAccentTokens(accentHex: string, preferredInk?: string): {
 
   const white: RGBA = { r: 255, g: 255, b: 255, a: 1 };
   const darkInk: RGBA = { r: 10, g: 16, b: 20, a: 1 };
+  const black: RGBA = { r: 0, g: 0, b: 0, a: 1 };
 
   let inkHex = '#ffffff';
   let bestRatio = contrastRatio(white, parsed);
@@ -210,6 +211,14 @@ export function deriveAccentTokens(accentHex: string, preferredInk?: string): {
     if (darkRatio > bestRatio) {
       inkHex = '#0a1014';
       bestRatio = darkRatio;
+    }
+  }
+
+  if (bestRatio < 4.5) {
+    const blackRatio = contrastRatio(black, parsed);
+    if (blackRatio > bestRatio) {
+      inkHex = '#000000';
+      bestRatio = blackRatio;
     }
   }
 

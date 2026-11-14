@@ -97,7 +97,14 @@ export class ThemeEngine {
       }
     }
 
-    const res = validateTheme(candidate);
+    let res = validateTheme(candidate);
+    if (!res.valid && overrides?.accent) {
+      this.log('warn', `Accent override "${overrides.accent}" failed contrast validation; keeping theme default accent.`, {
+        errors: res.errors,
+        failingPairs: res.failingPairs,
+      });
+      return this.applyThemeObject(rawTheme, overrides.edge ? { edge: overrides.edge } : undefined);
+    }
     if (!res.valid) {
       this.log('warn', `Theme validation failed; falling back to Paper.`, {
         errors: res.errors,

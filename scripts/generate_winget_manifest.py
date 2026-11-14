@@ -71,7 +71,6 @@ def main() -> None:
         f"PackageName: Flank\n"
         f"PackageUrl: https://github.com/nandhakrishnasr/Flank\n"
         f"License: MIT\n"
-        f"LicenseUrl: https://github.com/nandhakrishnasr/Flank/blob/master/LICENSE\n"
         f"ShortDescription: A second dock for Windows with pinned apps, clipboard history, and 22 live interactive widgets.\n"
         f"Tags:\n"
         f"  - dock\n"

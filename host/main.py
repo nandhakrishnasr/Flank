@@ -1053,8 +1053,9 @@ class FlankHostApi:
 
                 setup_transparency(dock.native)
 
-                # SWP_NOZORDER (4) | SWP_NOACTIVATE (16) | SWP_SHOWWINDOW (64) = 84
-                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | 0x0040)
+                # SWP_NOZORDER (4) | SWP_NOACTIVATE (16) | SWP_SHOWWINDOW (64) or SWP_HIDEWINDOW (128)
+                swp_vis = 0x0080 if self._dock_hidden_for_onboarding else 0x0040
+                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | swp_vis)
 
                 # Inward 12px radius, flat 0px on edge
                 corner_d = int(round(12 * scale * 2))
@@ -1095,7 +1096,8 @@ class FlankHostApi:
                 py = int(round(dock_y * scale))
 
                 setup_transparency(dock.native)
-                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | 0x0040)
+                swp_vis = 0x0080 if self._dock_hidden_for_onboarding else 0x0040
+                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | swp_vis)
 
                 shape = self.prefs.get('themeShape', 'pill')
                 if shape == 'pill':
@@ -1547,8 +1549,9 @@ class FlankHostApi:
 
             setup_transparency(dock.native)
 
-            # SWP_NOZORDER (4) | SWP_NOACTIVATE (16) | SWP_SHOWWINDOW (64) = 84
-            user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | 0x0040)
+            # SWP_NOZORDER (4) | SWP_NOACTIVATE (16) | SWP_SHOWWINDOW (64) or SWP_HIDEWINDOW (128)
+            swp_vis = 0x0080 if self._dock_hidden_for_onboarding else 0x0040
+            user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | swp_vis)
 
             # Apply region clipping to shape (+1 for GDI exclusive right/bottom boundaries)
             if shape == 'pill':
@@ -1711,8 +1714,9 @@ class FlankHostApi:
                 setup_transparency(card.native)
                 radius = cradius if cradius > 0 else 20
                 diameter = int(round(radius * 2 * scale))
-                # SWP_NOZORDER (4) | SWP_NOACTIVATE (16) | SWP_SHOWWINDOW (64) = 84
-                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | 0x0040)
+                # SWP_NOZORDER (4) | SWP_NOACTIVATE (16) | SWP_SHOWWINDOW (64) or SWP_HIDEWINDOW (128)
+                swp_vis = 0x0080 if self._dock_hidden_for_onboarding else 0x0040
+                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | swp_vis)
                 rgn = gdi32.CreateRoundRectRgn(0, 0, pw + 1, ph + 1, diameter, diameter)
                 user32.SetWindowRgn(hwnd, rgn, True)
                 _sync_card_form_size(card.native, pw, ph)
@@ -1901,6 +1905,8 @@ class FlankHostApi:
         self._is_collapsed = False
         if isinstance(prefs_patch, dict):
             self.prefs.update(prefs_patch)
+            if 'themeId' in prefs_patch and 'themeShape' not in prefs_patch:
+                self.prefs['themeShape'] = 'rail' if prefs_patch.get('themeId') == 'rail' else 'pill'
         if not isinstance(self.prefs.get('onboarding'), dict) or not self.prefs['onboarding'].get('completed'):
             self.prefs['onboarding'] = {
                 'completed': True,
@@ -1918,7 +1924,32 @@ class FlankHostApi:
                 self.set_dock_state('expanded')
                 user32.ShowWindow(dock_hwnd, 4)  # SW_SHOWNOACTIVATE
                 remove_from_taskbar(dock_hwnd)
-                dock.evaluate_js("window.flankSetDockState && window.flankSetDockState('expanded')")
+                tid = self.prefs.get('themeId', 'paper')
+                sync_payload = {
+                    'themeId': tid,
+                    'edgeOverride': self.prefs.get('edgeOverride'),
+                    'accentOverride': self.prefs.get('accentOverride'),
+                    'reserveScreenSpace': bool(self.prefs.get('reserveScreenSpace', False)),
+                    'autostart': bool(self.prefs.get('autostart', False)),
+                    'widgetsCollapsed': bool(self.prefs.get('widgetsCollapsed', False)),
+                    'items': self.prefs.get('items', []),
+                }
+
+                def _sync_dock_after_onboarding():
+                    try:
+                        time.sleep(0.05)
+                        self._broadcast_update(sync_payload)
+                        dock.evaluate_js("window.flankSetDockState && window.flankSetDockState('expanded')")
+                        if tid == 'liquid-glass':
+                            sw = user32.GetSystemMetrics(0) or 1920
+                            sh = user32.GetSystemMetrics(1) or 1080
+                            dx, dy, dw, dh = self._dock_shape_rect
+                            backdrop = self._wallpaper_mgr.get_backdrop(sw, sh, dx, dy, dw or 64, dh or 660)
+                            dock.evaluate_js(f"window.flankUpdateBackdrop && window.flankUpdateBackdrop({json.dumps(backdrop)})")
+                    except Exception as err:
+                        _log_debug(f"complete_onboarding sync error: {err}")
+
+                threading.Thread(target=_sync_dock_after_onboarding, daemon=True).start()
             except Exception as e:
                 _log_debug(f"complete_onboarding show dock error: {e}")
         return res
@@ -2442,15 +2473,15 @@ def main() -> None:
         title='Flank',
         url=f'{index_url}#dock',
         js_api=api,
-        x=dock_x,
-        y=dock_y,
+        x=-9999 if api._dock_hidden_for_onboarding else dock_x,
+        y=-9999 if api._dock_hidden_for_onboarding else dock_y,
         width=dock_w,
         height=dock_h,
         min_size=(10, 10),
         frameless=True,
         easy_drag=False,
         on_top=True,
-        focus=True,
+        focus=not api._dock_hidden_for_onboarding,
         transparent=True,
         resizable=False,
     )
@@ -2535,8 +2566,11 @@ def main() -> None:
             py = int(round(shape_y * scale))
 
             setup_transparency(dock_window.native)
-            # Force exact window bounds
-            user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0040)
+            # Force exact window bounds (never show while onboarding is active)
+            if api._dock_hidden_for_onboarding:
+                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0010 | 0x0080)
+            else:
+                user32.SetWindowPos(hwnd, 0, px, py, pw, ph, 0x0004 | 0x0040)
             rgn = gdi32.CreateRoundRectRgn(0, 0, pw + 1, ph + 1, pw, pw)
             user32.SetWindowRgn(hwnd, rgn, True)
 
